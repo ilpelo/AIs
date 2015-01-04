@@ -47,32 +47,21 @@ public class GenKMLPlaceMarker {
 			Element dnode = doc.createElement("Document");
 			root.appendChild(dnode);
 			
-			Element rstyle = doc.createElement("Style");
-			rstyle.setAttribute("id", "restaurantStyle");
-			Element ristyle = doc.createElement("IconStyle");
-			ristyle.setAttribute("id", "restaurantIcon");
-			Element ricon = doc.createElement("Icon");
-			Element riconhref = doc.createElement("href");
-			riconhref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/pal2/icon63.png"));
-			rstyle.appendChild(ristyle);
-			ricon.appendChild(riconhref);
-			ristyle.appendChild(ricon);
-			dnode.appendChild(rstyle);
 			
-			Element bstyle = doc.createElement("Style");
-			bstyle.setAttribute("id", "barStyle");
-			Element bistyle = doc.createElement("IconStyle");
-			bistyle.setAttribute("id", "barIcon");
+			Element tstyle = doc.createElement("Style");
+			tstyle.setAttribute("id", "targetStyle");
+			Element tistyle = doc.createElement("IconStyle");
+			tistyle.setAttribute("id", "targetStyle");
 			Element bicon = doc.createElement("Icon");
 			Element biconhref = doc.createElement("href");
-			biconhref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/pal2/icon27.png"));
-			bstyle.appendChild(bistyle);
+			biconhref.appendChild(doc.createTextNode("http://maps.google.com/mapfiles/kml/shapes/target.png"));
+			tstyle.appendChild(tistyle);
 			bicon.appendChild(biconhref);
-			bistyle.appendChild(bicon);
-			dnode.appendChild(bstyle);
+			tistyle.appendChild(bicon);
+			dnode.appendChild(tstyle);
 			
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM position limit 100000");
+			rs = stmt.executeQuery("SELECT * FROM position limit 10");
 			while(rs.next()){
 				KML.id = rs.getInt("mmsi");
 				KML.lat = rs.getFloat("lat");
@@ -80,9 +69,9 @@ public class GenKMLPlaceMarker {
 
 				Element placemark = doc.createElement("Placemark");
 				dnode.appendChild(placemark);
-				//Element styleUrl = doc.createElement("styleUrl");
-				//styleUrl.appendChild(doc.createTextNode( "#" + KML.type+ "Style"));
-				//placemark.appendChild(styleUrl);
+				Element styleUrl = doc.createElement("styleUrl");
+				styleUrl.appendChild(doc.createTextNode( "#targetStyle"));
+				placemark.appendChild(styleUrl);
 				Element point = doc.createElement("Point");
 				Element coordinates = doc.createElement("coordinates");
 				coordinates.appendChild(doc.createTextNode(KML.lon+ "," + KML.lat));
