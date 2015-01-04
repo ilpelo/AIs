@@ -1,0 +1,1 @@
+mysql> load data infile 'C:\\master_data\\ais_output.txt' into table position fields terminated by ',' lines terminated by '\r\n';
