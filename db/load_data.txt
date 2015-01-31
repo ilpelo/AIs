@@ -1,1 +1,11 @@
-mysql> load data infile 'C:\\master_data\\ais_output.txt' into table position fields terminated by ',' lines terminated by '\r\n';
+mysql> 
+load data infile 'C:\\master_data\\ais_output.csv' into table position fields terminated by ',' lines terminated by '\r\n';
+
+load data infile 'C:\\master_data\\shiptypes_output.csv' into table shiptype fields terminated by ',' lines terminated by '\r\n';
+
+load data infile 'C:\\master_data\\lrit.csv' into table position fields terminated by ',' lines terminated by '\r\n'
+ignore 1 lines
+(@dummy,     @dummy,     @dummy,             @dummy,     @dummy,     @dummy,     @dummy,     lat,     lon,      @ts,        @dummy,            @dummy,           @dummy,      mmsi,         @dummy)
+set source = 'L', ts = truncate(unix_timestamp(@ts),0);
+
+
