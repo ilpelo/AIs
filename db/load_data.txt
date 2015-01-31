@@ -1,11 +1,12 @@
 mysql> 
-load data infile 'C:\\master_data\\ais_output.csv' into table position fields terminated by ',' lines terminated by '\r\n';
+load data infile 'C:\\master_data\\ais_output.csv' into table pos fields terminated by ',' lines terminated by '\r\n';
 
 load data infile 'C:\\master_data\\shiptypes_output.csv' into table shiptype fields terminated by ',' lines terminated by '\r\n';
 
-load data infile 'C:\\master_data\\lrit.csv' into table position fields terminated by ',' lines terminated by '\r\n'
-ignore 1 lines
-(@dummy,     @dummy,     @dummy,             @dummy,     @dummy,     @dummy,     @dummy,     lat,     lon,      @ts,        @dummy,            @dummy,           @dummy,      mmsi,         @dummy)
-set source = 'L', ts = truncate(unix_timestamp(@ts),0);
+>>> Python script to generate load LRIT data statements (see load_lrit.py)
+>>> Python script to generate decode AIS statements (see decode_ais.py)
+>>> Python script to generate load AIS data statements (see load_ais.py)
+
+Note: check the dir names
 
 

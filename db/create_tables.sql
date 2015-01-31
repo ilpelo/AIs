@@ -1,6 +1,6 @@
-drop table position;
+drop table pos;
 
-create table position
+create table pos
 (
 mmsi varchar(15) not null,
 ts int not null,
