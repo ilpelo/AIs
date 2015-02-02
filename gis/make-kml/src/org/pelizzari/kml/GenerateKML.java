@@ -21,20 +21,24 @@ public class GenerateKML {
 		Statement stmt;
 		ResultSet rs;
 		
-		final String FIRST_DEPARTURE_DAY = "'2011-03-02' ";
-		final String LAST_DEPARTURE_DAY = "'2011-03-03' ";
+		final String FIRST_DEPARTURE_DAY = "'2011-03-10' ";
+		final String LAST_DEPARTURE_DAY = "'2011-03-20' ";
+		final String VOYAGE_DURATION_IN_DAYS = "10";
 		
 		final String DEPARTURE_PERIOD_COND = 
 				"and date(from_unixtime(ts)) >= "+FIRST_DEPARTURE_DAY+
-				"and date(from_unixtime(ts)) < "+LAST_DEPARTURE_DAY;
+				"and date(from_unixtime(ts)) <= "+LAST_DEPARTURE_DAY;
 
 		final String ARRIVAL_PERIOD_COND = 
-				"and date(from_unixtime(ts)) >= ("+FIRST_DEPARTURE_DAY+ " + INTERVAL 10 DAY) "+
-				"and date(from_unixtime(ts)) < ("+LAST_DEPARTURE_DAY+ " + INTERVAL 10 DAY) ";
+				"and date(from_unixtime(ts)) >= ("+FIRST_DEPARTURE_DAY+
+				" + INTERVAL "+ VOYAGE_DURATION_IN_DAYS +" DAY) "+
+				"and date(from_unixtime(ts)) <= ("+LAST_DEPARTURE_DAY+
+				" + INTERVAL "+ VOYAGE_DURATION_IN_DAYS +" DAY) ";
 		
 		final String VOYAGE_PERIOD_COND = 
 				"and date(from_unixtime(ts)) >= "+FIRST_DEPARTURE_DAY+
-				"and date(from_unixtime(ts)) < ("+LAST_DEPARTURE_DAY+ " + INTERVAL 10 DAY) ";		
+				"and date(from_unixtime(ts)) < ("+LAST_DEPARTURE_DAY+
+				" + INTERVAL "+ VOYAGE_DURATION_IN_DAYS +" DAY) ";		
 
 		final String GIBRALTAR_COND = 
 				"and lat between 30 and 40 "+
@@ -55,7 +59,7 @@ public class GenerateKML {
 				"group by mmsi order by 2 desc limit 10";
 
 		final String SHIP_ARRIVAL_QUERY = 
-				"SELECT mmsi "+
+				"SELECT distinct mmsi "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
 			    NEWYORK_COND+
@@ -63,13 +67,13 @@ public class GenerateKML {
 
 		// select ships that made the specific voyage
 		final String SHIP_VOYAGE_QUERY = 
-				"SELECT mmsi "+
+				"SELECT distinct mmsi "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
 			    NEWYORK_COND+
 			    ARRIVAL_PERIOD_COND+
 			    "and mmsi in ("+
-					"SELECT mmsi "+
+					"SELECT distinct mmsi "+
 					"FROM wpos "+
 				    "WHERE 1=1 "+
 				    DEPARTURE_PERIOD_COND +
@@ -80,7 +84,13 @@ public class GenerateKML {
 				"SELECT mmsi, ts, lat, lon "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
-			    VOYAGE_PERIOD_COND;
+			    VOYAGE_PERIOD_COND+
+			    "and NOT ( 1=1 "+
+			    		   ARRIVAL_PERIOD_COND+
+			    		   "and NOT ( 1=1 "+
+			    		              NEWYORK_COND+
+			    		            ") "+
+			    		 ") ";
 		
 		final String TRACK_QUERY_ORDER_LIMIT = 
 				" order by ts desc limit 1000";
