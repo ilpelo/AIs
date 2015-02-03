@@ -15,16 +15,27 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.pelizzari.ship.*;
+import org.pelizzari.gis.*;
+
+
 public class GenerateKML {
 
 	public static void main(String[]args ){
 		Statement stmt;
 		ResultSet rs;
 		
-		final String FIRST_DEPARTURE_DAY = "'2011-03-10' ";
-		final String LAST_DEPARTURE_DAY = "'2011-03-20' ";
-		final String VOYAGE_DURATION_IN_DAYS = "10";
+		final String FIRST_DEPARTURE_DAY = "'2011-03-17' ";
+		final String LAST_DEPARTURE_DAY = "'2011-03-18' ";
+		final String VOYAGE_DURATION_IN_DAYS = "8"; // 8 deg/day
 		
+//		final String BEFORE_DEPARTURE_PERIOD_COND = 
+//				"and date(from_unixtime(ts)) <= "+FIRST_DEPARTURE_DAY;
+//
+//		final String AFTER_ARRIVAL_PERIOD_COND = 
+//				"and date(from_unixtime(ts)) >= ("+LAST_DEPARTURE_DAY+
+//				" + INTERVAL "+ VOYAGE_DURATION_IN_DAYS +" DAY) ";
+
 		final String DEPARTURE_PERIOD_COND = 
 				"and date(from_unixtime(ts)) >= "+FIRST_DEPARTURE_DAY+
 				"and date(from_unixtime(ts)) <= "+LAST_DEPARTURE_DAY;
@@ -37,7 +48,7 @@ public class GenerateKML {
 		
 		final String VOYAGE_PERIOD_COND = 
 				"and date(from_unixtime(ts)) >= "+FIRST_DEPARTURE_DAY+
-				"and date(from_unixtime(ts)) < ("+LAST_DEPARTURE_DAY+
+				"and date(from_unixtime(ts)) <= ("+LAST_DEPARTURE_DAY+
 				" + INTERVAL "+ VOYAGE_DURATION_IN_DAYS +" DAY) ";		
 
 		final String GIBRALTAR_COND = 
@@ -46,10 +57,10 @@ public class GenerateKML {
 		
 		final String NEWYORK_COND = 
 				"and lat between 40 and 41 "+
-				"and lon between -75 and -73 ";
+				"and lon between -80 and -70 ";
 		
 		// select ships with more positions in area/period
-		final String SHIP_DEPARTURE_QUERY = 
+		final String SHIP_COUNT_POS_QUERY = 
 				"SELECT mmsi, count(*) "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
@@ -58,6 +69,13 @@ public class GenerateKML {
 				//NEWYORK_COND +
 				"group by mmsi order by 2 desc limit 10";
 
+		final String SHIP_DEPARTURE_QUERY = 
+				"SELECT distinct mmsi "+
+				"FROM wpos "+
+			    "WHERE 1=1 "+
+			    DEPARTURE_PERIOD_COND +
+				GIBRALTAR_COND;
+		
 		final String SHIP_ARRIVAL_QUERY = 
 				"SELECT distinct mmsi "+
 				"FROM wpos "+
@@ -73,22 +91,24 @@ public class GenerateKML {
 			    NEWYORK_COND+
 			    ARRIVAL_PERIOD_COND+
 			    "and mmsi in ("+
-					"SELECT distinct mmsi "+
-					"FROM wpos "+
-				    "WHERE 1=1 "+
-				    DEPARTURE_PERIOD_COND +
-					GIBRALTAR_COND+
+			    	SHIP_DEPARTURE_QUERY+
 					")";
 		
 		final String TRACK_QUERY_SELECT_FROM_WHERE = 
-				"SELECT mmsi, ts, lat, lon "+
+				"SELECT mmsi, ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
-			    VOYAGE_PERIOD_COND+
-			    "and NOT ( 1=1 "+
+			    VOYAGE_PERIOD_COND+ // select position in the reference period
+			    "and NOT ( 1=1 "+   // but not after arrival
 			    		   ARRIVAL_PERIOD_COND+
 			    		   "and NOT ( 1=1 "+
 			    		              NEWYORK_COND+
+			    		            ") "+
+			    		 ") "+
+			    "and NOT ( 1=1 "+    // and not before departure
+			    		   DEPARTURE_PERIOD_COND+
+			    		   "and NOT ( 1=1 "+
+			    		              GIBRALTAR_COND+
 			    		            ") "+
 			    		 ") ";
 		
@@ -106,9 +126,18 @@ public class GenerateKML {
 			
 			kmlGenerator.addIconStyle("targetStyle", "http://maps.google.com/mapfiles/kml/shapes/target.png");
 			
-			stmt = con.createStatement();
+			Point gibraltarNW = new Point(40, -15);
+			Point gibraltarSE = new Point(30, -5);
+			Box depBox = new Box(gibraltarNW, gibraltarSE);
+			Point nyNW = new Point(41, -80);
+			Point nySE = new Point(40, -70);
+			Box arrBox = new Box(nyNW, nySE);
+			Ship.findVoyages(depBox, arrBox, "2011-03-17", 8);
+			
+/*			stmt = con.createStatement();
 			// get top 10 ships
 			List<String> top10Ships = new ArrayList<String>();
+			//String shipQuery = SHIP_ARRIVAL_QUERY;
 			String shipQuery = SHIP_VOYAGE_QUERY;
 			System.out.println(shipQuery);
 			rs = stmt.executeQuery(shipQuery);
@@ -121,6 +150,7 @@ public class GenerateKML {
 			Iterator<String> itr = top10Ships.iterator();
 			while(itr.hasNext()) {
 				String mmsi = itr.next();
+				List<ShipPosition> posList = new ArrayList<ShipPosition>();
 				String trackQuery =
 						TRACK_QUERY_SELECT_FROM_WHERE +
 						"and mmsi = "+mmsi+			
@@ -128,18 +158,18 @@ public class GenerateKML {
 				System.out.println(trackQuery);
 				rs = stmt.executeQuery(trackQuery);
 				ShipPosition pos = null;
-				List<ShipPosition> posList = new ArrayList<ShipPosition>();
 				while(rs.next()){
 					float lat = rs.getFloat("lat");
 					float lon = rs.getFloat("lon");
 					pos = new ShipPosition(lat, lon);
+					String tsDate = rs.getString("ts_date");
 					
-					kmlGenerator.addPoint("targetStyle", mmsi, pos.lat, pos.lon);
+					kmlGenerator.addPoint("targetStyle", tsDate, pos.lat, pos.lon);
 					
 					posList.add(pos);					
 				}
 				kmlGenerator.addLineString("track", posList);
-			}
+			}*/
 			
 			Source src = new DOMSource(kmlGenerator.getDoc());
 			
