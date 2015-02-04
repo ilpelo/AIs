@@ -37,7 +37,7 @@ public class Ship {
 			    "WHERE 1=1 "+
 			    DEPARTURE_PERIOD_COND+
 				DEPARTURE_AREA_COND+
-				"limit 5";
+				"limit 50";
 		
 		Connection con = DBConnection.getCon();	
 		

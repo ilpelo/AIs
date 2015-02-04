@@ -3,6 +3,7 @@
  */
 package org.pelizzari.kml;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.pelizzari.gis.Box;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipVoyage;
 import org.w3c.dom.Document;
@@ -96,6 +98,27 @@ public class KMLGenerator {
 		placemark.appendChild(lineString);
 	}	
 
+	public void addBox(String title, Box box) {
+		Element placemark = doc.createElement("Placemark");		
+		docNode.appendChild(placemark);
+		Element name = doc.createElement("name");
+		name.appendChild(doc.createTextNode(title));
+		placemark.appendChild(name);
+		Element lineString = doc.createElement("LineString");
+		Element coordinates = doc.createElement("coordinates");
+		String coordList = 
+						box.getMinLon()+ "," +box.getMaxLat()+" "+
+						box.getMaxLon()+ "," +box.getMaxLat()+" "+
+						box.getMaxLon()+ "," +box.getMinLat()+" "+
+						box.getMinLon()+ "," +box.getMinLat()+" "+
+						box.getMinLon()+ "," +box.getMaxLat()+" ";
+		coordinates.appendChild(doc.createTextNode(coordList));
+		lineString.appendChild(coordinates);
+		placemark.appendChild(lineString);		
+		
+	}
+	
+	
 	public Document getDoc() {
 		return doc;
 	}

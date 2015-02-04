@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.pelizzari.db.DBConnection;
@@ -53,7 +54,21 @@ public class ShipVoyage {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		this.posList = posList;
+		boolean voyageCrossesArrivalArea = false;
+		List<ShipPosition> voyageBetweenDepartureAndArrivalAreas = new ArrayList<ShipPosition>();
+		
+		Iterator<ShipPosition> posItr = posList.iterator();
+		while(posItr.hasNext()) {
+			ShipPosition pos = posItr.next();
+			voyageBetweenDepartureAndArrivalAreas.add(pos);
+			if(arrivalArea.isWithinBox(pos)) {
+				voyageCrossesArrivalArea = true;
+				break;
+			}
+		}
+		if(voyageCrossesArrivalArea) { // || true) {
+			this.posList = voyageBetweenDepartureAndArrivalAreas;
+		}
 	}
 
 	public List<ShipPosition> getPosList() {
@@ -71,6 +86,4 @@ public class ShipVoyage {
 	public void setMmsi(String mmsi) {
 		this.mmsi = mmsi;
 	}
-	
-	
 }
