@@ -6,6 +6,16 @@ select left(date(from_unixtime(ts)),7), count(*)
 from pos
 group by left(date(from_unixtime(ts)),7) order by 1;
 
+-- count position per day
+select date(from_unixtime(ts)) "Date",
+	   count(*) "Position count",
+	   truncate(max(lat),0) "Max lat",
+	   truncate(min(lat),0) "Min lat", 
+	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
+from pos 
+group by date(from_unixtime(ts)) order by 1;
+
+
 
 -- Table WPOS
 -- count positions between 2 dates

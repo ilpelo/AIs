@@ -66,7 +66,7 @@ public class ShipVoyage {
 				break;
 			}
 		}
-		if(voyageCrossesArrivalArea) { // || true) {
+		if(voyageCrossesArrivalArea || true) {
 			this.posList = voyageBetweenDepartureAndArrivalAreas;
 		}
 	}
