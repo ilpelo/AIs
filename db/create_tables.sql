@@ -1,4 +1,6 @@
-drop table pos;
+create database ai;
+
+//drop table pos;
 
 create table pos
 (
