@@ -9,5 +9,11 @@ public class ShipPosition extends Point {
 		super(lat, lon);
 		this.ts = ts;		
 	}
+	public int getTs() {
+		return ts;
+	}
+	public void setTs(int ts) {
+		this.ts = ts;
+	}
 
 }

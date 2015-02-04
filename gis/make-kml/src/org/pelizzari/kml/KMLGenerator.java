@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipVoyage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -68,7 +69,11 @@ public class KMLGenerator {
 		point.appendChild(coordinates);
 		placemark.appendChild(point);
 	}
-	
+
+	public void addLineString(ShipVoyage voyage) {
+		addLineString(voyage.getMmsi(), voyage.getPosList());
+	}
+
 	public void addLineString(String mmsi, List<ShipPosition> posList) {
 		Element placemark = doc.createElement("Placemark");		
 		docNode.appendChild(placemark);

@@ -35,17 +35,11 @@ public class Ship {
 				"SELECT distinct mmsi "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
-			    DEPARTURE_PERIOD_COND +
-				DEPARTURE_AREA_COND;
+			    DEPARTURE_PERIOD_COND+
+				DEPARTURE_AREA_COND+
+				"limit 5";
 		
-		Connection con = null;
-		try {
-			con = new DBConnection().getCon();
-		} catch (ClassNotFoundException | SQLException e) {
-			System.err.println("Cannot make DB connection");
-			e.printStackTrace();
-			System.exit(-1);
-		}		
+		Connection con = DBConnection.getCon();	
 		
 		Statement stmt;
 		ResultSet rs;
@@ -64,15 +58,16 @@ public class Ship {
 			Iterator<String> itr = ships.iterator();
 			while(itr.hasNext()) {
 				String mmsi = itr.next();
-				List<ShipPosition> posList = new ArrayList<ShipPosition>();
-				voyages.add(new ShipVoyage(mmsi, posList));
+				voyages.add(new ShipVoyage(mmsi, 
+										   arrivalArea, 
+										   departureISODate, 
+										   maxVoyageDurationInDays));
 			}
 		} catch (SQLException e) {
 			System.err.println("Cannot select ships");
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
 
 		return voyages;
 	}

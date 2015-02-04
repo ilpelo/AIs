@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -126,14 +127,14 @@ public class GenerateKML {
 			
 			kmlGenerator.addIconStyle("targetStyle", "http://maps.google.com/mapfiles/kml/shapes/target.png");
 			
-			Point gibraltarNW = new Point(40, -15);
-			Point gibraltarSE = new Point(30, -5);
+			Point gibraltarNW = new Point(40, -15); // 40
+			Point gibraltarSE = new Point(35, -5); // 30
 			Box depBox = new Box(gibraltarNW, gibraltarSE);
 			Point nyNW = new Point(41, -80);
 			Point nySE = new Point(40, -70);
 			Box arrBox = new Box(nyNW, nySE);
-			Ship.findVoyages(depBox, arrBox, "2011-03-17", 8);
-			
+			List<ShipVoyage> voyages = Ship.findVoyages(depBox, arrBox, "2011-03-17", 8);
+
 /*			stmt = con.createStatement();
 			// get top 10 ships
 			List<String> top10Ships = new ArrayList<String>();
@@ -171,6 +172,24 @@ public class GenerateKML {
 				kmlGenerator.addLineString("track", posList);
 			}*/
 			
+			if(voyages.size() == 0) {
+				System.out.println("No voyages");
+			} else {
+				Iterator<ShipVoyage> itr = voyages.iterator();
+				while(itr.hasNext()) {
+					ShipVoyage voyage = itr.next();
+					List<ShipPosition> positions = voyage.getPosList();
+					Iterator<ShipPosition> posItr = positions.iterator();
+					while(posItr.hasNext()) {
+						ShipPosition pos = posItr.next();
+						int ts = pos.getTs();
+						Date date = new Date(ts * 1000);
+						kmlGenerator.addPoint("targetStyle", date.toString(), pos.lat, pos.lon);					
+					}
+					kmlGenerator.addLineString(voyage);
+				}
+			}
+
 			Source src = new DOMSource(kmlGenerator.getDoc());
 			
 			Result dest = new StreamResult(new File(OUTPUT_FILE)); 
