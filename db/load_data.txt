@@ -1,12 +1,23 @@
-mysql> 
-load data infile 'C:\\master_data\\ais_output.csv' into table pos fields terminated by ',' lines terminated by '\r\n';
-
-load data infile 'C:\\master_data\\shiptypes_output.csv' into table shiptype fields terminated by ',' lines terminated by '\r\n';
-
 >>> Python script to generate load LRIT data statements (see load_lrit.py)
+
 >>> Python script to generate decode AIS statements (see decode_ais.py)
+
+With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db
+Edit the dir where the AIS data is and save.
+Run the script.
+Copy the output and paste it into a DOS command window.
+
 >>> Python script to generate load AIS data statements (see load_ais.py)
 
-Note: check the dir names
+With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db
+Edit the dir where the AIS data is and save.
+Run the python script: the mysql script load_data.mysql is written in the data dir.
+Run the script in mysql client.
+
+mysql> source C:\master_data\AIS\03-Mar\load_data.mysql
+Query OK, 179600 rows affected (1 min 20.37 sec)
+Records: 179600  Deleted: 0  Skipped: 0  Warnings: 0
+...
+
 
 

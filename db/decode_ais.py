@@ -2,7 +2,7 @@ from os import listdir
 
 # the java command must be run in the data directory
 
-ais_data_dir = 'C:\\master_data\\AIS\\01-Jan'
+ais_data_dir = 'C:\\master_data\\AIS\\03-Mar'
 
 dat_files = []
 for f in listdir(ais_data_dir):
