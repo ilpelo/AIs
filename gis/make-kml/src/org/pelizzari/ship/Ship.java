@@ -20,7 +20,8 @@ public class Ship {
 	public static List<ShipVoyage> findVoyages(Box departureArea,
 											   Box arrivalArea,
 											   String departureISODate, // YYYY-MM-DD
-											   int maxVoyageDurationInDays) {
+											   int maxVoyageDurationInDays,
+											   String[] excludeMmsi) {
 		
 		List<ShipVoyage> voyages = new ArrayList<ShipVoyage>();
 		
@@ -30,6 +31,15 @@ public class Ship {
 		final String DEPARTURE_AREA_COND = 
 			"and lat between "+departureArea.getMinLat()+" and "+departureArea.getMaxLat()+" "+
 			"and lon between "+departureArea.getMinLon()+" and "+departureArea.getMaxLon()+" ";
+		
+		String MMSI_NOT_IN_LIST = " ";
+		if(excludeMmsi != null && excludeMmsi.length > 0) {
+			MMSI_NOT_IN_LIST = " and mmsi not in (";
+			for (int i = 0; i < excludeMmsi.length; i++) {
+				MMSI_NOT_IN_LIST += "'"+excludeMmsi[i]+"', ";
+			}
+			MMSI_NOT_IN_LIST += "'') ";	// add an empty string to complete the list
+		}
 
 		final String SHIP_DEPARTURE_QUERY = 
 				"SELECT distinct mmsi "+
@@ -37,7 +47,8 @@ public class Ship {
 			    "WHERE 1=1 "+
 			    DEPARTURE_PERIOD_COND+
 				DEPARTURE_AREA_COND+
-				"limit 50";
+				MMSI_NOT_IN_LIST+
+				"limit 1";
 		
 		Connection con = DBConnection.getCon();	
 		

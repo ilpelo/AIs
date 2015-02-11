@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -25,14 +26,12 @@ public class GenerateKML {
 	static Box depBox, arrBox;
 	final static int 
 			VOYAGE_DURATION_IN_DAYS = 15, // 8 deg/day
-			ANALYSIS_PERIOD_IN_DAYS = 6;
+			ANALYSIS_PERIOD_IN_DAYS = 2;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Statement stmt;
-		ResultSet rs;
 
 		// final String BEFORE_DEPARTURE_PERIOD_COND =
 		// "and date(from_unixtime(ts)) <= "+FIRST_DEPARTURE_DAY;
@@ -150,9 +149,22 @@ public class GenerateKML {
 			kmlGenerator.addBox("Departure", depBox);
 			kmlGenerator.addBox("Arrival", arrBox);
 
+			String[] excludeMmsi = null;
 			for (int i = 0; i < ANALYSIS_PERIOD_IN_DAYS; i++) {
-				String departureDay = "2011-03-" + String.format("%02d", i) + " ";
-				addTracks(kmlGenerator, departureDay);
+				String departureDay = "2011-03-" + String.format("%02d", i+1);
+				String[] mmsiList = addTracks(kmlGenerator, departureDay, excludeMmsi);
+				// add mmsi to the exclude list
+				if(mmsiList != null && mmsiList.length > 0) {
+					if(excludeMmsi != null) {
+						String[] newExcludeMmsi = Arrays.copyOf(excludeMmsi, 
+																excludeMmsi.length + mmsiList.length);
+						System.arraycopy(mmsiList, 0, newExcludeMmsi, excludeMmsi.length, mmsiList.length);
+						excludeMmsi = newExcludeMmsi;
+					} else {
+						excludeMmsi = mmsiList;
+					}
+						
+				}
 			}
 
 			Source src = new DOMSource(kmlGenerator.getDoc());
@@ -168,16 +180,22 @@ public class GenerateKML {
 		}
 	}
 
-	public static void addTracks(KMLGenerator kmlGenerator, String depDay) {
+	public static String[] addTracks(KMLGenerator kmlGenerator,
+									 String depDay,
+									 String[] excludeMmsi) {
 		List<ShipVoyage> voyages = Ship.findVoyages(depBox, arrBox, depDay,
-				VOYAGE_DURATION_IN_DAYS);
+				VOYAGE_DURATION_IN_DAYS, excludeMmsi);
 
+		String[] mmsiList = null;
 		if (voyages.size() == 0) {
 			System.out.println("No voyages");
 		} else {
+			mmsiList = new String[voyages.size()];
+			int i = 0;
 			Iterator<ShipVoyage> itr = voyages.iterator();
 			while (itr.hasNext()) {
 				ShipVoyage voyage = itr.next();
+				mmsiList[i] = voyage.getMmsi();
 				List<ShipPosition> positions = voyage.getPosList();
 				if (positions != null) {
 					Iterator<ShipPosition> posItr = positions.iterator();
@@ -192,5 +210,6 @@ public class GenerateKML {
 				}
 			}
 		}
+		return mmsiList;
 	}
 }
