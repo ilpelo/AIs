@@ -48,7 +48,7 @@ public class Ship {
 			    DEPARTURE_PERIOD_COND+
 				DEPARTURE_AREA_COND+
 				MMSI_NOT_IN_LIST+
-				"limit 1";
+				"limit 1000";
 		
 		Connection con = DBConnection.getCon();	
 		
