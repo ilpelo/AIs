@@ -31,3 +31,12 @@ index index_ts (ts),
 index index_lat (lat),
 index index_lon (lon)
 );
+
+-- temporary table for importing eE data
+create table tpos
+(
+mmsi varchar(15),
+ts varchar(15),
+lat varchar(20),
+lon varchar(20)
+);
