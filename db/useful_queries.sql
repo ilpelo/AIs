@@ -16,7 +16,6 @@ from pos
 group by date(from_unixtime(ts)) order by 1;
 
 
-
 -- Table WPOS
 -- count positions between 2 dates
 select count(*)
@@ -26,9 +25,37 @@ and date(from_unixtime(ts)) >= '2011-03-02'
 and date(from_unixtime(ts)) < '2011-03-03'
 ;
 
+-- select timestamps of the last 10 positions in a time interval
+select from_unixtime(ts)
+from wpos
+where 1=1
+and from_unixtime(ts) >= '2011-03-02 00:00:00'
+and from_unixtime(ts) <  '2011-03-02 00:10:00'
+order by ts desc
+limit 10
+;
+
+-- count top 10 ships with most positions in a time interval
+select mmsi, count(*)
+from (
+	select *
+	from wpos
+	where 1=1
+	and from_unixtime(ts) >= '2011-03-02 00:00:00'
+	and from_unixtime(ts) <  '2011-03-02 00:10:00'
+) as fpos
+where 1=1
+group by mmsi
+order by 2 desc
+limit 10
+;
+
 -- count position per day
 select date(from_unixtime(ts)), count(*) 
 from wpos 
+where 1=1
+and date(from_unixtime(ts)) >= '2011-03-02'
+and date(from_unixtime(ts)) < '2011-03-30'
 group by date(from_unixtime(ts)) order by 1;
 
 -- select positions within a box

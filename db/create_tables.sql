@@ -1,5 +1,14 @@
 //create database ai;
 
+-- temporary table for importing eE data
+create table tpos
+(
+mmsi varchar(15),
+ts varchar(15),
+lat varchar(20),
+lon varchar(20)
+);
+
 create table pos
 (
 mmsi varchar(15) not null,
@@ -10,6 +19,7 @@ source varchar(1),
 index index_mmsi (mmsi),
 index index_ts (ts)
 );
+
 
 create table shiptype
 (
@@ -32,11 +42,4 @@ index index_lat (lat),
 index index_lon (lon)
 );
 
--- temporary table for importing eE data
-create table tpos
-(
-mmsi varchar(15),
-ts varchar(15),
-lat varchar(20),
-lon varchar(20)
-);
+
