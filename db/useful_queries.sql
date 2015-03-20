@@ -75,18 +75,21 @@ and lat between 30 and 40
 and lon between -15 and -5
 group by left(date(from_unixtime(ts)),7) order by 1;
 
+
 -- downsample position to 1h rate
-select mmsi, ts, lat, lon
+select from_unixtime(ts), lat, lon
 from (
-	select *
+	select mmsi, max(ts) as ts, lat, lon
 	from wpos
 	where 1=1
 	and from_unixtime(ts) >= '2011-03-02 00:00:00'
-	and from_unixtime(ts) <  '2011-03-02 01:00:00'
+	and from_unixtime(ts) <  '2011-03-02 06:00:00'
+	group by mmsi, left(from_unixtime(ts), 16)
 ) as fpos
 where 1=1
 and mmsi = 740339000
-order by 2 desc
+order by 1 asc
+;
 -- limit 10
 INTO OUTFILE '/tmp/pos.csv'
 FIELDS TERMINATED BY ','
