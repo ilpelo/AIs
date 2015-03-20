@@ -16,7 +16,7 @@ drop table wpos;
 
 -- create table wpos (see create_table.sql)
 
--- insert from LRIT and Norway AIS data
+-- insert from LRIT and eE, Norway AIS data
 insert into wpos
 select * from pos
 where 1=1
