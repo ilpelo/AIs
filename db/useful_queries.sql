@@ -13,6 +13,9 @@ select date(from_unixtime(ts)) "Date",
 	   truncate(min(lat),0) "Min lat", 
 	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
 from pos 
+where 1=1
+and date(from_unixtime(ts)) >= '2013-03-01'
+and date(from_unixtime(ts)) < '2013-04-01'
 group by date(from_unixtime(ts)) order by 1;
 
 
@@ -51,11 +54,15 @@ limit 10
 ;
 
 -- count position per day
-select date(from_unixtime(ts)), count(*) 
+select date(from_unixtime(ts)),
+       count(*), 
+	   truncate(max(lat),0) "Max lat",
+	   truncate(min(lat),0) "Min lat", 
+	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
 from wpos 
 where 1=1
-and date(from_unixtime(ts)) >= '2011-03-02'
-and date(from_unixtime(ts)) < '2011-03-30'
+and date(from_unixtime(ts)) >= '2013-03-01'
+and date(from_unixtime(ts)) < '2013-04-01'
 group by date(from_unixtime(ts)) order by 1;
 
 -- select positions within a box
@@ -67,3 +74,24 @@ and date(from_unixtime(ts)) < '2011-03-03'
 and lat between 30 and 40
 and lon between -15 and -5
 group by left(date(from_unixtime(ts)),7) order by 1;
+
+
+-- downsample position to 1h rate
+select from_unixtime(ts), lat, lon
+from (
+	select mmsi, max(ts) as ts, lat, lon
+	from wpos
+	where 1=1
+	and from_unixtime(ts) >= '2011-03-02 00:00:00'
+	and from_unixtime(ts) <  '2011-03-02 06:00:00'
+	group by mmsi, left(from_unixtime(ts), 16)
+) as fpos
+where 1=1
+and mmsi = 740339000
+order by 1 asc
+;
+-- limit 10
+INTO OUTFILE '/tmp/pos.csv'
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n';
+
