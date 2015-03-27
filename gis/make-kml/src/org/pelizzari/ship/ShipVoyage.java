@@ -16,6 +16,8 @@ public class ShipVoyage {
 	String mmsi;
 	List<ShipPosition> posList;
 	
+	static final boolean SHOW_ALL_VOYAGES = true;
+	
 	public ShipVoyage(String mmsi, 
 					  Box arrivalArea,
 					  String departureISODate, // YYYY-MM-DD
@@ -66,7 +68,7 @@ public class ShipVoyage {
 				break;
 			}
 		}
-		if(voyageCrossesArrivalArea) { // || true) { // if true, get any voyages
+		if(voyageCrossesArrivalArea || SHOW_ALL_VOYAGES) { // if true, get any voyages
 			this.posList = voyageBetweenDepartureAndArrivalAreas;
 		}
 	}

@@ -26,7 +26,7 @@ public class GenerateKML {
 	static Box depBox, arrBox;
 	final static int 
 			VOYAGE_DURATION_IN_DAYS = 15, // 8 deg/day
-			ANALYSIS_PERIOD_IN_DAYS = 10;
+			ANALYSIS_PERIOD_IN_DAYS = 5;
 
 	/**
 	 * @param args
@@ -45,15 +45,40 @@ public class GenerateKML {
 			KMLGenerator kmlGenerator = new KMLGenerator();
 
 			kmlGenerator.addIconStyle("targetStyle",
-					"http://maps.google.com/mapfiles/kml/shapes/target.png");
-
-			Point gibraltarNW = new Point(40, -15); // 40
-			Point gibraltarSE = new Point(35, -5); // 30
-			depBox = new Box(gibraltarNW, gibraltarSE);
-
+					//"http://maps.google.com/mapfiles/kml/shapes/target.png");
+					"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
+			
+			// Gibraltar
+			Point gibraltarNW = new Point(37, -10);
+			Point gibraltarSE = new Point(35, -5);
+			// Copenhagen
+			Point copenhagenNW = new Point(56, 12);
+			Point copenhagenSE = new Point(55, 14);
+			// Channel
+			Point channelNW = new Point(51, 1);
+			Point channelSE = new Point(50.5f, 2.5f);
+			// New York
 			Point nyNW = new Point(44, -77);
 			Point nySE = new Point(40, -70);
-			arrBox = new Box(nyNW, nySE);
+			// Rio de Janeiro
+			Point rioNW = new Point(-21, -46);
+			Point rioSE = new Point(-26, -40);
+			// South Africa
+			Point saNW = new Point(-32, 17);
+			Point saSE = new Point(-36, 20);
+			// Suez
+			Point suezNW = new Point(32, 31.5f);
+			Point suezSE = new Point(29.5f, 33);
+
+			
+			depBox = new Box(gibraltarNW, gibraltarSE);
+			//depBox = new Box(channelNW, channelSE);
+			
+			//arrBox = new Box(nyNW, nySE);
+			//arrBox = new Box(rioNW, rioSE);
+			//arrBox = new Box(saNW, saSE);
+			//arrBox = new Box(copenhagenNW, copenhagenSE);
+			arrBox = new Box(suezNW, suezSE);
 
 			/*
 			 * Point galiziaNW = new Point(45, -13); Point galiziaSE = new
@@ -117,7 +142,8 @@ public class GenerateKML {
 						ShipPosition pos = posItr.next();
 						int ts = pos.getTs();
 						Date date = new Date(ts * 1000);
-						kmlGenerator.addPoint("targetStyle", date.toString(),
+						kmlGenerator.addPoint("targetStyle", "", 
+								//date.toString(),
 								pos.lat, pos.lon);
 					}
 					kmlGenerator.addLineString(voyage);
