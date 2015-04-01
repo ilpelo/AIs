@@ -25,8 +25,7 @@ public class MapPlot {
                
                 FileReader fr = new FileReader("C:\\master_data\\pos1.csv");
                 map.loadTrack(fr);
-                fr.close();
-                
+                fr.close();      
                 map.setVisible(true);
 
                 File mapFile = new File("C:\\master_data\\map.png");
