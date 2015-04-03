@@ -7,7 +7,7 @@ import ec.vector.*;
 
 public class LatVector extends Problem implements SimpleProblemForm {
 
-	public final float[] TRACK = {35.5f, 35.6f, 36};
+	public final float[] TRACK = {32f, 35f, 38f};
 
 	// ind is the individual to be evaluated.
 	// We're given state and threadnum primarily so we

@@ -21,15 +21,15 @@ import javax.imageio.ImageIO;
 public class MapPlot {
        
         public static void main(String[] args) throws IOException {
-                Map map = new Map();
-               
-                FileReader fr = new FileReader("C:\\master_data\\pos1.csv");
-                map.loadTrack(fr);
-                fr.close();      
-                map.setVisible(true);
-
-                File mapFile = new File("C:\\master_data\\map.png");
-                map.saveAsImage(mapFile);
+//                Map map = new Map();
+//               
+//                FileReader fr = new FileReader("C:\\master_data\\pos1.csv");
+//                map.loadTrack(fr);
+//                fr.close();      
+//                map.setVisible(true);
+//
+//                File mapFile = new File("C:\\master_data\\map.png");
+//                map.saveAsImage(mapFile);
         }
 
 }

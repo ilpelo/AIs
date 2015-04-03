@@ -7,5 +7,9 @@ public class Point {
 		this.lat = lat;
 		this.lon = lon;
 	}
+	
+	public String toString() {
+		return "["+String.format("%2.2f", lat)+","+String.format("%3.2f", lon)+"]";
+	}
 
 }
