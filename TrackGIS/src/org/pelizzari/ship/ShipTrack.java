@@ -1,6 +1,5 @@
 package org.pelizzari.ship;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,7 +13,9 @@ import org.pelizzari.gis.*;
 
 public class ShipTrack {
 	
-	final float SEGMENT_PRECISION = 0.5f;
+	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
+	final float AVERAGE_SPEED = 5f; // speed parameter
+	
     private static Pattern SHIP_POSITION =
     		Pattern.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
     
@@ -35,7 +36,6 @@ public class ShipTrack {
 		addPosition(pos);
 	}
 	
-	
 	/*
 	 * Loads a track from a 3 column input CSV file: lat, lon, ts
 	 */
@@ -54,8 +54,10 @@ public class ShipTrack {
 			        		int ts = Integer.parseInt(m.group(1));
 			                double lat = Double.parseDouble(m.group(2));
 			                double lon = Double.parseDouble(m.group(3));
-			                System.out.println("ts " + ts + " lat " + lat + " lon "+ lon);			                
+			                //System.out.println("ts " + ts + " lat " + lat + " lon "+ lon);			                
 			                pos = new ShipPosition(new Point((float)lat, (float)lon), new Timestamp(ts));
+			                pos.setIndex(readCount);
+			                posList.add(pos);
 			        } else errCount++;			
 			}
             System.out.println("Read " + readCount + " lines; ignored " + errCount);
@@ -88,7 +90,7 @@ public class ShipTrack {
 			}
 			p3 = pos;
 			// the triplet (p1, p2, p3) is set; check if the points are aligned
-			if(isSegment(p1, p2, p3, SEGMENT_PRECISION)) {
+			if(p1.isAligned(p2, p3, SEGMENT_PRECISION)) {
 				// points are aligned, ignore p2: p3 becomes the 2nd point of the triplet
 				p2 = p3;
 			} else {
@@ -97,24 +99,14 @@ public class ShipTrack {
 				p1 = p2;
 				p2 = p3;
 			}
-			p3 = null;
 		}
 		reducedPosList.add(p2);
 		posList = reducedPosList;
 	}
 	
-	/*
-	 * Checks if the difference of the slope between (p1, p2) and (p1, p3) is the same, with a given precision:
-	 * slope(p1, p2) - slope(p1, p3) <= precision
-	 */
-	public boolean isSegment(ShipPosition p1, ShipPosition p2, ShipPosition p3, float precision) {		
-		return Math.abs((p1.point.lat - p2.point.lat) * (p1.point.lon - p3.point.lon)
-						-
-						(p1.point.lat - p3.point.lat) * (p1.point.lon - p2.point.lon)) <= precision;
-	}
-	
-	public List<ChangeOfCourse> computeChangeOfCourseSequence(ShipTrack track) {
-		List<ChangeOfCourse> changeOfCourseList = new ArrayList<ChangeOfCourse>();
+
+	public ChangeOfCourseSequence computeChangeOfCourseSequence() {
+		ChangeOfCourseSequence changeOfCourseSequence = new ChangeOfCourseSequence();
 		ShipPosition p1 = null;
 		ShipPosition p2 = null;
 		Iterator<ShipPosition> posItr = posList.iterator();
@@ -123,19 +115,80 @@ public class ShipTrack {
 			if(p1 == null) {
 				p1 = pos;
 				continue;
-			}
+			} 
 			p2 = pos;
-			ChangeOfCourse changeOfCourse;
+			ChangeOfCourse changeOfCourse = null;
 			try {
 				changeOfCourse = p1.computeChangeOfCourse(p2);
-				changeOfCourseList.add(changeOfCourse);
+				if(changeOfCourse == null) throw new Exception("coc is null");
+				changeOfCourseSequence.add(changeOfCourse);
 			} catch (Exception e) {
 				System.err.println("Error in computeChangeOfCourseSequence: "+e);
 			}
+			p1 = p2;
 		}
-		return changeOfCourseList;
+		return changeOfCourseSequence;
+	}
+	
+	public ShipTrack getInterpolatedTrack(int timePeriod) {
+		ShipPosition posFirst = posList.get(0);
+		int trackSize = posList.size();
+		ShipPosition posLast = posList.get(trackSize-1);
+		int maxTs = posLast.ts.getTs();
+		ShipTrack interpolatedTrack = new ShipTrack();
+		interpolatedTrack.addPosition(posFirst);
+		for (int t = posFirst.ts.getTs()+timePeriod; t < maxTs; t += timePeriod) {
+			ShipPosition pos = getInterpolatedPosition(t);
+			interpolatedTrack.addPosition(pos);
+		}
+		interpolatedTrack.addPosition(posLast);
+		return interpolatedTrack;		
 	}
 
+	public ShipPosition getInterpolatedPosition(int ts) {
+		ShipPosition posFirst = posList.get(0);
+		int trackSize = posList.size();
+		ShipPosition posLast = posList.get(trackSize-1);
+		ShipPosition pos = null;
+		if(ts < posFirst.ts.getTs() || ts > posLast.ts.getTs()) {
+			System.err.println("getInterpolatedPosition: ts out of bounds");
+			return null;
+		}
+		ShipPosition posBefore = posFirst;
+		ShipPosition posAfter = posList.get(1);
+		int i = 2;
+		while(ts > posAfter.ts.getTs()) {
+			posBefore = posAfter;
+			posAfter = posList.get(i);
+			i++;
+		}
+		float r = (float) (ts - posBefore.ts.getTs()) / (float) (posAfter.ts.getTs() - posBefore.ts.getTs());
+		float lat = posBefore.point.lat + (posAfter.point.lat - posBefore.point.lat) * r;
+		float lon = posBefore.point.lon + (posAfter.point.lon - posBefore.point.lon) * r;
+		pos = new ShipPosition(new Point(lat, lon), new Timestamp(ts));
+		pos.setIndex(ts);
+		return pos;
+	}
+	
+	public ShipTrack reconstructShipTrack(ShipPosition startPosition,
+										  ChangeOfCourseSequence cocSeq,
+										  float averageSpeed) {
+		ShipTrack reconstructedTrack = new ShipTrack();
+		reconstructedTrack.addPosition(startPosition);
+		ShipPosition pos = startPosition;
+		for(ChangeOfCourse coc : cocSeq) {
+			ShipPosition nextPos = pos.computeNextPosition(coc, AVERAGE_SPEED);
+			reconstructedTrack.addPosition(nextPos);
+			pos = nextPos;
+		}
+		return reconstructedTrack;
+	}
+	
+	public float getCourseError(ChangeOfCourseSequence cocSeq) {
+		float error = 1;
+		
+		return error;
+	}
 	
 	public List<ShipPosition> getPosList() {
 		return posList;
@@ -146,11 +199,9 @@ public class ShipTrack {
 	}
 
 	public String toString() {
-		String s = "ShipTrack: ";
-		Iterator<ShipPosition> posItr = posList.iterator();
-		while(posItr.hasNext()) {
-			ShipPosition pos = posItr.next();
-			s = s + pos + " ";
+		String s = "ShipTrack:\n";
+		for(ShipPosition pos : posList) {
+			s = s + pos + "\n";			
 		}
 		return s;
 	}

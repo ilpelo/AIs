@@ -72,8 +72,10 @@ public class Map extends MapWindow {
 				// System.out.println("ts " + ts + " lat " + lat + " lon "+
 				// lon);
 				cur = new Point(lat, lon);
-				if (prec != null)
+				addPOI(new POI(cur, ""+pos.getIndex()));                
+				if (prec != null) {
 					addSegment(new Segment(prec, cur, color));
+				}
 				prec = cur;
 			}
 			// System.out.println("Read " + readCount + " lines; ignored " +

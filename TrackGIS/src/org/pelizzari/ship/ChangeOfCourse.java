@@ -5,44 +5,26 @@ public class ChangeOfCourse {
 
 	static final float COURSE_PRECISION = 0.1f; // degrees
 	
-	float oldCourse, newCourse; // in degrees (0-359)
+	float course; // in degrees (0-359)
 	int duration; // in seconds
 	
-	public ChangeOfCourse(float oldCourse, float newCourse, int duration)
-			throws Exception {
-		setDuration(duration);
-		setOldCourse(oldCourse);
-		setNewCourse(newCourse);
-	}
 	
 	public ChangeOfCourse(float newCourse, int duration)
 			throws Exception {
 		setDuration(duration);
-		setNewCourse(newCourse);
+		setCourse(newCourse);
 	}
 	
-	public float getOldCourse() {
-		return oldCourse;
+	public float getCourse() {
+		return course;
 	}
 
-	public void setOldCourse(float oldCourse) throws Exception {
-		if (oldCourse < 0 || oldCourse > 359.9) {
-			throw new Exception("Parameter oldCourse out of bounds: "
-					+ oldCourse);
-		}
-		this.oldCourse = oldCourse;
-	}
-
-	public float getNewCourse() {
-		return newCourse;
-	}
-
-	public void setNewCourse(float newCourse) throws Exception {
+	public void setCourse(float newCourse) throws Exception {
 		if (newCourse < 0 || newCourse > 359.9) {
 			throw new Exception("Parameter newCourse out of bounds: "
 					+ newCourse);
 		}
-		this.newCourse = newCourse;
+		this.course = newCourse;
 	}
 
 	public int getDuration() {
@@ -51,8 +33,12 @@ public class ChangeOfCourse {
 
 	public void setDuration(int duration) throws Exception {
 		if (duration <= 0) {
-			throw new Exception("Parameter duration not valid: " + newCourse);
+			throw new Exception("Parameter duration not valid: " + duration);
 		}		this.duration = duration;
+	}
+	
+	public String toString() {
+		return "[" + String.format("%3.1f°,%ds", course, duration) + "]"; 
 	}
 
 }
