@@ -21,7 +21,7 @@ public class LatVector extends Problem implements SimpleProblemForm {
 	{
 		if (ind.evaluated) return;   //don't evaluate the individual if it's already evaluated
 		if (!(ind instanceof FloatVectorIndividual))
-			state.output.fatal("Whoa!  It's not a BitVectorIndividual!!!",null);
+			state.output.fatal("Whoa!  It's not a FloatVectorIndividual!!!",null);
 		FloatVectorIndividual ind2 = (FloatVectorIndividual)ind;
 		// compute fitness
 		float mse=0; // mean square error        

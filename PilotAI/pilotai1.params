@@ -16,7 +16,7 @@ stat.file		= $out.stat
 
 exch		= ec.simple.SimpleExchanger
 
-generations		= 200
+generations		= 500
 quit-on-run-complete	= true
 checkpoint		= false
 checkpoint-prefix	= ec
@@ -32,8 +32,8 @@ pop.subpop.0.species.genome-size	= 3
 pop.subpop.0.species.crossover-type	= one
 pop.subpop.0.species.mutation-type      = reset
 pop.subpop.0.species.mutation-prob	= 0.01
-pop.subpop.0.species.min-gene	= 30.0
-pop.subpop.0.species.max-gene	= 40.0
+pop.subpop.0.species.min-gene	= 0.0
+pop.subpop.0.species.max-gene	= 359.9
 
 pop.subpop.0.species.fitness 		= ec.simple.SimpleFitness
 pop.subpop.0.species.pipe			= ec.vector.breed.VectorMutationPipeline
@@ -43,11 +43,11 @@ pop.subpop.0.species.pipe.source.0.source.1	= ec.select.TournamentSelection
 
 select.tournament.size		= 2
 
-eval.problem		= org.pelizzari.ai.LatVector
+eval.problem		= org.pelizzari.ai.CourseVector
 
 # Add our statistics object
 stat.num-children      = 1
-stat.child.0           = org.pelizzari.ai.MyStatistics
+stat.child.0           = org.pelizzari.ai.BestStatistics
 stat.child.0.pop-file  = pop.stat
 stat.child.0.info-file = info.stat
 
