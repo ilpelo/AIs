@@ -60,7 +60,7 @@ public class ShipPosition {
 											new Timestamp(ts.getTs() + coc.duration));
 		return pos;
 	}
-	
+		
 	/*
 	 * Returns the ChangeOfCourse needed to reach the position pos from the current position.
 	 */
@@ -88,8 +88,14 @@ public class ShipPosition {
 		return new ChangeOfCourse(course, duration);
 	}
 	
+	public float getAverageSpeed(ShipPosition pos) {
+		float distance = point.distanceInMiles(pos.point); // in nm
+		float duration = (float) (ts.getTs() - pos.ts.getTs())/3600f; // in hours
+		return distance / duration;
+	}
+	
 	public String toString() {
-		String indexStr = index == -1 ? "" : ""+index;
+		String indexStr = index == -1 ? "-" : ""+index;
 		return "(" + indexStr + ", " + point + ", " + ts.getISODatetime() + ")";
 	}
 }

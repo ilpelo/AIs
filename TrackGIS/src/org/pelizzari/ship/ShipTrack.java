@@ -14,7 +14,7 @@ import org.pelizzari.gis.*;
 public class ShipTrack {
 	
 	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
-	final float AVERAGE_SPEED = 5f; // speed parameter
+
 	
     private static Pattern SHIP_POSITION =
     		Pattern.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
@@ -34,6 +34,14 @@ public class ShipTrack {
 		Point point = new Point(lat, lon);
 		ShipPosition pos = new ShipPosition(point, timestamp);
 		addPosition(pos);
+	}
+	
+	public ShipPosition getFirstPosition() {
+		return posList.get(0);
+	}
+
+	public ShipPosition getLastPosition() {
+		return posList.get(posList.size()-1);
 	}
 	
 	/*
@@ -131,9 +139,9 @@ public class ShipTrack {
 	}
 	
 	public ShipTrack getInterpolatedTrack(int timePeriod) {
-		ShipPosition posFirst = posList.get(0);
-		int trackSize = posList.size();
-		ShipPosition posLast = posList.get(trackSize-1);
+		ShipPosition posFirst = getFirstPosition();
+		//int trackSize = posList.size();
+		ShipPosition posLast = getLastPosition();
 		int maxTs = posLast.ts.getTs();
 		ShipTrack interpolatedTrack = new ShipTrack();
 		interpolatedTrack.addPosition(posFirst);
@@ -146,9 +154,9 @@ public class ShipTrack {
 	}
 
 	public ShipPosition getInterpolatedPosition(int ts) {
-		ShipPosition posFirst = posList.get(0);
-		int trackSize = posList.size();
-		ShipPosition posLast = posList.get(trackSize-1);
+		ShipPosition posFirst = getFirstPosition();
+		//int trackSize = posList.size();
+		ShipPosition posLast = getLastPosition();
 		ShipPosition pos = null;
 		if(ts < posFirst.ts.getTs() || ts > posLast.ts.getTs()) {
 			System.err.println("getInterpolatedPosition: ts out of bounds");
@@ -177,11 +185,24 @@ public class ShipTrack {
 		reconstructedTrack.addPosition(startPosition);
 		ShipPosition pos = startPosition;
 		for(ChangeOfCourse coc : cocSeq) {
-			ShipPosition nextPos = pos.computeNextPosition(coc, AVERAGE_SPEED);
+			ShipPosition nextPos = pos.computeNextPosition(coc, averageSpeed);
 			reconstructedTrack.addPosition(nextPos);
 			pos = nextPos;
 		}
 		return reconstructedTrack;
+	}
+	
+	public float getAverageSpeed() {
+		float distance = 0;
+		ShipPosition prevPos = null;
+		for(ShipPosition pos : posList) {
+			if(prevPos != null) {
+				distance += prevPos.point.distanceInMiles(pos.point); // in nm
+			}
+			prevPos = pos;
+		}
+		float duration = (getLastPosition().ts.getTs() - getFirstPosition().ts.getTs())/3600f; // in hours
+		return distance / duration;
 	}
 	
 	public float getCourseError(ChangeOfCourseSequence cocSeq) {
