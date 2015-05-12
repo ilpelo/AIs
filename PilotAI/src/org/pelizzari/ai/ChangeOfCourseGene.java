@@ -6,6 +6,7 @@ package org.pelizzari.ai;
 import org.pelizzari.ship.ChangeOfCourse;
 
 import ec.EvolutionState;
+import ec.util.Parameter;
 import ec.vector.Gene;
 
 /**
@@ -16,8 +17,8 @@ public class ChangeOfCourseGene extends Gene {
 
 	public final static float MIN_COURSE = 0f;
 	public final static float MAX_COURSE = 360f;
-	public final static int MIN_DURATION = 0;
-	public final static int MAX_DURATION = 3600*24*1; // one day	
+	public final static int MIN_DISTANCE = 0;
+	public final static int MAX_DISTANCE = 500;	
 	
 	private ChangeOfCourse allele;
 	/**
@@ -53,7 +54,7 @@ public class ChangeOfCourseGene extends Gene {
 	@Override
 	public int hashCode() {
 		int hash = this.getClass().hashCode();
-		hash = hash ^ (int) allele.getCourse() ^ allele.getDuration();
+		hash = hash ^ (int) allele.getCourse() ^ allele.getDistance();
 		return hash;
 	}
 
@@ -63,9 +64,9 @@ public class ChangeOfCourseGene extends Gene {
 	@Override
 	public void reset(EvolutionState state, int thread) {
 		float course = MIN_COURSE + state.random[thread].nextFloat(true, false) * MAX_COURSE;
-		int duration = MIN_DURATION + state.random[thread].nextInt(MAX_DURATION);
+		int distance = MIN_DISTANCE + state.random[thread].nextInt(MAX_DISTANCE);
 		try {
-			allele = new ChangeOfCourse(course, duration);
+			allele = new ChangeOfCourse(course, distance);
 		} catch (Exception e) {
 			state.output.fatal(e.toString());
 		}

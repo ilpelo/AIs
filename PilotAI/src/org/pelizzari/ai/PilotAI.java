@@ -11,6 +11,7 @@ import org.pelizzari.ship.*;
 public class PilotAI {
 
 	static final boolean FROM_FILE = false;
+	static final float SPEED = 10; // knots
 
 	public static void main(String[] args) {
 
@@ -18,14 +19,21 @@ public class PilotAI {
 
 //		final float[] TRACK_LAT = { 32f, 33f, 32f, 33f };
 //		final float[] TRACK_LON = { -10f, -11f, -13f, -15f };
-		 final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
-		 final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
+		final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
+		final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
 
 		ShipTrack track = new ShipTrack();
 		if (!FROM_FILE) {
+			Point p = null;
+			Point prevP = null;			
 			for (int i = 0; i < TRACK_LON.length; i++) {
-				Point p = new Point(TRACK_LAT[i], TRACK_LON[i]);
-				Timestamp ts = new Timestamp(100000 + i * 3600);
+				p = new Point(TRACK_LAT[i], TRACK_LON[i]);
+				int duration = 0;
+				if(i>0) {
+					duration = (int)(prevP.distanceInMiles(p)/SPEED*3600);
+				}
+				prevP = p;
+				Timestamp ts = new Timestamp(100000 + i * duration);
 				ShipPosition pos = new ShipPosition(p, ts);
 				pos.setIndex(i);
 				track.addPosition(pos);
@@ -51,14 +59,14 @@ public class PilotAI {
 		ChangeOfCourseSequence cocSeq = track.computeChangeOfCourseSequence();
 		System.out.println(cocSeq);
 
-		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3000);
+		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3600);
 		System.out.println(interpolatedTrack);
 		map.plotTrack(interpolatedTrack, Color.BLUE);
 		cocSeq = interpolatedTrack.computeChangeOfCourseSequence();
 		System.out.println(cocSeq);
 
-		ShipTrack reconstructedTrack = track.reconstructShipTrack(track
-				.getPosList().get(0), cocSeq, track.getAverageSpeed());
+		ShipTrack reconstructedTrack = ShipTrack.reconstructShipTrack(
+				track.getPosList().get(0), cocSeq, SPEED);
 		System.out.println(reconstructedTrack);
 		map.plotTrack(reconstructedTrack, Color.RED);
 

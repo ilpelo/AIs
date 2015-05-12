@@ -178,14 +178,14 @@ public class ShipTrack {
 		return pos;
 	}
 	
-	public ShipTrack reconstructShipTrack(ShipPosition startPosition,
+	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
 										  ChangeOfCourseSequence cocSeq,
-										  float averageSpeed) {
+										  float speed) {
 		ShipTrack reconstructedTrack = new ShipTrack();
 		reconstructedTrack.addPosition(startPosition);
 		ShipPosition pos = startPosition;
 		for(ChangeOfCourse coc : cocSeq) {
-			ShipPosition nextPos = pos.computeNextPosition(coc, averageSpeed);
+			ShipPosition nextPos = pos.computeNextPosition(coc, speed);
 			reconstructedTrack.addPosition(nextPos);
 			pos = nextPos;
 		}

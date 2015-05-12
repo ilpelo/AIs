@@ -52,12 +52,12 @@ public class ShipPosition {
 	}
 	
 	public ShipPosition computeNextPosition(ChangeOfCourse coc, float speedInKnots) {
-		float distanceInMinutesOfDegree = speedInKnots*(float)coc.duration/3600f; // knot=nm/h; duration:s
-		float approxDistanceInDegree = distanceInMinutesOfDegree/60f;
+		//float distanceInMinutesOfDegree = speedInKnots*(float)coc.duration/3600f; // knot=nm/h; duration:s
+		float approxDistanceInDegree = coc.distance/60f;
 		float dLat = (float) (approxDistanceInDegree * Math.cos(Math.toRadians(coc.course)));
 		float dLon = (float) (approxDistanceInDegree * Math.sin(Math.toRadians(coc.course)));
 		ShipPosition pos = new ShipPosition(new Point(point.lat + dLat, point.lon + dLon),
-											new Timestamp(ts.getTs() + coc.duration));
+											new Timestamp(ts.getTs() + (int)(coc.distance/speedInKnots*3600)));
 		return pos;
 	}
 		
@@ -68,7 +68,8 @@ public class ShipPosition {
 		float course = -1;
 		float lonDiff = pos.point.lon - point.lon;
 		float latDiff = pos.point.lat - point.lat;
-		int duration = pos.ts.getTs() - ts.getTs();
+		//int duration = pos.ts.getTs() - ts.getTs();
+		float distance = point.distanceInMiles(pos.point); // in nm
 		if(Math.abs(lonDiff) < ChangeOfCourse.COURSE_PRECISION &&
 		   Math.abs(latDiff) < ChangeOfCourse.COURSE_PRECISION) {
 			course = 0;
@@ -85,13 +86,13 @@ public class ShipPosition {
 				course = 270f + (float) Math.toDegrees(Math.atan(latDiff/-lonDiff));								
 			}
 		}
-		return new ChangeOfCourse(course, duration);
+		return new ChangeOfCourse(course, (int)distance);
 	}
 	
-	public float getAverageSpeed(ShipPosition pos) {
+	public float getAverageSpeed(ShipPosition pos) { // in knots
 		float distance = point.distanceInMiles(pos.point); // in nm
 		float duration = (float) (ts.getTs() - pos.ts.getTs())/3600f; // in hours
-		return distance / duration;
+		return distance / duration; // knots
 	}
 	
 	public String toString() {
