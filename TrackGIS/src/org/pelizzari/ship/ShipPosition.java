@@ -61,6 +61,17 @@ public class ShipPosition {
 		return pos;
 	}
 		
+	public ShipPosition computeNextPosition(Displacement displ, float speedInKnots) {
+		float nextLat = point.lat + displ.deltaLat;
+		float nextLon = point.lon + displ.deltaLon;
+		Point nextPoint = new Point(nextLat, nextLon);
+		float distance = point.distanceInMiles(nextPoint);
+		Timestamp nextTs = new Timestamp(ts.getTs() + (int)(distance/speedInKnots*3600));
+		ShipPosition nextPos = new ShipPosition(nextPoint, nextTs);
+		return nextPos;
+	}
+	
+	
 	/*
 	 * Returns the ChangeOfCourse needed to reach the position pos from the current position.
 	 */

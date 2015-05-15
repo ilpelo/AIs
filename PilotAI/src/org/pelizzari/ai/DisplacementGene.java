@@ -3,7 +3,7 @@
  */
 package org.pelizzari.ai;
 
-import org.pelizzari.gis.Point;
+import org.pelizzari.gis.Displacement;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
@@ -13,16 +13,16 @@ import ec.vector.Gene;
  * @author andrea
  *
  */
-public class PositionGene extends Gene {
+public class DisplacementGene extends Gene {
 
 	public final static float MAX_DELTA = 10f; // max absolute value of change of coordinate (lat or lon)
 											   // in decimal degree for each step 
 	
-	private Point allele;
+	private Displacement allele;
 	/**
 	 * 
 	 */
-	public PositionGene() {
+	public DisplacementGene() {
 		// TODO Auto-generated constructor stub
 		super();
 	}
@@ -41,7 +41,7 @@ public class PositionGene extends Gene {
             return false;
         }
 
-        PositionGene posGene = (PositionGene) otherGene;
+        DisplacementGene posGene = (DisplacementGene) otherGene;
 
         return allele.equals(posGene.allele);
     }
@@ -52,7 +52,7 @@ public class PositionGene extends Gene {
 	@Override
 	public int hashCode() {
 		int hash = this.getClass().hashCode();
-		hash = hash ^ (int) (allele.lat * 1000) ^ (int) (allele.lon * 1000);
+		hash = hash ^ (int) (allele.deltaLat * 1000) ^ (int) (allele.deltaLon * 1000);
 		return hash;
 	}
 
@@ -61,23 +61,24 @@ public class PositionGene extends Gene {
 	 */
 	@Override
 	public void reset(EvolutionState state, int thread) {
-		float course = MIN_COURSE + state.random[thread].nextFloat(true, false) * MAX_COURSE;
-		int distance = MIN_DISTANCE + state.random[thread].nextInt(MAX_DISTANCE);
+		// set to a random value in [-MAX_DELTA, +MAX_DELTA] interval
+		float deltaLat = - MAX_DELTA + state.random[thread].nextFloat(true, true) * MAX_DELTA * 2;
+		float deltaLon = - MAX_DELTA + state.random[thread].nextFloat(true, true) * MAX_DELTA * 2;;
 		try {
-			allele = new ChangeOfCourse(course, distance);
+			allele = new Displacement(deltaLat, deltaLon);
 		} catch (Exception e) {
 			state.output.fatal(e.toString());
 		}
 	}
 	
-	ChangeOfCourse getAllele() {
+	Displacement getAllele() {
 		return allele;
 	}
 	
     public Object clone() {
-        PositionGene cocGene = (PositionGene) (super.clone());
+        DisplacementGene displGene = (DisplacementGene) (super.clone());
 
-        return cocGene;
+        return displGene;
     }
 
 }

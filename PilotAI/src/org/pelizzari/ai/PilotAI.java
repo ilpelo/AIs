@@ -19,10 +19,10 @@ public class PilotAI {
 
 //		final float[] TRACK_LAT = { 32f, 33f, 32f, 33f };
 //		final float[] TRACK_LON = { -10f, -11f, -13f, -15f };
-//		final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
-//		final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
-		final float[] TRACK_LAT = {31f, 32f};
-		final float[] TRACK_LON = {-12f, -11f};
+		final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
+		final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
+//		final float[] TRACK_LAT = {31f, 32f};
+//		final float[] TRACK_LON = {-12f, -11f};
 
 		ShipTrack track = new ShipTrack();
 		if (!FROM_FILE) {

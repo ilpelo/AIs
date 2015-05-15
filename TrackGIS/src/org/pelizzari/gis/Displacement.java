@@ -17,9 +17,10 @@ public class Displacement {
 	}
 	
 	public String toString() {
+		String signedDelta = "%+2.2f";
 		return "["+
-				String.format("+%2.2f", deltaLat)+","+
-				String.format("+%3.2f", deltaLon)+
+				String.format(signedDelta, deltaLat)+","+
+				String.format(signedDelta, deltaLon)+
 				"]";
 	}
 
