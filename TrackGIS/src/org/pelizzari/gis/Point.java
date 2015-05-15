@@ -14,7 +14,7 @@ public class Point {
 		// see http://www.movable-type.co.uk/scripts/latlong.html
 		float y = p.latRad - latRad;
 		float x = (p.lonRad - lonRad) * (float) Math.cos((p.latRad + latRad)/2);
-		return (float) Math.sqrt(x*x + y*y) * 3440f; // * Earth radius in miles
+		return (float) Math.sqrt(x*x + y*y) * 3410f; // * Earth radius in miles
 	}
 	
 	public String toString() {

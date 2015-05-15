@@ -6,7 +6,7 @@ public class ChangeOfCourse {
 	static final float COURSE_PRECISION = 0.1f; // degrees
 	
 	float course; // in degrees (0-359)
-	int distance; // in nautical miles
+	int distance; // in nm
 	
 	
 	public ChangeOfCourse(float newCourse, int distance)

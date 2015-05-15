@@ -89,6 +89,15 @@ public class ShipPosition {
 		return new ChangeOfCourse(course, (int)distance);
 	}
 	
+	/*
+	 * Returns the Displacement needed to reach the position pos from the current position.
+	 */
+	public Displacement computeDisplacement(ShipPosition pos) throws Exception {
+		float latDiff = pos.point.lat - point.lat;
+		float lonDiff = pos.point.lon - point.lon;
+		return new Displacement(latDiff, lonDiff);
+	}
+	
 	public float getAverageSpeed(ShipPosition pos) { // in knots
 		float distance = point.distanceInMiles(pos.point); // in nm
 		float duration = (float) (ts.getTs() - pos.ts.getTs())/3600f; // in hours

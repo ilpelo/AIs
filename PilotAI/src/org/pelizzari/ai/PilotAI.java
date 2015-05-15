@@ -19,8 +19,10 @@ public class PilotAI {
 
 //		final float[] TRACK_LAT = { 32f, 33f, 32f, 33f };
 //		final float[] TRACK_LON = { -10f, -11f, -13f, -15f };
-		final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
-		final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
+//		final float[] TRACK_LAT = {31f, 32f, 31f, 30f, 31f};
+//		final float[] TRACK_LON = {-12f, -11f, -10f, -11f, -12f};
+		final float[] TRACK_LAT = {31f, 32f};
+		final float[] TRACK_LON = {-12f, -11f};
 
 		ShipTrack track = new ShipTrack();
 		if (!FROM_FILE) {
@@ -56,19 +58,28 @@ public class PilotAI {
 
 		System.out.println(track);
 		map.plotTrack(track, Color.BLACK);
-		ChangeOfCourseSequence cocSeq = track.computeChangeOfCourseSequence();
-		System.out.println(cocSeq);
+		DisplacementSequence displSeq = track.computeDisplacements();
+		System.out.println(displSeq);
 
-		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3600);
-		System.out.println(interpolatedTrack);
-		map.plotTrack(interpolatedTrack, Color.BLUE);
-		cocSeq = interpolatedTrack.computeChangeOfCourseSequence();
-		System.out.println(cocSeq);
-
-		ShipTrack reconstructedTrack = ShipTrack.reconstructShipTrack(
-				track.getPosList().get(0), cocSeq, SPEED);
-		System.out.println(reconstructedTrack);
-		map.plotTrack(reconstructedTrack, Color.RED);
+		ShipTrack reconstructedTrack1 = ShipTrack.reconstructShipTrack(
+				track.getPosList().get(0), displSeq, SPEED);
+		System.out.println(reconstructedTrack1);
+		map.plotTrack(reconstructedTrack1, Color.GREEN);
+		
+		
+		System.out.println(track.getCourseError(reconstructedTrack1));
+		
+		
+//		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3600);
+//		System.out.println(interpolatedTrack);
+//		map.plotTrack(interpolatedTrack, Color.BLUE);
+//		cocSeq = interpolatedTrack.computeChangeOfCourseSequence();
+//		System.out.println(cocSeq);
+//
+//		ShipTrack reconstructedTrack2 = ShipTrack.reconstructShipTrack(
+//				track.getPosList().get(0), cocSeq, SPEED);
+//		System.out.println(reconstructedTrack2);
+//		map.plotTrack(reconstructedTrack2, Color.RED);
 
 		// System.out.println("Reducing...");
 		// track.reducePositions();
