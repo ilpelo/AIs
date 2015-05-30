@@ -62,6 +62,11 @@ public class Map extends MapWindow {
 	// }
 
 	public void plotTrack(ShipTrack track, Color color) {
+		plotTrack(track, color, null);
+	}
+
+	
+	public void plotTrack(ShipTrack track, Color color, String lastPositionLabel) {
 		Point cur, prec = null;
 		try {
 			Iterator<ShipPosition> posItr = track.getPosList().iterator();
@@ -72,7 +77,12 @@ public class Map extends MapWindow {
 				// System.out.println("ts " + ts + " lat " + lat + " lon "+
 				// lon);
 				cur = new Point(lat, lon);
-				addPOI(new POI(cur, ""+pos.getIndex()));                
+				String label = ""+pos.getIndex();
+				if(lastPositionLabel != null && !posItr.hasNext()) {
+					label = lastPositionLabel;
+				}
+				POI posPoi = new POI(cur, label);
+				addPOI(posPoi);                
 				if (prec != null) {
 					addSegment(new Segment(prec, cur, color));
 				}

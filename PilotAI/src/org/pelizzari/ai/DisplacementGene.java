@@ -40,9 +40,7 @@ public class DisplacementGene extends Gene {
         if (!this.getClass().isInstance(otherGene)) {
             return false;
         }
-
         DisplacementGene posGene = (DisplacementGene) otherGene;
-
         return allele.equals(posGene.allele);
     }
 
@@ -61,13 +59,13 @@ public class DisplacementGene extends Gene {
 	 */
 	@Override
 	public void reset(EvolutionState state, int thread) {
-		// set to a random value in [-MAX_DELTA, +MAX_DELTA] interval
+		// set to a random value in [-MAX_DELTA, +MAX_DELTA] interval both for lat and lon
 		float deltaLat = - MAX_DELTA + state.random[thread].nextFloat(true, true) * MAX_DELTA * 2;
 		float deltaLon = - MAX_DELTA + state.random[thread].nextFloat(true, true) * MAX_DELTA * 2;;
 		try {
 			allele = new Displacement(deltaLat, deltaLon);
 		} catch (Exception e) {
-			state.output.fatal(e.toString());
+			state.output.fatal("Resetting Dispacement gene:"+ e.toString());
 		}
 	}
 	
@@ -77,8 +75,11 @@ public class DisplacementGene extends Gene {
 	
     public Object clone() {
         DisplacementGene displGene = (DisplacementGene) (super.clone());
-
         return displGene;
+    }
+    
+    public String toString() {
+    	return allele.toString();
     }
 
 }
