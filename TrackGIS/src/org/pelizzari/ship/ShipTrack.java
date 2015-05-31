@@ -252,13 +252,18 @@ public class ShipTrack {
 		return distance / duration;
 	}
 
-	public float getCourseError(ShipTrack track) {
-		float error = 0;
+	public TrackLocationError computeTrackLocationError(ShipTrack track) {
 		TrackLocationError trackError = new TrackLocationError(this);
 		trackError.computeError(track);
-		error = trackError.meanError();
-		return error;
+		return trackError;		
 	}
+	
+//	public float computeCourseError(ShipTrack track) {
+//		float error = 0;
+//		TrackLocationError trackError = computeTrackLocationError(track);
+//		error = trackError.meanError();
+//		return error;
+//	}
 
 	public List<ShipPosition> getPosList() {
 		return posList;

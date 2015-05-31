@@ -15,8 +15,9 @@ import ec.vector.Gene;
  */
 public class DisplacementGene extends Gene {
 
-	public final static float PARAM_MAX_DELTA = 10f; // max absolute value of change of coordinate (lat or lon)
-											   // in decimal degree for each step 
+//	public final static float PARAM_MAX_DELTA = 10f; // max absolute value of change of coordinate (lat or lon)
+//											   // in decimal degree for each step 
+	float maxDisplacement;
 	
 	private Displacement allele;
 	/**
@@ -31,7 +32,7 @@ public class DisplacementGene extends Gene {
     {
     	super.setup(state, base);
     	// get the maximum displacement and use it to initialize an allele
-    	//int maxDisplacement = state.parameters.getInt(base.pop().push("max-gene"), null);
+    	maxDisplacement = state.parameters.getFloat(base.pop().push("max-gene"), null);
     	//state.output.fatal("Max displ: "+ maxDisplacement);
     }	
 	
@@ -63,8 +64,8 @@ public class DisplacementGene extends Gene {
 	@Override
 	public void reset(EvolutionState state, int thread) {
 		// set to a random value in [-MAX_DELTA, +MAX_DELTA] interval both for lat and lon
-		float deltaLat = - PARAM_MAX_DELTA + state.random[thread].nextFloat(true, true) * PARAM_MAX_DELTA * 2;
-		float deltaLon = - PARAM_MAX_DELTA + state.random[thread].nextFloat(true, true) * PARAM_MAX_DELTA * 2;;
+		float deltaLat = - maxDisplacement + state.random[thread].nextFloat(true, true) * maxDisplacement * 2;
+		float deltaLon = - maxDisplacement + state.random[thread].nextFloat(true, true) * maxDisplacement * 2;;
 		try {
 			allele = new Displacement(deltaLat, deltaLon);
 		} catch (Exception e) {

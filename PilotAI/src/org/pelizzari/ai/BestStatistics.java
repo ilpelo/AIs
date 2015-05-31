@@ -28,9 +28,9 @@ public class BestStatistics extends Statistics {
 	// Output params
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
-	public static final int GEN_OUTPUT_RATE = 500; // print log every Nth
+	public static final int GEN_OUTPUT_RATE = 3000; // print log every Nth
 													// generations
-	public static Map map;
+	public static Map map, map1;
 
 	public void setup(final EvolutionState state, final Parameter base) {
 		// DO NOT FORGET to call super.setup(...) !!
@@ -66,9 +66,15 @@ public class BestStatistics extends Statistics {
 		state.output.println("generations: " + genMax, popLog);
 		// init Map and show target track
 		map = new Map();
+		map1 = new Map();
 		DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
-		map.plotTrack(prob.getTargetTrack(), Color.RED);
+		map.plotTrack(prob.getTargetTrack(), Color.GREEN);
+		map1.plotTrack(prob.getTargetTrack(), Color.GREEN);
 		map.setVisible(true);
+		// target displacements
+		state.output.println("Target track: \n" + prob.getTargetTrack(), popLog);
+		state.output.println("Target displacements: \n" + prob.getTargetTrack().computeDisplacements(), popLog);
+		
 	}
 
 	public void postEvaluationStatistics(final EvolutionState state) {
@@ -104,11 +110,13 @@ public class BestStatistics extends Statistics {
 				state.output.println(bestTrack.toString(), popLog);
 				
 				TrackLocationError trackError = bestTrack.computeTrackLocationError(prob.getTargetTrack());
-				state.output.println("Error vector: "+trackError, popLog);
+				state.output.println(""+trackError, popLog);
 				
-				Color trackColor = lastGen?Color.GREEN:Color.GRAY;
+				Color trackColor = lastGen?Color.PINK:Color.GRAY;
 				map.plotTrack(bestTrack, trackColor, ""+state.generation);
 				if(lastGen) {
+					map1.plotTrack(bestTrack, Color.PINK, ""+state.generation);
+					map1.setVisible(true);
 					try {
 						System.in.read();
 					} catch (IOException e) {
