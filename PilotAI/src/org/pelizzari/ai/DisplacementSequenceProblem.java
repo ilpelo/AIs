@@ -12,6 +12,7 @@ import org.pelizzari.gis.Point;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.Timestamp;
+import org.pelizzari.ship.TrackLocationError;
 
 import ec.*;
 import ec.simple.*;
@@ -21,7 +22,7 @@ import ec.vector.*;
 public class DisplacementSequenceProblem extends Problem implements SimpleProblemForm {
 
 	static ShipTrack targetTrack;
-	static final boolean FROM_FILE = false;
+	static final boolean FROM_FILE = true;
 	static final float SPEED = 10; // knots
 //	static final float[] TRACK_LAT = {31f, 33f};
 //	static final float[] TRACK_LON = {-12f, -12.1f};
@@ -90,12 +91,16 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 //		}
 		ShipTrack trackInd = makeTrack(state, displSeqInd);
 		
-		// compute fitness		
-		float error = targetTrack.getCourseError(trackInd);
+		// compute fitness
+		TrackLocationError trackError = trackInd.computeTrackLocationError(targetTrack);
+		
+		//float error = trackError.meanError();
+		float error = trackError.meanErrorWithThreshold();
+		
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness",null);
 
-		((SimpleFitness)displSeqInd.fitness).setFitness(state,
+			((SimpleFitness)displSeqInd.fitness).setFitness(state,
 				// ...the fitness... (negative!)
 				-error,
 				///... is the individual ideal?  Indicate here...

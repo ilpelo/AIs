@@ -10,6 +10,7 @@ import java.io.*;
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
 import org.pelizzari.ship.ShipTrack;
+import org.pelizzari.ship.TrackLocationError;
 
 import ec.vector.*;
 
@@ -27,7 +28,7 @@ public class BestStatistics extends Statistics {
 	// Output params
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
-	public static final int GEN_OUTPUT_RATE = 100; // print log every Nth
+	public static final int GEN_OUTPUT_RATE = 500; // print log every Nth
 													// generations
 	public static Map map;
 
@@ -66,15 +67,16 @@ public class BestStatistics extends Statistics {
 		// init Map and show target track
 		map = new Map();
 		DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
-		map.plotTrack(prob.getTargetTrack(), Color.BLACK);
+		map.plotTrack(prob.getTargetTrack(), Color.RED);
 		map.setVisible(true);
 	}
 
 	public void postEvaluationStatistics(final EvolutionState state) {
 		// be certain to call the hook on super!
 		super.postEvaluationStatistics(state);
-		// write out a warning that the next generation is coming
-		if (genCount % GEN_OUTPUT_RATE == 0 || genCount == genMax - 1) {
+		// show best individual
+		boolean lastGen = genCount == genMax - 1;
+		if (genCount % GEN_OUTPUT_RATE == 0 || lastGen) {
 			state.output.println("GENERATION " + state.generation, popLog);
 			// print out the population
 			// state.population.printPopulation(state, popLog);
@@ -89,22 +91,30 @@ public class BestStatistics extends Statistics {
 				}
 			}
 			Individual simplyTheBest = state.population.subpops[0].individuals[best];
+			
+			// print individual to pop log file
 			state.output.println("BEST", popLog);
 			simplyTheBest.printIndividualForHumans(state, popLog);
-			// built ship track using the winner's displacements
+						
+			// build ship track using the winner's displacements
 			// and starting from the first position if the Target track
 			if (state.evaluator.p_problem instanceof DisplacementSequenceProblem) {
 				DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
 				ShipTrack bestTrack = prob.makeTrack(state, (GeneVectorIndividual)simplyTheBest);
 				state.output.println(bestTrack.toString(), popLog);
-				map.plotTrack(bestTrack, Color.GRAY, ""+state.generation);
-				if(genCount == genMax - 1) {
+				
+				TrackLocationError trackError = bestTrack.computeTrackLocationError(prob.getTargetTrack());
+				state.output.println("Error vector: "+trackError, popLog);
+				
+				Color trackColor = lastGen?Color.GREEN:Color.GRAY;
+				map.plotTrack(bestTrack, trackColor, ""+state.generation);
+				if(lastGen) {
 					try {
 						System.in.read();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				}
+				}				
 			}
 		}
 		genCount++;

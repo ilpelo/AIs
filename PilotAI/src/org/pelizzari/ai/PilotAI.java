@@ -67,7 +67,7 @@ public class PilotAI {
 		map.plotTrack(reconstructedTrack1, Color.GREEN);
 		
 		
-		System.out.println(track.getCourseError(reconstructedTrack1));
+		//System.out.println(track.getCourseError(reconstructedTrack1));
 		
 		
 //		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3600);
