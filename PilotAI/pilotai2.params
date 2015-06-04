@@ -1,6 +1,6 @@
 breedthreads	= 1
 evalthreads	= 1
-seed.0		= 5372
+seed.0		= 5379
 
 state		= ec.simple.SimpleEvolutionState
 pop			= ec.Population
@@ -18,13 +18,14 @@ exch		= ec.simple.SimpleExchanger
 
 
 # relevant parameters
-generations		= 10000
-pop.subpop.0.size 		= 1000
-pop.subpop.0.species.crossover-prob	= 0.8
-pop.subpop.0.species.mutation-prob	= 0.05
+generations	= 10000
+pop.subpop.0.size = 1000
+# the crossover likelihood
+pop.subpop.0.species.pipe.likelihood = 0.5
+pop.subpop.0.species.mutation-prob	= 0.03
 
 # number of displacements (must be equal to track size - 1)
-pop.subpop.0.species.genome-size	= 9
+pop.subpop.0.species.genome-size	= 14
 
 # min/max displacement (absolute values MUST be the same)
 pop.subpop.0.species.min-gene	= -1.0
@@ -42,6 +43,8 @@ pop.subpop.0.duplicate-retries 	= 0
 pop.subpop.0.species 		= ec.vector.GeneVectorSpecies
 pop.subpop.0.species.ind	= ec.vector.GeneVectorIndividual
 pop.subpop.0.species.crossover-type	= one
+# this is the per-gene probability of being crossovered (my guess...); no influence on result
+#pop.subpop.0.species.crossover-prob	= 0.0
 pop.subpop.0.species.mutation-type  = reset
 
 pop.subpop.0.species.gene       = org.pelizzari.ai.DisplacementGene
