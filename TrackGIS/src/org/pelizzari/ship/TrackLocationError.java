@@ -54,7 +54,7 @@ public class TrackLocationError {
 		meanError = (float) Math.sqrt(sumSquareErrors);
 		return meanError;
 	}
-	
+		
 	public String toString() {
 		String s = "Track error: ";
 		for (int i = 0; i < errorVector.length; i++) {
