@@ -21,8 +21,9 @@ exch		= ec.simple.SimpleExchanger
 generations	= 10000
 pop.subpop.0.size = 1000
 # the crossover likelihood
-pop.subpop.0.species.pipe.likelihood = 0.5
-pop.subpop.0.species.mutation-prob	= 0.03
+pop.subpop.0.species.pipe.source.0.likelihood = 0.5
+pop.subpop.0.species.mutation-prob	= 0.07
+select.tournament.size		= 100
 
 # number of displacements (must be equal to track size - 1)
 pop.subpop.0.species.genome-size	= 14
@@ -54,7 +55,6 @@ pop.subpop.0.species.pipe.source.0		= ec.vector.breed.VectorCrossoverPipeline
 pop.subpop.0.species.pipe.source.0.source.0	= ec.select.TournamentSelection
 pop.subpop.0.species.pipe.source.0.source.1	= ec.select.TournamentSelection
 
-select.tournament.size		= 2
 
 eval.problem		= org.pelizzari.ai.DisplacementSequenceProblem
 
@@ -63,6 +63,7 @@ stat.num-children      = 1
 stat.child.0           = org.pelizzari.ai.BestStatistics
 stat.child.0.pop-file  = pop.stat
 stat.child.0.info-file = info.stat
+stat.child.0.image-file = C:\\master_data\\map
 
 
 
