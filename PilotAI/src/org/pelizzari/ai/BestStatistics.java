@@ -9,8 +9,10 @@ import java.io.*;
 
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
+import org.pelizzari.ship.ChangeOfHeadingSequence;
+import org.pelizzari.ship.HeadingSequence;
 import org.pelizzari.ship.ShipTrack;
-import org.pelizzari.ship.TrackLocationError;
+import org.pelizzari.ship.TrackError;
 
 import ec.vector.*;
 
@@ -91,8 +93,12 @@ public class BestStatistics extends Statistics {
 		map.setVisible(true);
 		// target displacements
 		state.output.println("Target track: \n" + prob.getTargetTrack(), popLog);
-		state.output.println("Target displacements: \n" + prob.getTargetTrack().computeDisplacements(), popLog);
-		
+		DisplacementSequence displSeq = prob.getTargetTrack().computeDisplacements();
+		state.output.println("Target displacements: \n" + displSeq, popLog);
+		HeadingSequence headSeq = prob.getTargetTrack().computeHeadingSequence();
+		state.output.println("Target heading sequence: \n" + headSeq, popLog);		
+		ChangeOfHeadingSequence cohSeq = prob.getTargetTrack().computeChangeOfHeadingSequence();
+		state.output.println("Target change of heading sequence: \n" + cohSeq, popLog);		
 	}
 
 	public void postEvaluationStatistics(final EvolutionState state) {
@@ -101,7 +107,7 @@ public class BestStatistics extends Statistics {
 		// show best individual
 		boolean lastGen = genCount == genMax - 1;
 		if (genCount % GEN_OUTPUT_RATE == 0 || lastGen) {
-			state.output.println("GENERATION " + state.generation, popLog);
+			state.output.println("============= GENERATION " + state.generation, popLog);
 			// print out the population
 			// state.population.printPopulation(state, popLog);
 			// print out best genome individual in subpop 0
@@ -127,8 +133,14 @@ public class BestStatistics extends Statistics {
 				ShipTrack bestTrack = prob.makeTrack(state, (GeneVectorIndividual)simplyTheBest);
 				state.output.println(bestTrack.toString(), popLog);
 				
-				TrackLocationError trackError = bestTrack.computeTrackLocationError(prob.getTargetTrack());
+				TrackError trackError = bestTrack.computeTrackError(prob.getTargetTrack());
 				state.output.println(""+trackError, popLog);
+				DisplacementSequence displSeq = bestTrack.computeDisplacements();
+				state.output.println("Best displacements: \n" + displSeq, popLog);
+				HeadingSequence headSeq = bestTrack.computeHeadingSequence();
+				state.output.println("Best heading sequence: \n" + headSeq, popLog);
+				ChangeOfHeadingSequence cohSeq = bestTrack.computeChangeOfHeadingSequence();
+				state.output.println("Best change of heading sequence: \n" + cohSeq, popLog);		
 				
 				Color trackColor = lastGen?Color.PINK:Color.GRAY;
 				map.plotTrack(bestTrack, trackColor, ""+state.generation);

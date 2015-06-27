@@ -14,6 +14,10 @@ import org.pelizzari.gis.*;
 public class ShipTrack {
 
 	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
+	
+	DisplacementSequence displacementSeq; // this sequence has length = length(ShipTrack) - 1;
+	HeadingSequence headingSeq; // this sequence has length = length(ShipTrack) - 1;
+	ChangeOfHeadingSequence changeOfHeadingSeq; // this sequence has length = length(ShipTrack) - 2;
 
 	private static Pattern SHIP_POSITION = Pattern
 			.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
@@ -116,34 +120,73 @@ public class ShipTrack {
 		posList = reducedPosList;
 	}
 
-	public ChangeOfCourseSequence computeChangeOfCourseSequence() {
-		ChangeOfCourseSequence changeOfCourseSequence = new ChangeOfCourseSequence();
-		ShipPosition p1 = null;
-		ShipPosition p2 = null;
-		Iterator<ShipPosition> posItr = posList.iterator();
-		while (posItr.hasNext()) {
-			ShipPosition pos = posItr.next();
-			if (p1 == null) {
-				p1 = pos;
-				continue;
-			}
-			p2 = pos;
-			ChangeOfCourse changeOfCourse = null;
-			try {
-				changeOfCourse = p1.computeChangeOfCourse(p2);
-				if (changeOfCourse == null)
-					throw new Exception("coc is null");
-				changeOfCourseSequence.add(changeOfCourse);
-			} catch (Exception e) {
-				System.err.println("Error in computeChangeOfCourseSequence: "
-						+ e);
-			}
-			p1 = p2;
+	// old version with angle and distance (in fact this is not a change of course!)
+//	private ChangeOfCourseSequence computeChangeOfCourseSequence() {
+//		ChangeOfCourseSequence changeOfCourseSequence = new ChangeOfCourseSequence();
+//		ShipPosition p1 = null;
+//		ShipPosition p2 = null;
+//		Iterator<ShipPosition> posItr = posList.iterator();
+//		while (posItr.hasNext()) {
+//			ShipPosition pos = posItr.next();
+//			if (p1 == null) {
+//				p1 = pos;
+//				continue;
+//			}
+//			p2 = pos;
+//			ChangeOfCourse changeOfCourse = null;
+//			try {
+//				changeOfCourse = p1.computeChangeOfCourse(p2);
+//				if (changeOfCourse == null)
+//					throw new Exception("coc is null");
+//				changeOfCourseSequence.add(changeOfCourse);
+//			} catch (Exception e) {
+//				System.err.println("Error in computeChangeOfCourseSequence: "
+//						+ e);
+//			}
+//			p1 = p2;
+//		}
+//		return changeOfCourseSequence;
+//	}
+
+	
+	public HeadingSequence computeHeadingSequence() {
+		if(headingSeq != null) {
+			return headingSeq;
 		}
-		return changeOfCourseSequence;
+		if(displacementSeq == null) {
+			computeDisplacements();
+		}
+		headingSeq = new HeadingSequence(displacementSeq);		
+		return headingSeq;
 	}
 
+	public ChangeOfHeadingSequence computeChangeOfHeadingSequence() {
+		if(changeOfHeadingSeq != null) {
+			return changeOfHeadingSeq;
+		}
+		if(headingSeq == null) {
+			computeHeadingSequence();
+		}
+		changeOfHeadingSeq = new ChangeOfHeadingSequence();
+		Heading head1 = null;
+		Heading head2 = null;
+		for (Heading heading : headingSeq) {
+			if (head1 == null) {
+				head1 = heading;
+				continue;
+			}
+			head2 = heading;
+			ChangeOfHeading coh = new ChangeOfHeading(head1, head2);
+			changeOfHeadingSeq.add(coh);
+			head1 = head2;
+		}
+		return changeOfHeadingSeq;
+	}
+	
 	public DisplacementSequence computeDisplacements() {
+		if(displacementSeq != null) {
+			return displacementSeq;
+		}
 		DisplacementSequence displSeq = new DisplacementSequence();
 		ShipPosition p1 = null;
 		ShipPosition p2 = null;
@@ -166,6 +209,7 @@ public class ShipTrack {
 			}
 			p1 = p2;
 		}
+		displacementSeq = displSeq;
 		return displSeq;
 	}
 
@@ -252,18 +296,24 @@ public class ShipTrack {
 		return distance / duration;
 	}
 
-	public TrackLocationError computeTrackLocationError(ShipTrack track) {
-		TrackLocationError trackError = new TrackLocationError(this);
+	public TrackError computeTrackError(ShipTrack track) {
+		TrackError trackError = new TrackError(this);
 		trackError.computeError(track);
 		return trackError;		
 	}
 	
-//	public float computeCourseError(ShipTrack track) {
-//		float error = 0;
-//		TrackLocationError trackError = computeTrackLocationError(track);
-//		error = trackError.meanError();
-//		return error;
-//	}
+	public int countChangeOfHeadingOverLimit(float thresholdAngle) {
+		int cohOverLimitCount = 0;
+		if(changeOfHeadingSeq == null) {
+			computeChangeOfHeadingSequence();
+		}
+		for (ChangeOfHeading coh : changeOfHeadingSeq) {
+			if(Math.abs(coh.changeOfHeading) > thresholdAngle) {
+				cohOverLimitCount++;
+			}
+		}
+		return cohOverLimitCount;
+	}
 
 	public List<ShipPosition> getPosList() {
 		return posList;

@@ -12,7 +12,7 @@ import org.pelizzari.gis.Point;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.Timestamp;
-import org.pelizzari.ship.TrackLocationError;
+import org.pelizzari.ship.TrackError;
 
 import ec.*;
 import ec.simple.*;
@@ -92,10 +92,11 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 		ShipTrack trackInd = makeTrack(state, displSeqInd);
 		
 		// compute fitness
-		TrackLocationError trackError = trackInd.computeTrackLocationError(targetTrack);
+		TrackError trackError = trackInd.computeTrackError(targetTrack);
 		
 		//float error = trackError.meanError();
-		float error = trackError.meanErrorWithThreshold();
+		//float error = trackError.meanErrorWithThreshold();
+		float error = trackError.headingAndLocationError();
 		
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness",null);

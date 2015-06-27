@@ -3,14 +3,16 @@ package org.pelizzari.ship;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.pelizzari.gis.Displacement;
 import org.pelizzari.gis.DisplacementSequence;
 
 public class HeadingSequence extends ArrayList<Heading> {
 	
 	public HeadingSequence(DisplacementSequence displSeq) {
+		super();
 		for (Displacement displacement : displSeq) {
-			float angle = 
-			Heading head = new Heading(displ)
+			Heading head = new Heading(displacement);
+			this.add(head);
 		}
 	}
 	

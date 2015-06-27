@@ -10,7 +10,7 @@ import org.pelizzari.gis.Displacement;
  */
 public class Heading {
 
-	static final float HEADING_PRECISION = 0.1f; // degrees
+	static final float HEADING_PRECISION = 0.01f; // degrees
 
 	float heading; // in degrees (0-359)
 
@@ -47,7 +47,7 @@ public class Heading {
 	}
 
 	public String toString() {
-		return String.format("%3.1f°", heading);
+		return String.format("%3.1f", heading);
 	}
 
 	public boolean equals(Heading heading) {

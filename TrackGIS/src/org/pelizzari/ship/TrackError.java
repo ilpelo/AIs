@@ -5,14 +5,20 @@ import java.util.Iterator;
 import org.pelizzari.gis.Displacement;
 import org.pelizzari.gis.Point;
 
-public class TrackLocationError {
+
+/**
+ * Error is computed based on the point-to-point distance to the target track 
+ * @author andrea@pelizzari.org
+ */
+public class TrackError {
 	
 	final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 0.01f;
+	final static float MAX_CHANGE_OF_COURSE_ANGLE = 20f; // max angle for a change of heading not to be over the limit
 	
 	float[] errorVector;
 	ShipTrack baseTrack;
 			
-	public TrackLocationError(ShipTrack track) {
+	public TrackError(ShipTrack track) {
 		baseTrack = track;
 		int size = baseTrack.getPosList().size();
 		errorVector = new float[size];
@@ -31,7 +37,7 @@ public class TrackLocationError {
 			}
 	}
 	
-	public float meanError() {
+	public float meanLocError() {
 		float meanError = 0;
 		float sumSquareErrors = 0;
 		for (int i = 0; i < errorVector.length; i++) {
@@ -41,7 +47,7 @@ public class TrackLocationError {
 		return meanError;
 	}
 	
-	public float meanErrorWithThreshold() {
+	public float meanLocErrorWithThreshold() {
 		float meanError = 0;
 		float sumSquareErrors = 0;
 		for (int i = 0; i < errorVector.length; i++) {
@@ -54,7 +60,14 @@ public class TrackLocationError {
 		meanError = (float) Math.sqrt(sumSquareErrors);
 		return meanError;
 	}
-		
+
+	public float headingAndLocationError() {
+		float locError = meanLocErrorWithThreshold();
+		int cohOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(MAX_CHANGE_OF_COURSE_ANGLE);
+		return locError + cohOverLimitCount * 1000f;
+	}	
+	
+	
 	public String toString() {
 		String s = "Track error: ";
 		for (int i = 0; i < errorVector.length; i++) {
