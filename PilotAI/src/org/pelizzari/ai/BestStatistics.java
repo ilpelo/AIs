@@ -104,6 +104,46 @@ public class BestStatistics extends Statistics {
 	public void postEvaluationStatistics(final EvolutionState state) {
 		// be certain to call the hook on super!
 		super.postEvaluationStatistics(state);
+
+		showBestIndividual(state); //, genCount, genMax, popLog);
+	}	
+		
+	public Individual getBestIndividual(EvolutionState state) {
+		int best = 0;
+		Fitness best_fit = state.population.subpops[0].individuals[0].fitness;
+		for (int y = 1; y < state.population.subpops[0].individuals.length; y++) {
+			Fitness val_fit = state.population.subpops[0].individuals[y].fitness;
+			if (val_fit.betterThan(best_fit)) {
+				best = y;
+				best_fit = val_fit;
+			}
+		}
+		Individual simplyTheBest = state.population.subpops[0].individuals[best];
+		return simplyTheBest;
+	}
+	
+	public void drawOnMap(ShipTrack track, EvolutionState state, boolean lastGen) {
+		Color trackColor = lastGen?Color.PINK:Color.GRAY;
+		map.plotTrack(track, trackColor, ""+state.generation);
+		if(lastGen) {
+			map1.plotTrack(track, Color.PINK, ""+state.generation);
+			map1.setVisible(true);
+			// set up imageFile					
+			map1.saveAsImage(imageFile);
+			try {
+				System.in.read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}			
+	}
+	
+	public void showBestIndividual(EvolutionState state 
+//									      int genCount,
+//									      int genMax,
+//									      int popLog,
+//									      
+									      ) {			
 		// show best individual
 		boolean lastGen = genCount == genMax - 1;
 		if (genCount % GEN_OUTPUT_RATE == 0 || lastGen) {
@@ -111,19 +151,11 @@ public class BestStatistics extends Statistics {
 			// print out the population
 			// state.population.printPopulation(state, popLog);
 			// print out best genome individual in subpop 0
-			int best = 0;
-			Fitness best_fit = state.population.subpops[0].individuals[0].fitness;
-			for (int y = 1; y < state.population.subpops[0].individuals.length; y++) {
-				Fitness val_fit = state.population.subpops[0].individuals[y].fitness;
-				if (val_fit.betterThan(best_fit)) {
-					best = y;
-					best_fit = val_fit;
-				}
-			}
-			Individual simplyTheBest = state.population.subpops[0].individuals[best];
+			
+			Individual simplyTheBest = getBestIndividual(state);
 			
 			// print individual to pop log file
-			state.output.println("BEST", popLog);
+			state.output.println("BEST Track", popLog);
 			simplyTheBest.printIndividualForHumans(state, popLog);
 						
 			// build ship track using the winner's displacements
@@ -135,26 +167,8 @@ public class BestStatistics extends Statistics {
 				
 				TrackError trackError = bestTrack.computeTrackError(prob.getTargetTrack());
 				state.output.println(""+trackError, popLog);
-				DisplacementSequence displSeq = bestTrack.computeDisplacements();
-				state.output.println("Best displacements: \n" + displSeq, popLog);
-				HeadingSequence headSeq = bestTrack.computeHeadingSequence();
-				state.output.println("Best heading sequence: \n" + headSeq, popLog);
-				ChangeOfHeadingSequence cohSeq = bestTrack.computeChangeOfHeadingSequence();
-				state.output.println("Best change of heading sequence: \n" + cohSeq, popLog);		
 				
-				Color trackColor = lastGen?Color.PINK:Color.GRAY;
-				map.plotTrack(bestTrack, trackColor, ""+state.generation);
-				if(lastGen) {
-					map1.plotTrack(bestTrack, Color.PINK, ""+state.generation);
-					map1.setVisible(true);
-					// set up imageFile					
-					map1.saveAsImage(imageFile);
-					try {
-						System.in.read();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}				
+				drawOnMap(bestTrack, state, lastGen);
 			}
 		}
 		genCount++;

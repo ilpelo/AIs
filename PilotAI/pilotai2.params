@@ -1,6 +1,6 @@
 breedthreads	= 1
 evalthreads	= 1
-seed.0		= 5379
+seed.0		= 5366
 
 state		= ec.simple.SimpleEvolutionState
 pop			= ec.Population
@@ -18,19 +18,19 @@ exch		= ec.simple.SimpleExchanger
 
 
 # relevant parameters
-generations	= 10000
+generations	= 5000
 pop.subpop.0.size = 1000
 # the crossover likelihood
 pop.subpop.0.species.pipe.source.0.likelihood = 0.5
 pop.subpop.0.species.mutation-prob	= 0.07
-select.tournament.size		= 100
+select.tournament.size		= 10
 
 # number of displacements (must be equal to track size - 1)
-pop.subpop.0.species.genome-size	= 14
+pop.subpop.0.species.genome-size	= 9
 
 # min/max displacement (absolute values MUST be the same)
-pop.subpop.0.species.min-gene	= -1.0
-pop.subpop.0.species.max-gene	= +1.0
+pop.subpop.0.species.min-gene	= -5.0
+pop.subpop.0.species.max-gene	= +5.0
 
 
 quit-on-run-complete	= true

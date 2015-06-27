@@ -95,8 +95,9 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 		TrackError trackError = trackInd.computeTrackError(targetTrack);
 		
 		//float error = trackError.meanError();
-		//float error = trackError.meanErrorWithThreshold();
-		float error = trackError.headingAndLocationError();
+		float locError = trackError.meanLocErrorWithThreshold();
+		float headingError = trackError.headingError();
+		float error = headingError + locError;
 		
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness",null);
@@ -109,6 +110,21 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 		displSeqInd.evaluated = true;
 	}
 	
+		
+	@Override
+	public void closeContacts(EvolutionState state, int result) {
+		// TODO Auto-generated method stub
+		super.closeContacts(state, result);
+		System.out.println("============= Found in generation: " + state.generation + "\n");
+		BestStatistics bestStats = (BestStatistics)state.statistics.children[0];
+		//bestStats.showBestIndividual(state);
+		Individual idealInd = bestStats.getBestIndividual(state);
+		ShipTrack idealTrack =  makeTrack(state, (GeneVectorIndividual)idealInd);
+		System.out.println("Ideal Track: "+ idealTrack);
+		bestStats.drawOnMap(idealTrack, state, true);
+	}
+
+
 	public ShipTrack makeTrack(EvolutionState state, GeneVectorIndividual displSeqInd) {
 		// build track corresponding to the individual (sequence of displacements)
 		ShipTrack track = new ShipTrack();

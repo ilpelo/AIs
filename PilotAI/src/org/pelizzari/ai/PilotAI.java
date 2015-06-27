@@ -73,7 +73,7 @@ public class PilotAI {
 //		ShipTrack interpolatedTrack = track.getInterpolatedTrack(3600);
 //		System.out.println(interpolatedTrack);
 //		map.plotTrack(interpolatedTrack, Color.BLUE);
-//		cocSeq = interpolatedTrack.computeChangeOfCourseSequence();
+//		cocSeq = interpolatedTrack.getChangeOfCourseSequence();
 //		System.out.println(cocSeq);
 //
 //		ShipTrack reconstructedTrack2 = ShipTrack.reconstructShipTrack(
@@ -85,7 +85,7 @@ public class PilotAI {
 		// track.reducePositions();
 		// System.out.println(track);
 		// map.plotTrack(track, Color.BLUE);
-		// cocSeq = track.computeChangeOfCourseSequence();
+		// cocSeq = track.getChangeOfCourseSequence();
 		// System.out.println(cocSeq);
 
 		map.setVisible(true);

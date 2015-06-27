@@ -12,10 +12,10 @@ public class ChangeOfHeading {
 	public ChangeOfHeading(Heading head1, Heading head2) {
 		float coh = head2.heading - head1.heading;
 		if(coh > 180) {
-			coh = -360f + coh;
+			coh = coh - 360f;
 		} else {
 			if(coh < -180) {
-				coh = -(360f + coh);
+				coh = coh + 360f;
 			}
 		}
 		changeOfHeading = coh;		

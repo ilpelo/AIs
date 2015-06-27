@@ -298,7 +298,7 @@ public class ShipTrack {
 
 	public TrackError computeTrackError(ShipTrack track) {
 		TrackError trackError = new TrackError(this);
-		trackError.computeError(track);
+		trackError.computeErrorVector(track);
 		return trackError;		
 	}
 	
@@ -315,6 +315,14 @@ public class ShipTrack {
 		return cohOverLimitCount;
 	}
 
+	public ChangeOfHeadingSequence getChangeOfHeadingSeq() {
+		return changeOfHeadingSeq;
+	}
+
+	public void setChangeOfHeadingSeq(ChangeOfHeadingSequence changeOfHeadingSeq) {
+		this.changeOfHeadingSeq = changeOfHeadingSeq;
+	}
+
 	public List<ShipPosition> getPosList() {
 		return posList;
 	}
@@ -328,6 +336,12 @@ public class ShipTrack {
 		for (ShipPosition pos : posList) {
 			s = s + pos + "\n";
 		}
+		DisplacementSequence displSeq = computeDisplacements();
+		s = s + displSeq + "\n";
+		HeadingSequence headSeq = computeHeadingSequence();
+		s = s + headSeq + "\n";
+		ChangeOfHeadingSequence cohSeq = computeChangeOfHeadingSequence();
+		s = s + cohSeq + "\n";
 		return s;
 	}
 }
