@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.pelizzari.gis.*;
+import org.pelizzari.time.TimeInterval;
+import org.pelizzari.time.Timestamp;
 
 public class ShipTrack {
 
@@ -282,7 +284,8 @@ public class ShipTrack {
 		return reconstructedTrack;
 	}
 
-	public float getAverageSpeed() {
+	// in knots (miles/hours)
+	public float computeAverageSpeed() {
 		float distance = 0;
 		ShipPosition prevPos = null;
 		for (ShipPosition pos : posList) {
@@ -291,14 +294,14 @@ public class ShipTrack {
 			}
 			prevPos = pos;
 		}
-		float duration = (getLastPosition().ts.getTs() - getFirstPosition().ts
-				.getTs()) / 3600f; // in hours
+		float duration = (getLastPosition().ts.getTs() - getFirstPosition().ts.getTs())
+				/ 3600f; // in hours
 		return distance / duration;
 	}
 
-	public TrackError computeTrackError(ShipTrack track) {
+	public TrackError computeTrackError(ShipTrack targetTrack) {
 		TrackError trackError = new TrackError(this);
-		trackError.computeErrorVector(track);
+		trackError.computeErrorVector(targetTrack);
 		return trackError;		
 	}
 	
@@ -323,6 +326,16 @@ public class ShipTrack {
 		this.changeOfHeadingSeq = changeOfHeadingSeq;
 	}
 
+	public List<ShipPosition> getPosListInBoxAndInterval(Box box, TimeInterval interval) {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		for (ShipPosition pos : posList) {
+			if(box.isWithinBox(pos.point) && interval.isWithinInterval(pos.getTs())) {
+				filteredPosList.add(pos);
+			}
+		}
+		return filteredPosList;
+	}
+	
 	public List<ShipPosition> getPosList() {
 		return posList;
 	}

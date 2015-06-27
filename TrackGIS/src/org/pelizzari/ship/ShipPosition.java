@@ -1,6 +1,7 @@
 package org.pelizzari.ship;
 
 import org.pelizzari.gis.*;
+import org.pelizzari.time.Timestamp;
 
 public class ShipPosition {
 	int index;

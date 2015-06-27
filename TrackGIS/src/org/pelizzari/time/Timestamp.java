@@ -1,4 +1,4 @@
-package org.pelizzari.ship;
+package org.pelizzari.time;
 
 import java.util.Date;
 import java.text.DateFormat;
