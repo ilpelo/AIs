@@ -17,16 +17,24 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 0.01f; // position is not too far if < threshold
+	final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 10E-4f; // position is not too far if < threshold
 	final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
 	final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
 	final static float HEADING_ERROR_AMPLIFIER = 1000f; // multiply by the number of  changes of heading over the limit 
-	final static float BAD_TRACK_SEGMENT_FITNESS = 1000000f; // artificially high distance for segment that does not follow the target path
+	final static float BAD_TRACK_SEGMENT_FITNESS = 10E6f; // artificially high distance for segment that does not follow the target path
+	final static float BAD_TRACK_FITNESS = 10E7f; // artificially high distance for segment that does not follow the target path
+	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.9f; // percentage of target positions that are covered by the track
 	
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
+	// the destination of our journey (!) 
+	ShipPosition destinationPos;
 	// a measure of the error of each position of the baseTrack
 	float[] errorVector;
+	// target positions coverage (%)
+	float targetPosCoverage = 0;
+	// global error, related to the whole baseTrack
+	float globalError = 0;
 	// extra info for debug purposes (1 string for each position)
 	String[] extraInfo;
 	boolean debug = false;
@@ -55,11 +63,15 @@ public class TrackError {
 	}
 
 	public void computeErrorVector(ShipTrack targetTrack) throws Exception {
+		// store destination
+		destinationPos = targetTrack.getLastPosition();
+		//
 		ShipPosition p1 = null;
 		ShipPosition p2 = null;
 //		Timestamp ts1 = null;
 //		Timestamp ts2 = null;
 		int i = 0;
+		int totCoveredPositions = 0;
 		for (ShipPosition pos : baseTrack.posList) {
 			if (p1 == null) {
 				p1 = pos;
@@ -86,6 +98,8 @@ public class TrackError {
 			// filter position of target track and compute total squared distance to segment
 			List<ShipPosition> targetPosList = targetTrack.getPosListInBoxAndInterval(box, interval);
 			int nPos = targetPosList.size();
+			// increase total covered positions
+			totCoveredPositions += nPos;
 			float totSquaredDistance = 0;
 			if(nPos == 0 || 
 			   (nPos == 1 && i == 1)) { // first segment always include starting point of target track
@@ -95,7 +109,10 @@ public class TrackError {
 				if(debug) extraInfo[i] = "Segment "+i+": "+p1+"-"+p2+"\n";
 				for (ShipPosition targetPos : targetPosList) {
 					float squaredPointDistance = targetPos.point.approxSquaredDistanceToSegment(p1.point, p2.point);
-					if(debug) extraInfo[i] = extraInfo[i] + "Point "+targetPos + ": "+ squaredPointDistance + "\n";					
+					if(debug) extraInfo[i] = extraInfo[i] + "Point "+targetPos + ": "+ squaredPointDistance + "\n";
+					if(squaredPointDistance > PARAM_MAX_DISTANCE_ERROR_THRESHOLD) {
+						globalError = BAD_TRACK_SEGMENT_FITNESS;
+					}
 					totSquaredDistance += squaredPointDistance;
 				}
 				totSquaredDistance = totSquaredDistance/nPos; // average over all filtered positions 
@@ -104,6 +121,11 @@ public class TrackError {
 			if(debug) extraInfo[i] = extraInfo[i] + "Average squared distance: "+ totSquaredDistance + "\n";				
 			i++;
 			p1 = p2;
+		}
+		// bad global fitness if the target positions covered by the track are less than threshold (e.g. 90%)
+		targetPosCoverage = totCoveredPositions/targetTrack.posList.size();
+		if( targetPosCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
+			globalError += BAD_TRACK_FITNESS;
 		}
 	}
 
@@ -148,15 +170,24 @@ public class TrackError {
 			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100;
 	}
 	
+	public float destinationError() {
+		float distanceToDestination = baseTrack.getLastPosition().point.distanceInMiles(destinationPos.point);
+		return distanceToDestination;
+	}
 	
 
-	
+	public float getGlobalError() {
+		return globalError;
+	}
+
+
 	public String toString() {
 		String s = "Track error: ";
 		for (int i = 0; i < errorVector.length; i++) {
 			s = s + errorVector[i] + " ";
 		}
 		s = s + "\n";
+		s = s + "Target track positions coverage = " + targetPosCoverage*100 + " %\n";		
 		if(extraInfo != null) {
 			String extra = "Extra info: ";
 			for (int i = 0; i < extraInfo.length; i++) {
@@ -168,6 +199,8 @@ public class TrackError {
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
 		s = s + "meanDistanceToSegmentError = " + meanDistanceToSegmentError() + "\n";		
 		s = s + "headingError = " + headingError() + "\n";		
+		s = s + "destinationError = " + destinationError() + "\n";		
+		s = s + "globalError = " + globalError + "\n";		
 		return s;
 	}
 }
