@@ -1,6 +1,6 @@
 breedthreads	= 1
 evalthreads	= 1
-seed.0		= 5366
+seed.0		= 5361
 
 state		= ec.simple.SimpleEvolutionState
 pop			= ec.Population
@@ -25,8 +25,11 @@ pop.subpop.0.species.pipe.source.0.likelihood = 0.5
 pop.subpop.0.species.mutation-prob	= 0.07
 select.tournament.size		= 10
 
-# number of displacements (must be equal to track size - 1)
-pop.subpop.0.species.genome-size	= 9
+# number of displacements
+#pop.subpop.0.species.genome-size	= 7
+pop.subpop.0.species.genome-size = uniform
+pop.subpop.0.species.min-initial-size = 3
+pop.subpop.0.species.max-initial-size = 10
 
 # min/max displacement (absolute values MUST be the same)
 pop.subpop.0.species.min-gene	= -5.0

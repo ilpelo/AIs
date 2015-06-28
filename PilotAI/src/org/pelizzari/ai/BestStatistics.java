@@ -17,6 +17,9 @@ import org.pelizzari.ship.TrackError;
 import ec.vector.*;
 
 public class BestStatistics extends Statistics {
+	
+	public static final boolean DEBUG = true;
+	
 	// The parameter string and log number of the file for our readable
 	// population
 	public static final String P_POPFILE = "pop-file";
@@ -165,7 +168,13 @@ public class BestStatistics extends Statistics {
 				ShipTrack bestTrack = prob.makeTrack(state, (GeneVectorIndividual)simplyTheBest);
 				state.output.println(bestTrack.toString(), popLog);
 				
-				TrackError trackError = bestTrack.computeTrackError(prob.getTargetTrack());
+				TrackError trackError = null;
+				try {
+					trackError = bestTrack.computeTrackError(prob.getTargetTrack(), DEBUG);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				state.output.println(""+trackError, popLog);
 				
 				drawOnMap(bestTrack, state, lastGen);

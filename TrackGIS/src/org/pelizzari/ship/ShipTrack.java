@@ -13,6 +13,10 @@ import org.pelizzari.gis.*;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
+/**
+ * @author andrea@pelizzari.org
+ *
+ */
 public class ShipTrack {
 
 	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
@@ -24,7 +28,10 @@ public class ShipTrack {
 	private static Pattern SHIP_POSITION = Pattern
 			.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
 
+	// list of positions of this track
 	List<ShipPosition> posList = new ArrayList<ShipPosition>();
+	// average speed
+	float avgSpeed = -1;
 
 	public ShipTrack() {
 		// nothing
@@ -258,18 +265,18 @@ public class ShipTrack {
 		return pos;
 	}
 
-	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
-			ChangeOfCourseSequence cocSeq, float speed) {
-		ShipTrack reconstructedTrack = new ShipTrack();
-		reconstructedTrack.addPosition(startPosition);
-		ShipPosition pos = startPosition;
-		for (ChangeOfCourse coc : cocSeq) {
-			ShipPosition nextPos = pos.computeNextPosition(coc, speed);
-			reconstructedTrack.addPosition(nextPos);
-			pos = nextPos;
-		}
-		return reconstructedTrack;
-	}
+//	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
+//			ChangeOfCourseSequence cocSeq, float speed) {
+//		ShipTrack reconstructedTrack = new ShipTrack();
+//		reconstructedTrack.addPosition(startPosition);
+//		ShipPosition pos = startPosition;
+//		for (ChangeOfCourse coc : cocSeq) {
+//			ShipPosition nextPos = pos.computeNextPosition(coc, speed);
+//			reconstructedTrack.addPosition(nextPos);
+//			pos = nextPos;
+//		}
+//		return reconstructedTrack;
+//	}
 
 	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
 		DisplacementSequence displSeq, float speed) {
@@ -286,6 +293,9 @@ public class ShipTrack {
 
 	// in knots (miles/hours)
 	public float computeAverageSpeed() {
+		if(avgSpeed != -1) {
+			return avgSpeed;
+		}
 		float distance = 0;
 		ShipPosition prevPos = null;
 		for (ShipPosition pos : posList) {
@@ -296,13 +306,18 @@ public class ShipTrack {
 		}
 		float duration = (getLastPosition().ts.getTs() - getFirstPosition().ts.getTs())
 				/ 3600f; // in hours
-		return distance / duration;
+		avgSpeed = distance / duration;
+		return avgSpeed;
 	}
-
-	public TrackError computeTrackError(ShipTrack targetTrack) {
-		TrackError trackError = new TrackError(this);
+	
+	public TrackError computeTrackError(ShipTrack targetTrack, boolean debug) throws Exception {
+		TrackError trackError = new TrackError(this, debug);
 		trackError.computeErrorVector(targetTrack);
 		return trackError;		
+	}
+
+	public TrackError computeTrackError(ShipTrack targetTrack) throws Exception {
+		return computeTrackError(targetTrack, false);		
 	}
 	
 	public int countChangeOfHeadingOverLimit(float thresholdAngle) {
@@ -344,6 +359,16 @@ public class ShipTrack {
 		this.posList = posList;
 	}
 
+	public float getAvgSpeed() {
+		return avgSpeed;
+	}
+
+	public void setAvgSpeed(float avgSpeed) {
+		this.avgSpeed = avgSpeed;
+	}
+	
+	/* Print all characteristics of this ShipTrack
+	 */
 	public String toString() {
 		String s = "ShipTrack:\n";
 		for (ShipPosition pos : posList) {
@@ -355,6 +380,8 @@ public class ShipTrack {
 		s = s + headSeq + "\n";
 		ChangeOfHeadingSequence cohSeq = computeChangeOfHeadingSequence();
 		s = s + cohSeq + "\n";
+		float speed = computeAverageSpeed();
+		s = s + "Avg. speed = " + speed + "\n";
 		return s;
 	}
 }

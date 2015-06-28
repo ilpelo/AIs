@@ -30,6 +30,10 @@ public class ShipPosition {
 		this.ts = ts;
 	}
 
+	public void setTs(int tsEpoch) {
+		this.ts = new Timestamp(tsEpoch);
+	}	
+	
 	public int getIndex() {
 		return index;
 	}
@@ -118,6 +122,6 @@ public class ShipPosition {
 	
 	public String toString() {
 		String indexStr = index == -1 ? "-" : ""+index;
-		return "(" + indexStr + ", " + point + ", " + ts.getISODatetime() + ")";
+		return "(" + indexStr + ", " + point + ", " + ts.getISODatetime() + "/" + ts.getTs() + ")";
 	}
 }

@@ -11,8 +11,8 @@ import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
-import org.pelizzari.ship.Timestamp;
 import org.pelizzari.ship.TrackError;
+import org.pelizzari.time.Timestamp;
 
 import ec.*;
 import ec.simple.*;
@@ -58,7 +58,9 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 				e.printStackTrace();
 			}
 		}
-		targetTrack = track;
+		// WARNING: overwrite timestamps!!! 10 knots.
+		DisplacementSequence displSeq = track.computeDisplacements();		
+		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(), displSeq, SPEED);
 		System.out.println("Problem initialized; Target " + track);
 	}
 	
@@ -76,28 +78,23 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 		if (!(ind instanceof GeneVectorIndividual))
 			state.output.fatal("evaluate: not a GeneVectorIndividual",null);
 		GeneVectorIndividual displSeqInd = (GeneVectorIndividual) ind;
-		// check if the length of target track corresponds to number of displacements 
-		if(displSeqInd.genome.length != targetTrack.getPosList().size()-1) {
-			state.output.fatal("evaluate: track length and displacement sequence do not match",null);
-		}		
-//		// build track corresponding to the individual (sequence of displacements)
-//		ShipTrack trackInd = new ShipTrack();
-//		DisplacementSequence displSeq = new DisplacementSequence();
-//		for(int i=0; i < displSeqInd.genome.length; i++) {
-//			if(!(displSeqInd.genome[i] instanceof DisplacementGene))
-//				state.output.fatal("evaluate: not a DisplacementGene",null);
-//			Displacement displ = ((DisplacementGene) displSeqInd.genome[i]).getAllele();
-//			displSeq.add(displ);
-//		}
 		ShipTrack trackInd = makeTrack(state, displSeqInd);
 		
 		// compute fitness
-		TrackError trackError = trackInd.computeTrackError(targetTrack);
+		TrackError trackError = null;
+		try {
+			trackError = trackInd.computeTrackError(targetTrack);
+		} catch (Exception e) {
+			state.output.fatal("computing error: exception",null);
+			e.printStackTrace();
+		}
 		
-		//float error = trackError.meanError();
-		float locError = trackError.meanLocErrorWithThreshold();
+		float distSegmentEerror = trackError.meanDistanceToSegmentError();
+		//float locError = trackError.meanLocErrorWithThreshold();
 		float headingError = trackError.headingError();
-		float error = headingError + locError;
+		
+		//float error = headingError + locError;
+		float error = headingError + distSegmentEerror;		
 		
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness",null);
@@ -106,7 +103,9 @@ public class DisplacementSequenceProblem extends Problem implements SimpleProble
 				// ...the fitness... (negative!)
 				-error,
 				///... is the individual ideal?  Indicate here...
-				error < 1);
+				///error < 1);
+				// WARNING: overwrite. Never find ideal.
+				false);
 		displSeqInd.evaluated = true;
 	}
 	

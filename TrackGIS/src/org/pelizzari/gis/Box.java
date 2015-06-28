@@ -3,9 +3,13 @@ package org.pelizzari.gis;
 public class Box {
 
 	Point nw, se;
-	public Box(Point nw, Point se) {
-		this.nw = nw;
-		this.se = se;
+	public Box(Point p1, Point p2) {
+		float maxLat = p1.lat > p2.lat ? p1.lat : p2.lat;
+		float maxLon = p1.lon > p2.lon ? p1.lon : p2.lon;
+		float minLat = p1.lat < p2.lat ? p1.lat : p2.lat;
+		float minLon = p1.lon < p2.lon ? p1.lon : p2.lon;
+		this.nw = new Point(maxLat, minLon);
+		this.se = new Point(minLat, maxLon);;
 	}
 	
 	public float getMinLat() {
