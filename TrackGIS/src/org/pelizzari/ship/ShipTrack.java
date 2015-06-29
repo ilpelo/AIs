@@ -312,7 +312,7 @@ public class ShipTrack {
 	
 	public TrackError computeTrackError(ShipTrack targetTrack, boolean debug) throws Exception {
 		TrackError trackError = new TrackError(this, debug);
-		trackError.computeErrorVector(targetTrack);
+		trackError.computeSegmentErrorVector(targetTrack);
 		return trackError;		
 	}
 
@@ -341,6 +341,16 @@ public class ShipTrack {
 		this.changeOfHeadingSeq = changeOfHeadingSeq;
 	}
 
+	public List<ShipPosition> getPosListInInterval(TimeInterval interval) {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		for (ShipPosition pos : posList) {
+			if(interval.isWithinInterval(pos.getTs())) {
+				filteredPosList.add(pos);
+			}
+		}
+		return filteredPosList;
+	}	
+		
 	public List<ShipPosition> getPosListInBoxAndInterval(Box box, TimeInterval interval) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
 		for (ShipPosition pos : posList) {

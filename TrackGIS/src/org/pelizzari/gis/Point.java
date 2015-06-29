@@ -16,8 +16,17 @@ public class Point {
 		float x = (p.lonRad - lonRad) * (float) Math.cos((p.latRad + latRad)/2);
 		return (float) Math.sqrt(x*x + y*y) * 3410f; // * Earth radius in miles
 	}
-	
-	
+
+	public float squaredDistance(Point p) {
+		float y = p.lat - lat;
+		float x = p.lon - lon;
+		return x*x + y*y;
+	}
+
+	public float distance(Point p) {
+		return (float) Math.sqrt(squaredDistance(p));
+	}
+
 	/**
 	 * See https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
 	 * @param p1 segment fist point
