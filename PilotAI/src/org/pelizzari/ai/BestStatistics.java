@@ -6,12 +6,15 @@ import ec.util.*;
 
 import java.awt.Color;
 import java.io.*;
+import java.util.List;
 
+import org.pelizzari.gis.Box;
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
 import org.pelizzari.ship.ChangeOfHeadingSequence;
 import org.pelizzari.ship.HeadingSequence;
 import org.pelizzari.ship.ShipTrack;
+import org.pelizzari.ship.ShipTrackSegment;
 import org.pelizzari.ship.TrackError;
 
 import ec.vector.*;
@@ -125,11 +128,21 @@ public class BestStatistics extends Statistics {
 		return simplyTheBest;
 	}
 	
+	public void drawSegmentBoxes(ShipTrack track, Map map) {
+		List<ShipTrackSegment> segments = track.getTrackSegments();
+		for (ShipTrackSegment segment : segments) {
+			Box box = TrackError.makeSegmentBox(segment.getP1().getPoint(), segment.getP2().getPoint());
+			map.plotBox(box, Color.GRAY);
+		}
+	}
+	
 	public void drawOnMap(ShipTrack track, EvolutionState state, boolean lastGen) {
 		Color trackColor = lastGen?Color.PINK:Color.GRAY;
 		map.plotTrack(track, trackColor, ""+state.generation);
+		drawSegmentBoxes(track, map);
 		if(lastGen) {
 			map1.plotTrack(track, Color.PINK, ""+state.generation);
+			drawSegmentBoxes(track, map1);
 			map1.setVisible(true);
 			// set up imageFile					
 			map1.saveAsImage(imageFile);

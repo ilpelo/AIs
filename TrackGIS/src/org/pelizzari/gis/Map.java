@@ -64,7 +64,6 @@ public class Map extends MapWindow {
 	public void plotTrack(ShipTrack track, Color color) {
 		plotTrack(track, color, null);
 	}
-
 	
 	public void plotTrack(ShipTrack track, Color color, String lastPositionLabel) {
 		Point cur, prec = null;
@@ -97,6 +96,17 @@ public class Map extends MapWindow {
 		}
 	}
 
+	public void plotBox(Box box, Color color) {
+		Point p1 = new Point(box.getMaxLat(), box.getMinLon());
+		Point p2 = new Point(box.getMaxLat(), box.getMaxLon());
+		Point p3 = new Point(box.getMinLat(), box.getMaxLon());
+		Point p4 = new Point(box.getMinLat(), box.getMinLon());
+		addSegment(new Segment(p1, p2, color));
+		addSegment(new Segment(p2, p3, color));
+		addSegment(new Segment(p3, p4, color));
+		addSegment(new Segment(p4, p1, color));		
+	}
+	
 	public void saveAsImage(File outputFile) {
 		try {
 			BufferedImage image = new BufferedImage(getWidth(), getHeight(),

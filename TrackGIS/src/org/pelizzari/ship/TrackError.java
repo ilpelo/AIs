@@ -17,16 +17,16 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 10E-2f; // position is not too far if < threshold
+	//final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 10E-2f; // position is not too far if < threshold
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
 	final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
 	final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
-	final static float HEADING_ERROR_AMPLIFIER = 1000f; // multiply by the number of  changes of heading over the limit 
+	final static float HEADING_ERROR_AMPLIFIER = 10E4f; // multiply by the number of  changes of heading over the limit 
 	final static float BAD_TRACK_SEGMENT_FITNESS = 10E3f; // artificially high distance for segment that does not follow the target path
 	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
-	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.9f; // percentage of target positions that are covered by the track
+	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
@@ -67,6 +67,13 @@ public class TrackError {
 //			}
 //	}
 
+	public static Box makeSegmentBox(Point p1, Point p2) {
+		Point segmentCenterPoint = new Point((p1.lat + p2.lat)/2, (p1.lon + p2.lon)/2);
+		float segmentLength = p1.distance(p2);
+		Box box = new Box(segmentCenterPoint, segmentLength*(1+NEIGHBORHOOD_SEGMENT_FRAME)/2);
+		return box;
+	}
+	
 	public void computeSegmentErrorVector(ShipTrack targetTrack) throws Exception {
 		// store destination
 		destinationPos = targetTrack.getLastPosition();
@@ -96,15 +103,12 @@ public class TrackError {
 			float segmentLengthInMiles = p1.point.distanceInMiles(p2.point);
 			int duration = (int) (segmentLengthInMiles / targetAvgSpeed * 3600); // in seconds
 			p2.setTs(p1.ts.getTs()+duration);
-			// bounding box of the 2 positions of the GA track
-			//Box box = new Box(p1.point, p2.point);
-			Point segmentCenterPoint = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
-			float segmentLength = p1.point.distance(p2.point);
-			Box box = new Box(segmentCenterPoint, segmentLength*(1+NEIGHBORHOOD_SEGMENT_FRAME)/2);
+			// bounding box of the 2 positions of the GA track (including a frame)
+			Box box = makeSegmentBox(p1.point, p2.point);
 			// time difference of the 2 positions of the GA track
 			TimeInterval interval = new TimeInterval(p1.ts, p2.ts);
 			if(debug) extraInfo[i] = extraInfo[i] + 
-					"Center = "+segmentCenterPoint+"; length = "+segmentLength+"\n"+
+					//"Center = "+segmentCenterPoint+"; length = "+segmentLength+"\n"+
 					box+"\n";
 			// filter position of target track and compute total squared distance to segment
 			List<ShipPosition> targetPosList = targetTrack.getPosListInBoxAndInterval(box, interval);
@@ -123,7 +127,7 @@ public class TrackError {
 					float squaredPointDistance = targetPos.point.approxSquaredDistanceToSegment(p1.point, p2.point);
 					if(debug) extraInfo[i] = extraInfo[i] + "Covered Pos "+targetPos + ": "+ squaredPointDistance + "\n";
 //					if(squaredPointDistance > PARAM_MAX_DISTANCE_ERROR_THRESHOLD) {
-//						globalError += BAD_TRACK_SEGMENT_FITNESS;
+//						totClosePositions++;
 //					}
 					// sum up distances to segment
 					totSquaredDistanceBySegment += squaredPointDistance;

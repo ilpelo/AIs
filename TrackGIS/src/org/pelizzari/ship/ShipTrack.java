@@ -290,6 +290,18 @@ public class ShipTrack {
 		}
 		return reconstructedTrack;
 	}
+	
+	public List<ShipTrackSegment> getTrackSegments() {
+		List<ShipTrackSegment> segments = new ArrayList<ShipTrackSegment>();
+		ShipPosition prevPos = null;
+		for (ShipPosition pos : posList) {
+			if (prevPos != null) {
+				segments.add(new ShipTrackSegment(prevPos, pos));
+			}
+			prevPos = pos;
+		}
+		return segments;
+	}
 
 	// in knots (miles/hours)
 	public float computeAverageSpeed() {
