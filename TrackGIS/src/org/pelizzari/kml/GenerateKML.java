@@ -23,10 +23,11 @@ import org.pelizzari.gis.*;
 
 public class GenerateKML {
 
-	static Box depBox, arrBox;
+	static Box depBox, arrBox, nVoy;
 	final static int 
-			VOYAGE_DURATION_IN_DAYS = 15, // 8 deg/day
-			ANALYSIS_PERIOD_IN_DAYS = 5;
+			MAX_NUMBER_OF_VOYAGES = 5, 
+			VOYAGE_DURATION_IN_DAYS = 7, // 8 deg/day
+			ANALYSIS_PERIOD_IN_DAYS = 30;
 
 	/**
 	 * @param args
@@ -69,16 +70,21 @@ public class GenerateKML {
 			// Suez
 			Point suezNW = new Point(32, 31.5f);
 			Point suezSE = new Point(29.5f, 33);
+			// Golf of Aden
+			Point goaNW = new Point(18, 50);
+			Point goaSE = new Point(9, 51);
+			
 
 			
-			depBox = new Box(gibraltarNW, gibraltarSE);
+			//depBox = new Box(gibraltarNW, gibraltarSE);
 			//depBox = new Box(channelNW, channelSE);
+			depBox = new Box(suezNW, suezSE);
 			
 			//arrBox = new Box(nyNW, nySE);
 			//arrBox = new Box(rioNW, rioSE);
 			//arrBox = new Box(saNW, saSE);
 			//arrBox = new Box(copenhagenNW, copenhagenSE);
-			arrBox = new Box(suezNW, suezSE);
+			arrBox = new Box(goaNW, goaSE);
 
 			/*
 			 * Point galiziaNW = new Point(45, -13); Point galiziaSE = new
@@ -99,6 +105,9 @@ public class GenerateKML {
 																excludeMmsi.length + mmsiList.length);
 						System.arraycopy(mmsiList, 0, newExcludeMmsi, excludeMmsi.length, mmsiList.length);
 						excludeMmsi = newExcludeMmsi;
+						if(excludeMmsi.length > MAX_NUMBER_OF_VOYAGES) {
+							break;
+						}
 					} else {
 						excludeMmsi = mmsiList;
 					}
@@ -131,20 +140,20 @@ public class GenerateKML {
 		} else {
 			mmsiList = new String[voyages.size()];
 			int i = 0;
-			Iterator<ShipVoyage> itr = voyages.iterator();
-			while (itr.hasNext()) {
-				ShipVoyage voyage = itr.next();
+//			Iterator<ShipVoyage> itr = voyages.iterator();
+//			while (itr.hasNext()) {
+			for (ShipVoyage voyage : voyages) {
 				mmsiList[i++] = voyage.getMmsi();
 				List<ShipPosition> positions = voyage.getPosList();
 				if (positions != null) {
-					Iterator<ShipPosition> posItr = positions.iterator();
-					while (posItr.hasNext()) {
-						ShipPosition pos = posItr.next();
-						int ts = pos.getTs();
+//					Iterator<ShipPosition> posItr = positions.iterator();
+//					while (posItr.hasNext()) {
+					for (ShipPosition pos : positions) {
+						int ts = pos.getTs().getTs();
 						Date date = new Date(ts * 1000);
 						kmlGenerator.addPoint("targetStyle", "", 
 								//date.toString(),
-								pos.lat, pos.lon);
+								pos.getPoint().lat, pos.getPoint().lon);
 					}
 					kmlGenerator.addLineString(voyage);
 				}
