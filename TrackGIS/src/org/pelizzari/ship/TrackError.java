@@ -17,7 +17,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	//final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 10E-2f; // position is not too far if < threshold
+	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 10E-4f; // position is not too far if < threshold
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
@@ -111,8 +111,14 @@ public class TrackError {
 					//"Center = "+segmentCenterPoint+"; length = "+segmentLength+"\n"+
 					box+"\n";
 			// filter position of target track and compute total squared distance to segment
-			List<ShipPosition> targetPosList = targetTrack.getPosListInBoxAndInterval(box, interval);
+			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInInterval(interval);
+			List<ShipPosition> targetPosList = 
+					targetTrack.getPosListInIntervalAndBoxAndCloseToSegment(
+							interval,
+							box,
+							p1.point, p2.point, 
+							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
 			int nPos = targetPosList.size();
 			// increase total covered positions
 			totCoveredPositions += nPos;

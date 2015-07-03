@@ -363,15 +363,37 @@ public class ShipTrack {
 		return filteredPosList;
 	}	
 		
-	public List<ShipPosition> getPosListInBoxAndInterval(Box box, TimeInterval interval) {
+	
+	/**
+	 * Return the list of positions that have a timestamp within the interval and are within the box, 
+	 */
+	public List<ShipPosition> getPosListInIntervalAndBox(TimeInterval interval, Box box) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
 		for (ShipPosition pos : posList) {
-			if(box.isWithinBox(pos.point) && interval.isWithinInterval(pos.getTs())) {
+			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
 				filteredPosList.add(pos);
 			}
 		}
 		return filteredPosList;
 	}
+
+
+	public List<ShipPosition> getPosListInIntervalAndBoxAndCloseToSegment(TimeInterval interval,
+																	Box box,
+																	Point p1,
+																	Point p2,
+																	float maxSquaredDistance) {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		for (ShipPosition pos : posList) {
+			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
+				float squaredDistance = pos.point.approxSquaredDistanceToSegment(p1, p2);
+				if(squaredDistance <= maxSquaredDistance) {
+					filteredPosList.add(pos);
+				}
+			}
+		}
+		return filteredPosList;
+	}	
 	
 	public List<ShipPosition> getPosList() {
 		return posList;

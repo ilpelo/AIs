@@ -94,20 +94,20 @@ public class DisplacementSequenceProblem extends Problem implements
 			e.printStackTrace();
 		}
 
-		float distSegmentEerror = trackError.totalSegmentError();
-		// float locError = trackError.meanLocErrorWithThreshold();
-		float headingError = trackError.headingError();
-		float destinationError = trackError.destinationError();
-		float distanceError = trackError.getAvgSquaredDistanceAllSegments();
-		float noCoverageError = trackError.getNoCoverageError();
+		//float totalSegmentError = trackError.totalSegmentError();
+		// float meanLocErrorWithThreshold = trackError.meanLocErrorWithThreshold();
+//		float headingError = trackError.headingError();
+//		float destinationError = trackError.destinationError();
+//		float distanceError = trackError.getAvgSquaredDistanceAllSegments();
+//		float noCoverageError = trackError.getNoCoverageError();
 		// int numberOfSegments = trackError.getTrackSize();
 
-		// float error = headingError + locError;
 		float error =
-		// headingError +
-		// distSegmentEerror +
-		// destinationError +
-		noCoverageError + distanceError + 0f;
+		// trackError.headingError() +
+		trackError.destinationError() +
+		trackError.getAvgSquaredDistanceAllSegments() +
+		trackError.getNoCoverageError() + 
+		+ 0f;
 
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness", null);
