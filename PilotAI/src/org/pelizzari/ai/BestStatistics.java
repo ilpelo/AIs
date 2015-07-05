@@ -129,9 +129,9 @@ public class BestStatistics extends Statistics {
 	}
 	
 	public void drawSegmentBoxes(ShipTrack track, Map map) {
-		List<ShipTrackSegment> segments = track.getTrackSegments();
+		List<ShipTrackSegment> segments = track.getSegList();
 		for (ShipTrackSegment segment : segments) {
-			Box box = TrackError.makeSegmentBox(segment.getP1().getPoint(), segment.getP2().getPoint());
+			Box box = TrackError.makeSegmentBox(segment);
 			map.plotBox(box, Color.GRAY);
 		}
 	}

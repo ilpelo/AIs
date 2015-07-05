@@ -28,12 +28,12 @@ select.tournament.size		= 10
 # number of displacements
 #pop.subpop.0.species.genome-size	= 7
 pop.subpop.0.species.genome-size = uniform
-pop.subpop.0.species.min-initial-size = 3
+pop.subpop.0.species.min-initial-size = 4
 pop.subpop.0.species.max-initial-size = 10
 
 # min/max displacement (absolute values MUST be the same)
-pop.subpop.0.species.min-gene	= -5.0
-pop.subpop.0.species.max-gene	= +5.0
+pop.subpop.0.species.min-gene	= -3.0
+pop.subpop.0.species.max-gene	= +3.0
 
 
 quit-on-run-complete	= true

@@ -105,11 +105,18 @@ public class DisplacementSequenceProblem extends Problem implements
 
 		float error =
 		// trackError.headingError() +
+<<<<<<< HEAD
 		//trackError.destinationError() +
 		//trackError.getAvgSquaredDistanceAllSegments() +
 		trackError.getNoCoverageError() +
 		//trackError.avgTotalSegmentError() +
 		0f;
+=======
+		trackError.destinationError() +
+		trackError.getAvgSquaredDistanceAllSegments() +
+		trackError.getNoCoverageError() + 
+		+ 0f;
+>>>>>>> refs/remotes/origin/AIs
 
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness", null);

@@ -35,10 +35,10 @@ public class PilotAI {
 					duration = (int)(prevP.distanceInMiles(p)/SPEED*3600);
 				}
 				prevP = p;
-				Timestamp ts = new Timestamp(100000 + i * duration);
-				ShipPosition pos = new ShipPosition(p, ts);
-				pos.setIndex(i);
-				track.addPosition(pos);
+//				Timestamp ts = new Timestamp(100000 + i * duration);
+//				ShipPosition pos = new ShipPosition(p, ts);
+//				pos.setIndex(i);
+//				track.addPosition(pos);
 			}
 		} else {
 			try {
