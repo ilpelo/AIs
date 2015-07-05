@@ -30,6 +30,8 @@ public class ShipTrack {
 
 	// list of positions of this track
 	List<ShipPosition> posList = new ArrayList<ShipPosition>();
+	// list of segments of this track
+	List<ShipTrackSegment> segList = new ArrayList<ShipTrackSegment>();
 	// average speed
 	float avgSpeed = -1;
 
@@ -80,7 +82,7 @@ public class ShipTrack {
 					pos = new ShipPosition(new Point((float) lat, (float) lon),
 							new Timestamp(ts));
 					pos.setIndex(readCount);
-					posList.add(pos);
+					addPosition(pos);
 				} else
 					errCount++;
 			}
@@ -95,6 +97,8 @@ public class ShipTrack {
 		}
 	}
 
+
+	
 	public void reducePositions() {
 		List<ShipPosition> reducedPosList = new ArrayList<ShipPosition>();
 		ShipPosition p1 = null;
@@ -279,7 +283,8 @@ public class ShipTrack {
 //	}
 
 	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
-		DisplacementSequence displSeq, float speed) {
+												 DisplacementSequence displSeq,
+												 float speed) {
 		ShipTrack reconstructedTrack = new ShipTrack();
 		reconstructedTrack.addPosition(startPosition);
 		ShipPosition pos = startPosition;
@@ -291,16 +296,23 @@ public class ShipTrack {
 		return reconstructedTrack;
 	}
 	
-	public List<ShipTrackSegment> getTrackSegments() {
-		List<ShipTrackSegment> segments = new ArrayList<ShipTrackSegment>();
-		ShipPosition prevPos = null;
-		for (ShipPosition pos : posList) {
-			if (prevPos != null) {
-				segments.add(new ShipTrackSegment(prevPos, pos));
+	public List<ShipTrackSegment> computeTrackSegments(float speed) {
+		if(segList.size() == 0) {
+			//List<ShipTrackSegment> segments = new ArrayList<ShipTrackSegment>();
+			ShipPosition prevPos = null;
+			for (ShipPosition pos : posList) {
+				if (prevPos != null) {
+					segList.add(new ShipTrackSegment(prevPos, pos, speed));
+				}
+				prevPos = pos;
 			}
-			prevPos = pos;
 		}
-		return segments;
+		return segList;
+	}
+
+	
+	public List<ShipTrackSegment> getSegList() {
+		return segList;
 	}
 
 	// in knots (miles/hours)
@@ -325,6 +337,7 @@ public class ShipTrack {
 	public TrackError computeTrackError(ShipTrack targetTrack, boolean debug) throws Exception {
 		TrackError trackError = new TrackError(this, debug);
 		trackError.computeSegmentErrorVector(targetTrack);
+		trackError.computeStatsForFitness();
 		return trackError;		
 	}
 
@@ -363,15 +376,37 @@ public class ShipTrack {
 		return filteredPosList;
 	}	
 		
-	public List<ShipPosition> getPosListInBoxAndInterval(Box box, TimeInterval interval) {
+	
+	/**
+	 * Return the list of positions that have a timestamp within the interval and are within the box, 
+	 */
+	public List<ShipPosition> getPosListInIntervalAndBox(TimeInterval interval, Box box) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
 		for (ShipPosition pos : posList) {
-			if(box.isWithinBox(pos.point) && interval.isWithinInterval(pos.getTs())) {
+			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
 				filteredPosList.add(pos);
 			}
 		}
 		return filteredPosList;
 	}
+
+
+	public List<ShipPosition> getPosListInIntervalAndBoxAndCloseToSegment(TimeInterval interval,
+																	Box box,
+																	Point p1,
+																	Point p2,
+																	float maxSquaredDistance) {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		for (ShipPosition pos : posList) {
+			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
+				float squaredDistance = pos.point.approxSquaredDistanceToSegment(p1, p2);
+				if(squaredDistance <= maxSquaredDistance) {
+					filteredPosList.add(pos);
+				}
+			}
+		}
+		return filteredPosList;
+	}	
 	
 	public List<ShipPosition> getPosList() {
 		return posList;

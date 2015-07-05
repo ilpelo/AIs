@@ -17,7 +17,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	//final static float PARAM_MAX_DISTANCE_ERROR_THRESHOLD = 10E-2f; // position is not too far if < threshold
+	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 0.01f; // position is not too far if < threshold
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
@@ -30,18 +30,22 @@ public class TrackError {
 	
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
+	// the target positions used to compute the fitness 
+	ShipTrack targetTrack;
 	// the destination of our journey (!) 
 	ShipPosition destinationPos;
 	// a measure of the error of each position of the baseTrack
 	float[] segmentErrorVector;
-	// target positions coverage (%)
+	// target positions coverage (0.0-1.0)
 	float targetPositionCoverage = 0;
+	// target positions coverage (0.0-1.0) averaged over number of segments
+	float avgTargetPositionCoverageBySegment = 0;
 	// number of segments with no coverage of target positions
 	float noCoverageSegmentCounter = 0;
 	// average squared distance of the target positions to the segments for the whole baseTrack
 	float avgSquaredDistanceAllSegments = 0;
 	// extra info for debug purposes (1 string for each position)
-	String[] extraInfo;
+	//String[] extraInfo;
 	boolean debug = false;
 			
 	public TrackError(ShipTrack track, boolean debug) {
@@ -49,7 +53,7 @@ public class TrackError {
 		baseTrack = track;
 		int size = baseTrack.getPosList().size();
 		segmentErrorVector = new float[size];
-		if(debug) extraInfo = new String[size];
+		//if(debug) extraInfo = new String[size];
 	}
 	
 
@@ -67,99 +71,110 @@ public class TrackError {
 //			}
 //	}
 
-	public static Box makeSegmentBox(Point p1, Point p2) {
-		Point segmentCenterPoint = new Point((p1.lat + p2.lat)/2, (p1.lon + p2.lon)/2);
-		float segmentLength = p1.distance(p2);
-		Box box = new Box(segmentCenterPoint, segmentLength*(1+NEIGHBORHOOD_SEGMENT_FRAME)/2);
+	public static Box makeSegmentBox(ShipTrackSegment segment) {
+		Box box = new Box(segment.center, segment.length*(1+NEIGHBORHOOD_SEGMENT_FRAME)/2);
 		return box;
 	}
 	
+	/**
+	 * The main method to compute the error (and consequently fitness) of the track compared to the target track.
+	 * @param targetTrack
+	 * @throws Exception
+	 */
 	public void computeSegmentErrorVector(ShipTrack targetTrack) throws Exception {
 		// store destination
-		destinationPos = targetTrack.getLastPosition();
+		this.targetTrack = targetTrack;
+		float targetAvgSpeed = targetTrack.computeAverageSpeed();
+		if(targetAvgSpeed == 0) {
+			System.err.println("computeErrorVector: average speed is zero");
+			throw new Exception("Zero Average Speed");
+		}			
+		// use the average speed to set the timestamps of each position of the base track
+		baseTrack.computeTrackSegments(targetAvgSpeed);
 		//
-		ShipPosition p1 = null;
-		ShipPosition p2 = null;
-		int i = 0;
-		int totCoveredPositions = 0;
-		float totSquaredDistance = 0;
-		for (ShipPosition pos : baseTrack.posList) {
-			if (p1 == null) {
-				p1 = pos;
-				segmentErrorVector[0] = 0; // first position is fixed and always ok
-				if(debug) extraInfo[0] = "";
-				i = 1;
-				continue;
-			}
-			p2 = pos;
-			//
-			if(debug) extraInfo[i] = "###### Segment "+i+": "+p1+"-"+p2+"\n";
-			// ts of the 2nd position of the GA track is based on the avg. speed of the target track
-			float targetAvgSpeed = targetTrack.computeAverageSpeed();
-			if(targetAvgSpeed == 0) {
-				System.err.println("computeErrorVector: average speed is zero");
-				throw new Exception("Zero Average Speed");
-			}			
-			float segmentLengthInMiles = p1.point.distanceInMiles(p2.point);
-			int duration = (int) (segmentLengthInMiles / targetAvgSpeed * 3600); // in seconds
-			p2.setTs(p1.ts.getTs()+duration);
+		//int i = 0;
+//		int totCoveredPositions = 0;
+//		float totSquaredDistance = 0;
+		for (ShipTrackSegment seg : baseTrack.getSegList()) {			
 			// bounding box of the 2 positions of the GA track (including a frame)
-			Box box = makeSegmentBox(p1.point, p2.point);
-			// time difference of the 2 positions of the GA track
-			TimeInterval interval = new TimeInterval(p1.ts, p2.ts);
-			if(debug) extraInfo[i] = extraInfo[i] + 
-					//"Center = "+segmentCenterPoint+"; length = "+segmentLength+"\n"+
-					box+"\n";
+			Box box = makeSegmentBox(seg);
 			// filter position of target track and compute total squared distance to segment
-			List<ShipPosition> targetPosList = targetTrack.getPosListInBoxAndInterval(box, interval);
+			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInInterval(interval);
-			int nPos = targetPosList.size();
+			List<ShipPosition> targetPosList = 
+					targetTrack.getPosListInIntervalAndBoxAndCloseToSegment(
+							seg.getTimeInterval(),
+							box,
+							seg.p1.point, seg.p2.point, 
+							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
+			seg.setTargetPosList(targetPosList);
+			seg.computeDistanceToTargetPositions();
+			seg.computeStatsForFitness();
 			// increase total covered positions
-			totCoveredPositions += nPos;
-			float totSquaredDistanceBySegment = 0;
-			float totSquaredDistanceToSegmentEnd = 0;
-			if(nPos == 0) { // segment does not cover any position: set bad fitness
-			   noCoverageSegmentCounter++;
-			} else {
-				int j = 0;
-				for (ShipPosition targetPos : targetPosList) {
-					// distance of target positions from the segment
-					float squaredPointDistance = targetPos.point.approxSquaredDistanceToSegment(p1.point, p2.point);
-					if(debug) extraInfo[i] = extraInfo[i] + "Covered Pos "+targetPos + ": "+ squaredPointDistance + "\n";
-//					if(squaredPointDistance > PARAM_MAX_DISTANCE_ERROR_THRESHOLD) {
-//						totClosePositions++;
+			//totCoveredPositions += nCoveredPos;
+//			float totSquaredDistanceBySegment = 0;
+//			float totSquaredDistanceToSegmentEnd = 0;
+//			if(nPos == 0) { // segment does not cover any position
+//			   noCoverageSegmentCounter++;
+//			} else {
+//				int j = 0;
+//				for (ShipPosition targetPos : targetPosList) {
+//					// distance of target positions from the segment
+//					float squaredPointDistance = targetPos.point.approxSquaredDistanceToSegment(p1.point, p2.point);
+//					if(debug) extraInfo[i] = extraInfo[i] + "Covered Pos "+targetPos + ": "+ squaredPointDistance + "\n";
+////					if(squaredPointDistance > PARAM_MAX_DISTANCE_ERROR_THRESHOLD) {
+////						totClosePositions++;
+////					}
+//					// sum up distances to segment
+//					totSquaredDistanceBySegment += squaredPointDistance;
+//					// sum up distances for the whole track
+//					totSquaredDistance += squaredPointDistance;
+//					// add squared distance of last target positions (neighborhood) from p2
+//					// to avoid the end segment being too far from the target track
+//					if(j >= nPos - NEIGHBORHOOD_SEGMENT_END) {
+//						float squaredDistanceToSegmentEnd = targetPos.point.squaredDistance(p2.point);
+//						totSquaredDistanceToSegmentEnd += squaredDistanceToSegmentEnd;
 //					}
-					// sum up distances to segment
-					totSquaredDistanceBySegment += squaredPointDistance;
-					// sum up distances for the whole track
-					totSquaredDistance += squaredPointDistance;
-					// add squared distance of last target positions (neighborhood) from p2
-					// to avoid the end segment being too far from the target track
-					if(j >= nPos - NEIGHBORHOOD_SEGMENT_END) {
-						float squaredDistanceToSegmentEnd = targetPos.point.squaredDistance(p2.point);
-						totSquaredDistanceToSegmentEnd += squaredDistanceToSegmentEnd;
-					}
-					j++;
-				}
-				totSquaredDistanceBySegment = totSquaredDistanceBySegment/nPos; // average over all positions covered by the segment
-			}
-			// sum up the average distance to the segment and the distance to the segment end
-			segmentErrorVector[i] = totSquaredDistanceBySegment + totSquaredDistanceToSegmentEnd;
-			if(debug) {
-				extraInfo[i] = extraInfo[i] + "Avg squared distance: "+ totSquaredDistanceBySegment + 
-						"; to segment end: "+ totSquaredDistanceToSegmentEnd + "\n";
-			}
+//					j++;
+//				}
+//				totSquaredDistanceBySegment = totSquaredDistanceBySegment/nPos; // average over all positions covered by the segment
+//			}
+//			// sum up the average distance to the segment and the distance to the segment end
+//			segmentErrorVector[i] = totSquaredDistanceBySegment;
+//				//+ totSquaredDistanceToSegmentEnd;
+//			if(debug) {
+//				extraInfo[i] = "###### "+i+": "+seg;
+//				extraInfo[i] = extraInfo[i] + 
+//						//"Center = "+segmentCenterPoint+"; length = "+segmentLength+"\n"+
+//						box+"\n";
+//			}
 			// update index
-			i++;
-			// start of next segment is the end of this one
-			p1 = p2;
+			//i++;
 		}
 		// set track fitness based on average distance from target points
-		avgSquaredDistanceAllSegments = totSquaredDistance/targetTrack.posList.size();
+		//avgSquaredDistanceAllSegments = totSquaredDistance/targetTrack.posList.size();
 		// bad track fitness if the target positions covered by the track are less than threshold (e.g. 90%)
-		targetPositionCoverage = (float) totCoveredPositions/targetTrack.posList.size();
+		//targetPositionCoverage = (float) totCoveredPositions/targetTrack.posList.size();
 	}
 
+	
+	public void computeStatsForFitness() {
+		int coveredTargetPositionCount = 0;
+		for (ShipTrackSegment seg : baseTrack.getSegList()) {
+			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
+			coveredTargetPositionCount += segTargetPosCounter;
+			if(segTargetPosCounter == 0) {
+				noCoverageSegmentCounter++;
+			}
+		}
+		targetPositionCoverage = (float) coveredTargetPositionCount / targetTrack.getPosList().size();
+		avgTargetPositionCoverageBySegment = targetPositionCoverage / baseTrack.getSegList().size();
+	}
+	
+	/**
+	 * Sum up all segment errors (no average).
+	 * @return
+	 */
 	public float totalSegmentError() {
 		float sumErrors = 0;
 		for (int i = 0; i < segmentErrorVector.length; i++) {
@@ -167,7 +182,14 @@ public class TrackError {
 		}
 		return sumErrors;
 	}
-	
+
+	/**
+	 * Average segment error (total seg. err. / n. of segments).
+	 * @return
+	 */
+	public float avgTotalSegmentError() {
+		return totalSegmentError() / segmentErrorVector.length;
+	}
 	
 //	public float meanSquaredLocError() {
 //		float meanError = 0;
@@ -201,18 +223,25 @@ public class TrackError {
 			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100) / (float) getNumberOfTrackSegments();
 	}
 	
-	public float destinationError() {
-		float distanceToDestination = baseTrack.getLastPosition().point.distanceInMiles(destinationPos.point);
-		return distanceToDestination;
-	}
+//	public float destinationError() {
+//		float distanceToDestination = baseTrack.getLastPosition().point.distanceInMiles(destinationPos.point);
+//		return distanceToDestination;
+//	}
 	
+	/**
+	 * This should return a high value if the average coverage by segment of the target positions is bad
+	 * @return
+	 */
 	public float getNoCoverageError() {
-		float noCoverageError = 0f;
-		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
-			noCoverageError = BAD_TRACK_FITNESS;
-		}
-		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
-		return noCoverageError;
+//		float noCoverageError = 0f;
+//
+////		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
+////			noCoverageError = BAD_TRACK_FITNESS;
+////		}
+//		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
+		//return noCoverageError;
+		//return 1f-targetPositionCoverage; //+noCoverageError;
+		return 1f-avgTargetPositionCoverageBySegment; //+noCoverageError;
 	}
 
 	public int getNumberOfTrackSegments() {
@@ -225,26 +254,19 @@ public class TrackError {
 
 
 	public String toString() {
-		String s = "Track error: ";
-		for (int i = 0; i < segmentErrorVector.length; i++) {
-			s = s + segmentErrorVector[i] + " ";
+		String s = "Track error: \n";
+		for (ShipTrackSegment segment : baseTrack.getSegList()) {
+			s = s + segment + "\n";
 		}
-		s = s + "\n";
 		s = s + "Target track positions coverage = " + targetPositionCoverage*100 + " %\n";		
-		if(extraInfo != null) {
-			String extra = "Extra info: ";
-			for (int i = 0; i < extraInfo.length; i++) {
-				extra = extra + extraInfo[i] + "\n";
-			}
-			s = s + extra + "\n";						
-		}
 		//s = s + "meanSquaredLocError = " + meanSquaredLocError() + "\n";		
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
 		s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
 		s = s + "headingError = " + headingError() + "\n";		
-		s = s + "destinationError = " + destinationError() + "\n";		
-		s = s + "noCoverageError = " + getNoCoverageError() + "\n";		
+		//s = s + "destinationError = " + destinationError() + "\n";		
+		s = s + "noCoverageError = " + getNoCoverageError() + "\n";	
+		s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
 		return s;
 	}
 }

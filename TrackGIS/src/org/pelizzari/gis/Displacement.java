@@ -1,5 +1,8 @@
 package org.pelizzari.gis;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Displacement {
 	
 	final static float TOLERANCE = 0.1f; // tolerance in degree for 2 displacements to be equal
@@ -18,14 +21,6 @@ public class Displacement {
 		return sumD;
 	}
 	
-	public String toString() {
-		String signedDelta = "%+2.2f";
-		return "["+
-				String.format(signedDelta, deltaLat)+","+
-				String.format(signedDelta, deltaLon)+
-				"]";
-	}
-	
 	public boolean equals(Object other) {
         if (!this.getClass().isInstance(other)) {
             return false;
@@ -35,5 +30,29 @@ public class Displacement {
         float diffDeltaLon = Math.abs(deltaLon - otherDispl.deltaLon);        
         return (diffDeltaLat <= TOLERANCE) && (diffDeltaLon <= TOLERANCE);
 	}
-
+	
+	/*
+	 * Split in times+1 displacements with some randomness
+	 */
+	public DisplacementSequence split(int times) {
+		DisplacementSequence splitDispl = new DisplacementSequence();
+		Displacement displ = this;
+		for (int i = 0; i < times; i++) {
+			float latFraction = (float) Math.random();
+			float lonFraction = (float) Math.random();
+			Displacement displ1 = new Displacement(displ.deltaLat*latFraction, displ.deltaLon*lonFraction);
+			splitDispl.add(displ1);
+			displ = new Displacement(displ.deltaLat*(1-latFraction), displ.deltaLon*(1-lonFraction));
+		}
+		splitDispl.add(displ);
+		return splitDispl;
+	}
+	
+	public String toString() {
+		String signedDelta = "%+2.2f";
+		return "["+
+				String.format(signedDelta, deltaLat)+","+
+				String.format(signedDelta, deltaLon)+
+				"]";
+	}
 }

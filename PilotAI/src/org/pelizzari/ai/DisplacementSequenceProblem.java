@@ -62,6 +62,7 @@ public class DisplacementSequenceProblem extends Problem implements
 		}
 		// WARNING: overwrite timestamps!!! 10 knots.
 		DisplacementSequence displSeq = track.computeDisplacements();
+		displSeq = displSeq.increaseDisplacements(2);
 		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
 				displSeq, SPEED);
 		// set start position close to the first position of the track (0.1 deg North)
@@ -94,20 +95,21 @@ public class DisplacementSequenceProblem extends Problem implements
 			e.printStackTrace();
 		}
 
-		float distSegmentEerror = trackError.totalSegmentError();
-		// float locError = trackError.meanLocErrorWithThreshold();
-		float headingError = trackError.headingError();
-		float destinationError = trackError.destinationError();
-		float distanceError = trackError.getAvgSquaredDistanceAllSegments();
-		float noCoverageError = trackError.getNoCoverageError();
+		//float totalSegmentError = trackError.totalSegmentError();
+		// float meanLocErrorWithThreshold = trackError.meanLocErrorWithThreshold();
+//		float headingError = trackError.headingError();
+//		float destinationError = trackError.destinationError();
+//		float distanceError = trackError.getAvgSquaredDistanceAllSegments();
+//		float noCoverageError = trackError.getNoCoverageError();
 		// int numberOfSegments = trackError.getTrackSize();
 
-		// float error = headingError + locError;
 		float error =
-		// headingError +
-		// distSegmentEerror +
-		// destinationError +
-		noCoverageError + distanceError + 0f;
+		// trackError.headingError() +
+		//trackError.destinationError() +
+		//trackError.getAvgSquaredDistanceAllSegments() +
+		trackError.getNoCoverageError() +
+		//trackError.avgTotalSegmentError() +
+		0f;
 
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness", null);
