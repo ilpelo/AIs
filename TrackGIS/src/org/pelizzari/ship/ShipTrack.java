@@ -230,10 +230,10 @@ public class ShipTrack {
 		ShipPosition posFirst = getFirstPosition();
 		// int trackSize = posList.size();
 		ShipPosition posLast = getLastPosition();
-		int maxTs = posLast.ts.getTs();
+		long maxTs = posLast.ts.getTs();
 		ShipTrack interpolatedTrack = new ShipTrack();
 		interpolatedTrack.addPosition(posFirst);
-		for (int t = posFirst.ts.getTs() + timePeriod; t < maxTs; t += timePeriod) {
+		for (long t = posFirst.ts.getTs() + timePeriod; t < maxTs; t += timePeriod) {
 			ShipPosition pos = getInterpolatedPosition(t);
 			interpolatedTrack.addPosition(pos);
 		}
@@ -241,7 +241,7 @@ public class ShipTrack {
 		return interpolatedTrack;
 	}
 
-	public ShipPosition getInterpolatedPosition(int ts) {
+	public ShipPosition getInterpolatedPosition(long ts) {
 		ShipPosition posFirst = getFirstPosition();
 		// int trackSize = posList.size();
 		ShipPosition posLast = getLastPosition();

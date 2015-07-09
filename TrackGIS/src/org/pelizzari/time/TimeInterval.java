@@ -26,6 +26,11 @@ public class TimeInterval {
 		return startTs;
 	}
 
+	public String getStartTsISO() {
+		return startTs.getISODatetime();
+	}
+
+	
 	public void setStartTs(Timestamp startTs) {
 		this.startTs = startTs;
 	}
@@ -34,6 +39,10 @@ public class TimeInterval {
 		return endTs;
 	}
 
+	public String getEndTsISO() {
+		return endTs.getISODatetime();
+	}
+	
 	public void setEndTs(Timestamp endTs) {
 		this.endTs = endTs;
 	}

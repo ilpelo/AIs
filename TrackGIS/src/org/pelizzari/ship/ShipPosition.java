@@ -30,7 +30,7 @@ public class ShipPosition {
 		this.ts = ts;
 	}
 
-	public void setTs(int tsEpoch) {
+	public void setTs(long tsEpoch) {
 		this.ts = new Timestamp(tsEpoch);
 	}	
 	
@@ -38,8 +38,8 @@ public class ShipPosition {
 		return index;
 	}
 
-	public void setIndex(int index) {
-		this.index = index;
+	public void setIndex(long index) {
+		this.index = (int) index;
 	}
 
 	/*
