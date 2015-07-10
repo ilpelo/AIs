@@ -77,7 +77,7 @@ public class Map extends MapWindow {
 				// lon);
 				cur = new Point(lat, lon);
 				//String label = ""+pos.getIndex();
-				String label = ""+pos.getTs().getTs();
+				String label = ""+pos.getTs().getTsMillisec();
 				if(lastPositionLabel != null && !posItr.hasNext()) {
 					label = lastPositionLabel;
 				}

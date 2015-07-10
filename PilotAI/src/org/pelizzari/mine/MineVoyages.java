@@ -57,7 +57,7 @@ public class MineVoyages {
 		TimeInterval depInterval = null;
 		try {
 			startTS1 = new Timestamp(START_DT);
-			startTS2 = new Timestamp(startTS1.getTs()+START_PERIOD_IN_DAYS*3600*24*1000);
+			startTS2 = new Timestamp(startTS1.getTsMillisec()+(long)START_PERIOD_IN_DAYS*3600*24*1000);
 			depInterval = new TimeInterval(startTS1, startTS2);
 		} catch (Exception e) {
 			System.err.println("error parsing times");
@@ -79,14 +79,14 @@ public class MineVoyages {
 		Miner miner = new Miner();
 		
 		// get the ships that were present in the departure area
-		List<Ship> shipsInDepBox = miner.getShipsInBoxAndInterval(depBox, depInterval);
+		List<Ship> shipsInDepBox = miner.getShipsInIntervalAndBox(depInterval, depBox);
 		for (Ship ship : shipsInDepBox) {
-			System.out.print(ship+",");
+			System.out.print(ship+" ");
 			System.out.println("");
 		}
 
 		// check ships that were present in the arrival area afterwards
-		Timestamp endTS = new Timestamp(startTS1.getTs()+1000); //ANALYSIS_PERIOD_IN_DAYS*3600*24*1000);
+		Timestamp endTS = new Timestamp(startTS1.getTsMillisec()+(long)ANALYSIS_PERIOD_IN_DAYS*3600*24*1000);
 		TimeInterval arrInterval = null;
 		try {
 			arrInterval = new TimeInterval(startTS1, endTS);
@@ -94,12 +94,14 @@ public class MineVoyages {
 			System.err.println("error making arrival interval");
 			e.printStackTrace();
 		}
-		List<Ship> shipsInArrBox = miner.getShipsInBoxAndInterval(arrBox, arrInterval, shipsInDepBox, null);
+		List<Ship> shipsInArrBox = miner.getShipsInIntervalAndBox(arrInterval, arrBox, shipsInDepBox, null);
 		for (Ship ship : shipsInArrBox) {
-			System.out.print(ship+",");
+			System.out.print(ship+" ");
 			System.out.println("");
 		}		
-				
+		
+		miner.getShipPositionsInIntervalAndBetweenBoxes(depBox, arrBox, depInterval, null, null);
+		
 		System.out.println("Done\n");
 
 		

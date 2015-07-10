@@ -149,7 +149,7 @@ public class GenerateKML {
 //					Iterator<ShipPosition> posItr = positions.iterator();
 //					while (posItr.hasNext()) {
 					for (ShipPosition pos : positions) {
-						long ts = pos.getTs().getTs();
+						long ts = pos.getTs().getTsMillisec();
 						Date date = new Date(ts * 1000);
 						kmlGenerator.addPoint("targetStyle", "", 
 								//date.toString(),

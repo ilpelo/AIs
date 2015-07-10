@@ -230,10 +230,10 @@ public class ShipTrack {
 		ShipPosition posFirst = getFirstPosition();
 		// int trackSize = posList.size();
 		ShipPosition posLast = getLastPosition();
-		long maxTs = posLast.ts.getTs();
+		long maxTs = posLast.ts.getTsMillisec();
 		ShipTrack interpolatedTrack = new ShipTrack();
 		interpolatedTrack.addPosition(posFirst);
-		for (long t = posFirst.ts.getTs() + timePeriod; t < maxTs; t += timePeriod) {
+		for (long t = posFirst.ts.getTsMillisec() + timePeriod; t < maxTs; t += timePeriod) {
 			ShipPosition pos = getInterpolatedPosition(t);
 			interpolatedTrack.addPosition(pos);
 		}
@@ -246,20 +246,20 @@ public class ShipTrack {
 		// int trackSize = posList.size();
 		ShipPosition posLast = getLastPosition();
 		ShipPosition pos = null;
-		if (ts < posFirst.ts.getTs() || ts > posLast.ts.getTs()) {
+		if (ts < posFirst.ts.getTsMillisec() || ts > posLast.ts.getTsMillisec()) {
 			System.err.println("getInterpolatedPosition: ts out of bounds");
 			return null;
 		}
 		ShipPosition posBefore = posFirst;
 		ShipPosition posAfter = posList.get(1);
 		int i = 2;
-		while (ts > posAfter.ts.getTs()) {
+		while (ts > posAfter.ts.getTsMillisec()) {
 			posBefore = posAfter;
 			posAfter = posList.get(i);
 			i++;
 		}
-		float r = (float) (ts - posBefore.ts.getTs())
-				/ (float) (posAfter.ts.getTs() - posBefore.ts.getTs());
+		float r = (float) (ts - posBefore.ts.getTsMillisec())
+				/ (float) (posAfter.ts.getTsMillisec() - posBefore.ts.getTsMillisec());
 		float lat = posBefore.point.lat
 				+ (posAfter.point.lat - posBefore.point.lat) * r;
 		float lon = posBefore.point.lon
@@ -328,7 +328,7 @@ public class ShipTrack {
 			}
 			prevPos = pos;
 		}
-		float duration = (getLastPosition().ts.getTs() - getFirstPosition().ts.getTs())
+		float duration = (getLastPosition().ts.getTsMillisec() - getFirstPosition().ts.getTsMillisec())
 				/ 3600f; // in hours
 		avgSpeed = distance / duration;
 		return avgSpeed;

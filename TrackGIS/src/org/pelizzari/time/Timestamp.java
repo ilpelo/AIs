@@ -8,8 +8,8 @@ import java.text.SimpleDateFormat;
 public class Timestamp {
 	long ts; // Unix epoch in millisec
 	
-	public Timestamp(long ts) {
-		this.ts = ts;
+	public Timestamp(long tsMillisec) {
+		this.ts = tsMillisec;
 	}
 
 	public Timestamp(String datetimeISO) throws ParseException { // always use UTC
@@ -25,12 +25,12 @@ public class Timestamp {
 		return isoDatetimeStr;
 	}
 
-	public long getTs() {
+	public long getTsMillisec() {
 		return ts;
 	}
 
-	public void setTs(long ts) {
-		this.ts = ts;
+	public void setTsMillisec(long tsMillisec) {
+		this.ts = tsMillisec;
 	}
 	
 }

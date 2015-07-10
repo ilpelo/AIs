@@ -87,7 +87,7 @@ public class ShipTrackSegment {
 	}
 
 	public void setP2Timestamp(float avgSpeedInKnots) {
-		p2.setTs(p1.ts.getTs()+duration);
+		p2.setTs(p1.ts.getTsMillisec()+duration);
 	}
 
 	public ShipPosition getP1() {

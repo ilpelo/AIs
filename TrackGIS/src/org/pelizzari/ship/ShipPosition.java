@@ -62,7 +62,7 @@ public class ShipPosition {
 		float dLat = (float) (approxDistanceInDegree * Math.cos(Math.toRadians(coc.course)));
 		float dLon = (float) (approxDistanceInDegree * Math.sin(Math.toRadians(coc.course)));
 		ShipPosition pos = new ShipPosition(new Point(point.lat + dLat, point.lon + dLon),
-											new Timestamp(ts.getTs() + (int)(coc.distance/speedInKnots*3600)));
+											new Timestamp(ts.getTsMillisec() + (int)(coc.distance/speedInKnots*3600)));
 		return pos;
 	}
 		
@@ -71,7 +71,7 @@ public class ShipPosition {
 		float nextLon = point.lon + displ.deltaLon;
 		Point nextPoint = new Point(nextLat, nextLon);
 		float distance = point.distanceInMiles(nextPoint);
-		Timestamp nextTs = new Timestamp(ts.getTs() + (int)(distance/speedInKnots*3600));
+		Timestamp nextTs = new Timestamp(ts.getTsMillisec() + (int)(distance/speedInKnots*3600));
 		ShipPosition nextPos = new ShipPosition(nextPoint, nextTs);
 		return nextPos;
 	}
@@ -116,12 +116,12 @@ public class ShipPosition {
 	
 	public float getAverageSpeed(ShipPosition pos) { // in knots
 		float distance = point.distanceInMiles(pos.point); // in nm
-		float duration = (float) (ts.getTs() - pos.ts.getTs())/3600f; // in hours
+		float duration = (float) (ts.getTsMillisec() - pos.ts.getTsMillisec())/3600f; // in hours
 		return distance / duration; // knots
 	}
 	
 	public String toString() {
 		String indexStr = index == -1 ? "-" : ""+index;
-		return "(" + indexStr + ", " + point + ", " + ts.getISODatetime() + "/" + ts.getTs() + ")";
+		return "(" + indexStr + ", " + point + ", " + ts.getISODatetime() + "/" + ts.getTsMillisec() + ")";
 	}
 }
