@@ -22,6 +22,7 @@ public class Miner {
 	
 	final static int MIN_SHIP_TRACK_SIZE = 5;
 	final static int MAX_SHIPS_TO_ANALYSE = 5;
+	final static long ONE_DAY_IN_MILLISEC = 3600l*1000l*24l;
 
 	Connection con;
 	
@@ -224,13 +225,14 @@ public class Miner {
 		}
 				
 		track.setPosList(trackBetweenDepartureAndArrivalBoxes);						
+		long firstTSMillisec = track.getFirstPosition().getTs().getTsMillisec();
+		long lastTSMillisec = track.getLastPosition().getTs().getTsMillisec();
+		long durationInMillisec = lastTSMillisec - firstTSMillisec;
 		if(normalizeTime) {
-			long firstTSMillisec = track.getFirstPosition().getTs().getTsMillisec();
-			long lastTSMillisec = track.getLastPosition().getTs().getTsMillisec();
-			long durationInMillisec = lastTSMillisec - firstTSMillisec;
 			for (ShipPosition pos : track.getPosList()) {
 				long tsMillisec = pos.getTs().getTsMillisec();
-				long newTsMillisec = (tsMillisec - firstTSMillisec)/(long)durationInMillisec*3600000l*24l; // norm to 24h
+				long deltaTsMillisec = tsMillisec - firstTSMillisec;
+				long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*ONE_DAY_IN_MILLISEC); // norm to 24h
 				pos.setTs(new Timestamp(newTsMillisec));
 			}			
 		}
