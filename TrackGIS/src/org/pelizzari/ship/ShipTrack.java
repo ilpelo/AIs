@@ -1,7 +1,9 @@
 package org.pelizzari.ship;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,12 +63,10 @@ public class ShipTrack {
 	}
 
 	/*
-	 * Loads a track from a 3 column input CSV file: lat, lon, ts
+	 * Loads a track from an input CSV file: see pattern SHIP_POSITION
 	 */
 	public void loadTrack(FileReader fr) {
 		BufferedReader r = new BufferedReader(fr);
-		// BufferedReader r = new BufferedReader(new
-		// FileReader("C:\\master_data\\france.poly"));
 		ShipPosition pos = null;
 		String line;
 		int readCount = 0;
@@ -76,7 +76,7 @@ public class ShipTrack {
 				readCount++;
 				Matcher m = SHIP_POSITION.matcher(line);
 				if (m.matches()) {
-					int ts = Integer.parseInt(m.group(1));
+					long ts = Long.parseLong(m.group(1));
 					double lat = Double.parseDouble(m.group(2));
 					double lon = Double.parseDouble(m.group(3));
 					// System.out.println("ts " + ts + " lat " + lat + " lon "+
@@ -99,8 +99,25 @@ public class ShipTrack {
 		}
 	}
 
+	public void saveTrack(FileWriter fw) {
+		BufferedWriter w = new BufferedWriter(fw);
+		String line;
+		int writeCount = 0;
+		//int errCount = 0;
+		try {
+			for (ShipPosition pos : getPosList()) {
+				line = pos.getTs().getTsMillisec() + "," + pos.point.lat + "," + pos.point.lon + "\n";
+				w.write(line);
+				writeCount++;
+			}
+			System.out.println("Written " + writeCount + " lines");
+			w.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-	
 	public void reducePositions() {
 		List<ShipPosition> reducedPosList = new ArrayList<ShipPosition>();
 		ShipPosition p1 = null;
@@ -300,7 +317,6 @@ public class ShipTrack {
 	
 	public List<ShipTrackSegment> computeTrackSegments(float speed) {
 		if(segList.size() == 0) {
-			//List<ShipTrackSegment> segments = new ArrayList<ShipTrackSegment>();
 			ShipPosition prevPos = null;
 			for (ShipPosition pos : posList) {
 				if (prevPos != null) {
@@ -317,11 +333,7 @@ public class ShipTrack {
 		return segList;
 	}
 
-	// in knots (miles/hours)
-	public float computeAverageSpeed() {
-		if(avgSpeed != -1) {
-			return avgSpeed;
-		}
+	public float computeTotalDistance() {
 		float distance = 0;
 		ShipPosition prevPos = null;
 		for (ShipPosition pos : posList) {
@@ -330,8 +342,17 @@ public class ShipTrack {
 			}
 			prevPos = pos;
 		}
+		return distance;
+	}
+	
+	// in knots (miles/hours)
+	public float computeAverageSpeed() {
+		if(avgSpeed != -1) {
+			return avgSpeed;
+		}
+		float distance = computeTotalDistance();
 		float duration = (getLastPosition().ts.getTsMillisec() - getFirstPosition().ts.getTsMillisec())
-				/ 3600f; // in hours
+				/ 3600000f; // in hours
 		avgSpeed = distance / duration;
 		return avgSpeed;
 	}
@@ -367,6 +388,40 @@ public class ShipTrack {
 	public void setChangeOfHeadingSeq(ChangeOfHeadingSequence changeOfHeadingSeq) {
 		this.changeOfHeadingSeq = changeOfHeadingSeq;
 	}
+	
+	/*
+	 * Normalize timestamps: first position at Epoch 00:00, last at Epoch 24:00
+	 */
+	public void timeNormalize() {
+		long firstTSMillisec = getFirstPosition().getTs().getTsMillisec();
+		long lastTSMillisec = getLastPosition().getTs().getTsMillisec();
+		long durationInMillisec = lastTSMillisec - firstTSMillisec;
+		for (ShipPosition pos : getPosList()) {
+			long tsMillisec = pos.getTs().getTsMillisec();
+			long deltaTsMillisec = tsMillisec - firstTSMillisec;
+			long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
+					Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
+			pos.setTs(new Timestamp(newTsMillisec));
+		}	
+	}
+	
+	/*
+	 * Normalize timestamps based on the track distance and fixed speed: first position at Epoch 00:00, last at Epoch 24:00
+	 */
+//	public void normalize(float speedInKnots) {
+//		float totalDistance = computeTotalDistance();
+//		
+//		long firstTSMillisec = getFirstPosition().getTs().getTsMillisec();
+//		long lastTSMillisec = getLastPosition().getTs().getTsMillisec();
+//		long durationInMillisec = lastTSMillisec - firstTSMillisec;
+//		for (ShipPosition pos : getPosList()) {
+//			long tsMillisec = pos.getTs().getTsMillisec();
+//			long deltaTsMillisec = tsMillisec - firstTSMillisec;
+//			long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
+//					Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
+//			pos.setTs(new Timestamp(newTsMillisec));
+//		}	
+//	}
 
 	public List<ShipPosition> getPosListInInterval(TimeInterval interval) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();

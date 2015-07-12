@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.pelizzari.gis.Displacement;
 import org.pelizzari.gis.DisplacementSequence;
@@ -25,6 +27,12 @@ public class DisplacementSequenceProblem extends Problem implements
 	static ShipTrack targetTrack;
 	static ShipPosition startPosition;
 	static final boolean FROM_FILE = true;
+	static final String FILE_DIR = "c:/master_data/";
+	static final String FILE_PREFIX = "pos_";
+	static final String FILE_EXT = ".csv";
+	static final String[] MMSIs = {"211394200", "212720000"};
+	
+	
 	static final float SPEED = 10; // knots
 	// static final float[] TRACK_LAT = {31f, 33f};
 	// static final float[] TRACK_LON = {-12f, -12.1f};
@@ -33,15 +41,16 @@ public class DisplacementSequenceProblem extends Problem implements
 
 	// init target track, map, etc.
 	static {
-		ShipTrack track = new ShipTrack();
+		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
 		if (!FROM_FILE) {
+			ShipTrack track = new ShipTrack();
 			Point p = null;
 			Point prevP = null;
 			for (int i = 0; i < TRACK_LON.length; i++) {
 				p = new Point(TRACK_LAT[i], TRACK_LON[i]);
 				int duration = 0;
 				if (i > 0) {
-					duration = (int) (prevP.distanceInMiles(p) / SPEED * 3600);
+					duration = (int) (prevP.distanceInMiles(p) / SPEED * 3600000f);
 				}
 				prevP = p;
 				Timestamp ts = new Timestamp(100000 + i * duration);
@@ -49,27 +58,44 @@ public class DisplacementSequenceProblem extends Problem implements
 				pos.setIndex(i);
 				track.addPosition(pos);
 			}
+			tracks.add(track);
 		} else {
 			try {
-				FileReader fr = new FileReader("C:\\master_data\\pos.csv");
-				track.loadTrack(fr);
-				fr.close();
+				for (int i = 0; i < MMSIs.length; i++) {
+					ShipTrack track = new ShipTrack();
+					String fileName = FILE_DIR+FILE_PREFIX+MMSIs[i]+FILE_EXT;
+					FileReader fr = new FileReader(fileName);
+					track.loadTrack(fr);
+					fr.close();
+					tracks.add(track);
+				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		// WARNING: overwrite timestamps!!! 10 knots.
-		DisplacementSequence displSeq = track.computeDisplacements();
-		displSeq = displSeq.increaseDisplacements(2);
-		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
-				displSeq, SPEED);
+		
+		List<ShipPosition> allPos = new ArrayList<ShipPosition>();
+		// WARNING: overwrite timestamps!!! use fixed speed SPEED, then merge the tracks into a single one 
+		for (ShipTrack track : tracks) {
+			track.computeTrackSegments(SPEED);
+			allPos.addAll(track.getPosList());
+		}
+		ShipTrack mergedTrack = new ShipTrack();
+		mergedTrack.setPosList(allPos);
+		
+		//DisplacementSequence displSeq = mergedTrack.computeDisplacements();
+		//displSeq = displSeq.increaseDisplacements(2);			
+//		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
+//				displSeq, SPEED);
+		targetTrack = mergedTrack;
+		
 		// set start position close to the first position of the track (0.1 deg North)
-		Point startPoint = new Point(track.getFirstPosition().getPoint().lat+0.1f,
-									 track.getFirstPosition().getPoint().lon);
-		startPosition = new ShipPosition(startPoint, track.getFirstPosition().getTs());
-		System.out.println("Problem initialized; Target " + track);
+		Point startPoint = new Point(mergedTrack.getFirstPosition().getPoint().lat+0.1f,
+									 mergedTrack.getFirstPosition().getPoint().lon);
+		startPosition = new ShipPosition(startPoint, mergedTrack.getFirstPosition().getTs());
+		System.out.println("Problem initialized; Target " + mergedTrack);
 	}
 
 	// ind is the individual to be evaluated.
@@ -105,18 +131,11 @@ public class DisplacementSequenceProblem extends Problem implements
 
 		float error =
 		// trackError.headingError() +
-<<<<<<< HEAD
 		//trackError.destinationError() +
 		//trackError.getAvgSquaredDistanceAllSegments() +
 		trackError.getNoCoverageError() +
 		//trackError.avgTotalSegmentError() +
 		0f;
-=======
-		trackError.destinationError() +
-		trackError.getAvgSquaredDistanceAllSegments() +
-		trackError.getNoCoverageError() + 
-		+ 0f;
->>>>>>> refs/remotes/origin/AIs
 
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness", null);

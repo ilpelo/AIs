@@ -136,7 +136,8 @@ public class KMLGenerator {
 
 	public void saveKMLFile(String file) {
 		Source src = new DOMSource(getDoc());
-		Result dest = new StreamResult(new File(file));
+		File kmlFile = new File(file);
+		Result dest = new StreamResult(kmlFile);
 		TransformerFactory tranFactory = TransformerFactory.newInstance();
 		Transformer aTransformer;
 		try {

@@ -2,6 +2,8 @@ package org.pelizzari.mine;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +32,13 @@ public class MineVoyages {
 
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int VOYAGE_DURATION_IN_DAYS = 15;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
+	final static int VOYAGE_DURATION_IN_DAYS = 10;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 8;
 
-	final static String OUTPUT_FILE = "c:/master_data/PlaceMarkers.kml";
-	// final String OUTPUT_FILE = "/master_data/PlaceMarkers.kml";
+	final static String OUTPUT_DIR = "c:/master_data/";
+	// final String OUTPUT_DIR = "/master_data/";
 
+	final static String OUTPUT_KML_FILE = OUTPUT_DIR+"tracks.kml";
 	
 	public static void main(String[] args) throws Exception {
 
@@ -108,13 +111,13 @@ public class MineVoyages {
 			depInterval.shiftInterval(i*START_PERIOD_IN_DAYS);
 			System.out.println(">>> Period: "+depInterval);
 			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
-					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null, 100);
+					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null);
 			if(tracks != null) {
 				allTracks.addAll(tracks);			
 			}
 		}
 		
-		
+		// Make KML
 		kmlGenerator.addBox("Departure", depBox);
 		kmlGenerator.addBox("Arrival", arrBox);
 		Map map = new Map();
@@ -123,11 +126,15 @@ public class MineVoyages {
 			kmlGenerator.addTrack(track, track.getMmsi());
 		}
 //		map.setVisible(true);
+		kmlGenerator.saveKMLFile(OUTPUT_KML_FILE);
 		
-		kmlGenerator.saveKMLFile(OUTPUT_FILE);
-		
+		// Save track files
+		for (ShipTrack track : allTracks) {
+			FileWriter fw = new FileWriter(OUTPUT_DIR+"pos_"+track.getMmsi()+".csv");
+			track.saveTrack(fw);
+			fw.close();
+		}		
 		System.out.println("Done\n");
-		
 	}
 
 }

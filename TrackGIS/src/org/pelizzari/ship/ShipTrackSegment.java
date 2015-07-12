@@ -28,7 +28,7 @@ public class ShipTrackSegment {
 		center = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
 		length = p1.point.distance(p2.point);
 		lengthInMiles = p1.point.distanceInMiles(p2.point);
-		duration = (int) (lengthInMiles / speedInKnots * 3600); // in seconds
+		duration = (int) (lengthInMiles / speedInKnots * 3600000f); // in seconds
 		setP2Timestamp(speedInKnots);
 	}
 	

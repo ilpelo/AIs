@@ -28,9 +28,9 @@ import org.pelizzari.time.Timestamp;
 
 public class ShowShipTrack {
 
-	final static int MMSI = 219476000; //235068861;
+	final static int MMSI = 240028000; //235068861;
 	final static String START_DT = "2011-03-01 00:00:00";
-	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
 
 	final static String OUTPUT_FILE = "c:/master_data/ShipTrack";
 	
@@ -67,7 +67,10 @@ public class ShowShipTrack {
 		Miner miner = new Miner();
 		
 		ShipTrack track = miner.getShipTrackInIntervalAndBetweenBoxes(
-				new Ship(""+MMSI), analysisInterval, null, null, false);		
+				new Ship(""+MMSI), analysisInterval, null, null);		
+		
+		// make segment to change timestamps based on speed (10 knots)
+		//track.computeTrackSegments(10f);
 		
 		kmlGenerator.addTrack(track, ""+MMSI);
 		

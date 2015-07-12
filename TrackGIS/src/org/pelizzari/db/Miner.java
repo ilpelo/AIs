@@ -128,13 +128,12 @@ public class Miner {
 
 	
 	/*
-	 * If normalizeTime, set TS of first position to 00:00 and TS of last position to 24:00
+	 * Warning: if one of the boxes is null, return the full track
 	 */
 	public ShipTrack getShipTrackInIntervalAndBetweenBoxes(Ship ship,
 														   TimeInterval interval,
 														   Box departureBox,
-														   Box arrivalBox,
-														   boolean normalizeTime) {
+														   Box arrivalBox) {
 		// get positions from DB
 		final String PERIOD_COND = getPeriodSQLCondition(interval);
 		final String MMSI_COND = "and mmsi = "+ship.getMmsi()+" ";		
@@ -225,18 +224,11 @@ public class Miner {
 		}
 				
 		track.setPosList(trackBetweenDepartureAndArrivalBoxes);						
-		long firstTSMillisec = track.getFirstPosition().getTs().getTsMillisec();
-		long lastTSMillisec = track.getLastPosition().getTs().getTsMillisec();
-		long durationInMillisec = lastTSMillisec - firstTSMillisec;
-		if(normalizeTime) {
-			for (ShipPosition pos : track.getPosList()) {
-				long tsMillisec = pos.getTs().getTsMillisec();
-				long deltaTsMillisec = tsMillisec - firstTSMillisec;
-				long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
-						Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
-				pos.setTs(new Timestamp(newTsMillisec));
-			}			
-		}
+
+//		if(normalizeTime) {
+//			track.timeNormalize();		
+//		}
+
 		return track;
 	}
 	
@@ -246,8 +238,9 @@ public class Miner {
 														 TimeInterval depInterval,
 														 int voyageDurationInDays,
 														 List<Ship> includeShips,
-														 List<Ship> excludeShips,
-														 int limitTracks) throws Exception {
+														 List<Ship> excludeShips
+														 //,int limitTracks
+														 ) throws Exception {
 		// get ships that were in the departureBox
 		List<Ship> departingShips = getShipsInIntervalAndBox(depInterval, 
 															 departureBox, 
@@ -285,8 +278,7 @@ public class Miner {
 			ShipTrack track = getShipTrackInIntervalAndBetweenBoxes(ship, 
 																	analysisInterval,
 																	departureBox,
-																	arrivalBox,
-																	true);
+																	arrivalBox);
 			if(track != null) {
 				track.setMmsi(ship.getMmsi());
 				tracks.add(track);
