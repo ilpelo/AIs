@@ -20,13 +20,13 @@ import org.pelizzari.time.Timestamp;
 public class ShipTrack {
 
 	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
+	// used to read the input file with ship positions
+	private static Pattern SHIP_POSITION = Pattern
+			.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
 	
 	DisplacementSequence displacementSeq; // this sequence has length = length(ShipTrack) - 1;
 	HeadingSequence headingSeq; // this sequence has length = length(ShipTrack) - 1;
 	ChangeOfHeadingSequence changeOfHeadingSeq; // this sequence has length = length(ShipTrack) - 2;
-
-	private static Pattern SHIP_POSITION = Pattern
-			.compile("^(.+),(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)$"); // ts,lat,lon
 
 	// list of positions of this track
 	List<ShipPosition> posList = new ArrayList<ShipPosition>();
@@ -34,7 +34,9 @@ public class ShipTrack {
 	List<ShipTrackSegment> segList = new ArrayList<ShipTrackSegment>();
 	// average speed
 	float avgSpeed = -1;
-
+	// mmsi
+	String mmsi = null;
+	
 	public ShipTrack() {
 		// nothing
 	}
@@ -414,6 +416,15 @@ public class ShipTrack {
 
 	public void setPosList(List<ShipPosition> posList) {
 		this.posList = posList;
+	}
+	
+
+	public String getMmsi() {
+		return mmsi;
+	}
+
+	public void setMmsi(String mmsi) {
+		this.mmsi = mmsi;
 	}
 
 	public float getAvgSpeed() {

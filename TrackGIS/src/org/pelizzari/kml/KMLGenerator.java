@@ -1,12 +1,25 @@
 package org.pelizzari.kml;
 
+import java.io.File;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.pelizzari.gis.Box;
 import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.ShipVoyage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,10 +77,6 @@ public class KMLGenerator {
 		placemark.appendChild(point);
 	}
 
-	public void addLineString(ShipVoyage voyage) {
-		addLineString(voyage.getMmsi(), voyage.getPosList());
-	}
-
 	public void addLineString(String mmsi, List<ShipPosition> posList) {
 		Element placemark = doc.createElement("Placemark");
 		docNode.appendChild(placemark);
@@ -107,7 +116,41 @@ public class KMLGenerator {
 		lineString.appendChild(coordinates);
 		placemark.appendChild(lineString);
 	}
+	
+	public void addTrack(ShipTrack track, String label) {
+		if (track == null) {
+			System.err.println("addTrack: track is null");
+			return;
+		}
+		List<ShipPosition> positions = track.getPosList();		
+		for (ShipPosition pos : positions) {
+			long ts = pos.getTs().getTsMillisec();
+			Date date = new Date(ts);				
+			addPoint("targetStyle",  
+					date.toString(),
+					pos.getPoint().lat, 
+					pos.getPoint().lon);
+		}
+		addLineString(label, track.getPosList());
+	}
 
+	public void saveKMLFile(String file) {
+		Source src = new DOMSource(getDoc());
+		Result dest = new StreamResult(new File(file));
+		TransformerFactory tranFactory = TransformerFactory.newInstance();
+		Transformer aTransformer;
+		try {
+			aTransformer = tranFactory.newTransformer();
+			aTransformer.transform(src, dest);
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public Document getDoc() {
 		return doc;
 	}

@@ -1,24 +1,54 @@
 package org.pelizzari.mine;
 
+import java.awt.Color;
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.pelizzari.db.Miner;
 import org.pelizzari.gis.Box;
+import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
+import org.pelizzari.kml.KMLGenerator;
 import org.pelizzari.ship.Ship;
+import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
 public class MineVoyages {
 
 	final static String START_DT = "2011-03-01 00:00:00";
-	final static int START_PERIOD_IN_DAYS = 10;
-
+	final static int START_PERIOD_IN_DAYS = 4;
 	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+
+	final static String OUTPUT_FILE = "c:/master_data/PlaceMarkers.kml";
+	// final String OUTPUT_FILE = "/master_data/PlaceMarkers.kml";
+
 	
 	public static void main(String[] args) {
+
+		KMLGenerator kmlGenerator = null;
+		try {
+			kmlGenerator = new KMLGenerator();
+		} catch (ParserConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		kmlGenerator.addIconStyle("targetStyle",
+				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
+				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
 		
 		// Gibraltar
 		Point gibraltarNW = new Point(37, -10);
@@ -55,15 +85,18 @@ public class MineVoyages {
 		Timestamp startTS1 = null;
 		Timestamp startTS2 = null;
 		TimeInterval depInterval = null;
+		TimeInterval analysisInterval = null;
 		try {
 			startTS1 = new Timestamp(START_DT);
 			startTS2 = new Timestamp(startTS1.getTsMillisec()+(long)START_PERIOD_IN_DAYS*3600*24*1000);
+			Timestamp endTS1 = new Timestamp(startTS1.getTsMillisec()+(long)ANALYSIS_PERIOD_IN_DAYS*3600*24*1000);
 			depInterval = new TimeInterval(startTS1, startTS2);
+			analysisInterval = new TimeInterval(startTS1, endTS1);
 		} catch (Exception e) {
 			System.err.println("error parsing times");
 			e.printStackTrace();
 		}
-		
+				
 		/// Arrival
 		
 		//arrBox = new Box(nyNW, nySE);
@@ -78,33 +111,21 @@ public class MineVoyages {
 		
 		Miner miner = new Miner();
 		
-		// get the ships that were present in the departure area
-		List<Ship> shipsInDepBox = miner.getShipsInIntervalAndBox(depInterval, depBox);
-		for (Ship ship : shipsInDepBox) {
-			System.out.print(ship+" ");
-			System.out.println("");
-		}
-
-		// check ships that were present in the arrival area afterwards
-		Timestamp endTS = new Timestamp(startTS1.getTsMillisec()+(long)ANALYSIS_PERIOD_IN_DAYS*3600*24*1000);
-		TimeInterval arrInterval = null;
-		try {
-			arrInterval = new TimeInterval(startTS1, endTS);
-		} catch (Exception e) {
-			System.err.println("error making arrival interval");
-			e.printStackTrace();
-		}
-		List<Ship> shipsInArrBox = miner.getShipsInIntervalAndBox(arrInterval, arrBox, shipsInDepBox, null);
-		for (Ship ship : shipsInArrBox) {
-			System.out.print(ship+" ");
-			System.out.println("");
-		}		
+		List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
+				depBox, arrBox, depInterval, analysisInterval, null, null, 100);
 		
-		miner.getShipPositionsInIntervalAndBetweenBoxes(depBox, arrBox, depInterval, null, null);
+		kmlGenerator.addBox("Departure", depBox);
+		kmlGenerator.addBox("Arrival", arrBox);
+		Map map = new Map();
+		for (ShipTrack track : tracks) {
+			map.plotTrack(track, Color.GREEN, track.getMmsi());
+			kmlGenerator.addTrack(track, track.getMmsi());
+		}
+//		map.setVisible(true);
+		
+		kmlGenerator.saveKMLFile(OUTPUT_FILE);
 		
 		System.out.println("Done\n");
-
-		
 		
 	}
 

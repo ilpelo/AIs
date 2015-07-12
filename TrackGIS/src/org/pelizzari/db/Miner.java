@@ -1,5 +1,6 @@
 package org.pelizzari.db;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.pelizzari.gis.Box;
+import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
 import org.pelizzari.ship.Ship;
 import org.pelizzari.ship.ShipPosition;
@@ -17,6 +19,9 @@ import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
 public class Miner {
+	
+	final static int MIN_SHIP_TRACK_SIZE = 5;
+	final static int MAX_SHIPS_TO_ANALYSE = 5;
 
 	Connection con;
 	
@@ -34,7 +39,7 @@ public class Miner {
 	}
 
 	public List<Ship> getShipsInIntervalAndBox(TimeInterval interval, Box box) {
-		return getShipsInIntervalAndBox(interval, box, null, null);
+		return getShipsInIntervalAndBox(interval, box, null, null, -1);
 	}
 
 	
@@ -67,14 +72,15 @@ public class Miner {
 		final String INCLUDE_MMSI_COND =
 				(ships == null || ships.isEmpty()) ?
 				"" :
-				"and "+notStr+" mmsi in ("+convertIntoCommaSeparatedMMSIList(ships) +")";	
+				"and "+notStr+" mmsi in ("+convertIntoCommaSeparatedMMSIList(ships) +") ";	
 		return INCLUDE_MMSI_COND;
 	}
 	
 	public List<Ship> getShipsInIntervalAndBox(TimeInterval interval, 
 											   Box box, 
 											   List<Ship> includeShips,
-											   List<Ship> excludeShips) {
+											   List<Ship> excludeShips,
+											   int limitShips) {
 				
 		final String GEO_COND = getGeoSQLCondition(box);
 
@@ -83,6 +89,8 @@ public class Miner {
 		final String INCLUDE_MMSI_COND = getMmsiSQLCondition(includeShips, true);		
 
 		final String EXCLUDE_MMSI_COND = getMmsiSQLCondition(excludeShips, false);
+		
+		final String LIMIT_SHIPS = (limitShips > 0)?"limit "+limitShips+" ":"";		
 
 		final String SHIP_QUERY = 
 				"SELECT distinct mmsi "+
@@ -92,7 +100,7 @@ public class Miner {
 				EXCLUDE_MMSI_COND+
 			    PERIOD_COND+
 			    GEO_COND+
-			    "order by mmsi";
+			    LIMIT_SHIPS;
 		
 		String shipQuery = SHIP_QUERY;
 		System.out.println(shipQuery);
@@ -121,21 +129,22 @@ public class Miner {
 	/*
 	 * If normalizeTime, set TS of first position to 00:00 and TS of last position to 24:00
 	 */
-	public ShipTrack getShipTrackInIntervalAndStopInBox(Ship ship,
-														TimeInterval interval,
-														Box arrivalBox,
-														boolean normalizeTime) {
+	public ShipTrack getShipTrackInIntervalAndBetweenBoxes(Ship ship,
+														   TimeInterval interval,
+														   Box departureBox,
+														   Box arrivalBox,
+														   boolean normalizeTime) {
 		// get positions from DB
 		final String PERIOD_COND = getPeriodSQLCondition(interval);
 		final String MMSI_COND = "and mmsi = "+ship.getMmsi()+" ";		
-	
+		
 		final String SHIP_POSITION_QUERY = 
 				"SELECT ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
 				MMSI_COND+
 				PERIOD_COND+
-			    "order by ts asc";
+			    "order by ts asc ";
 	
 		String posQuery = SHIP_POSITION_QUERY;
 		System.out.println(posQuery);
@@ -159,48 +168,89 @@ public class Miner {
 			System.exit(-1);
 		}
 		
-		// now check if the voyage crosses the arrival area and truncate it
-		boolean trackCrossesArrivalArea = false;
-		List<ShipPosition> trackUntilArrivalBox = new ArrayList<ShipPosition>();
+		ShipTrack track = new ShipTrack();
+		
+		// if boxes are null, return full track
+		if(departureBox == null || arrivalBox == null) {
+			track.setPosList(posList);
+			return track;
+		}
+
+		
+		// now check if the voyage crosses the departure and arrival areas and truncate it
+		boolean trackCrossedDepartureArea = false;
+		boolean trackCrossedArrivalArea = false;
+		List<ShipPosition> trackBetweenDepartureAndArrivalBoxes = new ArrayList<ShipPosition>();
 		
 		Iterator<ShipPosition> posItr = posList.iterator();
+		boolean inDepartureArea = false;
+		boolean recordTrack = false;
 		while(posItr.hasNext()) {
 			ShipPosition pos = posItr.next();
-			trackUntilArrivalBox.add(pos);
+			boolean posInDepartureArea = departureBox.isWithinBox(pos.getPoint());
+			if (posInDepartureArea) {
+				if(!trackCrossedDepartureArea) { // pos in departure area for the first time, start recording the track
+					trackCrossedDepartureArea = true;
+					recordTrack = true;
+				} else { // another pos in departure area
+					if(!inDepartureArea) { // the ship came back to the departure area, ignore previous positions
+						trackBetweenDepartureAndArrivalBoxes.clear();
+					}
+				}
+			}
+			if(recordTrack) {
+				trackBetweenDepartureAndArrivalBoxes.add(pos);				
+			}
 			if(arrivalBox.isWithinBox(pos.getPoint())) {
-				trackCrossesArrivalArea = true;
+				trackCrossedArrivalArea = true;
 				break;
 			}
+			inDepartureArea = posInDepartureArea;
+		}
+
+		if(!trackCrossedDepartureArea) { // if false, ship does not cross the departure area, something is wrong!
+			System.err.println("ERROR: "+ship+" does not cross departure "+arrivalBox);
+			return null;
 		}
 		
-		if(!trackCrossesArrivalArea) { // if false, ship does not cross the area, something is wrong!
-			System.err.println("ERROR: "+ship+" does not cross "+arrivalBox);
+		if(!trackCrossedArrivalArea) { // if false, ship does not cross the arrival area, something is wrong!
+			System.err.println("ERROR: "+ship+" does not cross arrival "+arrivalBox);
+			return null;
+		}
+
+		if(trackBetweenDepartureAndArrivalBoxes.size() < MIN_SHIP_TRACK_SIZE) { // discard if positions are too few
+			System.err.println("WARN: "+ship+" track is too short, positions: "+trackBetweenDepartureAndArrivalBoxes.size());
 			return null;
 		}
 				
-		ShipTrack track = new ShipTrack();
-		track.setPosList(trackUntilArrivalBox);						
+		track.setPosList(trackBetweenDepartureAndArrivalBoxes);						
 		if(normalizeTime) {
 			long firstTSMillisec = track.getFirstPosition().getTs().getTsMillisec();
 			long lastTSMillisec = track.getLastPosition().getTs().getTsMillisec();
 			long durationInMillisec = lastTSMillisec - firstTSMillisec;
 			for (ShipPosition pos : track.getPosList()) {
 				long tsMillisec = pos.getTs().getTsMillisec();
-				long newTsMillisec = (tsMillisec - firstTSMillisec)/durationInMillisec*3600000l*24l; // norm to 24h
+				long newTsMillisec = (tsMillisec - firstTSMillisec)/(long)durationInMillisec*3600000l*24l; // norm to 24h
 				pos.setTs(new Timestamp(newTsMillisec));
 			}			
 		}
 		return track;
 	}
 	
-	public List<ShipPosition> getShipPositionsInIntervalAndBetweenBoxes(
+	public List<ShipTrack> getShipTracksInIntervalAndBetweenBoxes(
 														 Box departureBox,
 														 Box arrivalBox,
-														 TimeInterval interval,
+														 TimeInterval depInterval,
+														 TimeInterval analysisInterval,
 														 List<Ship> includeShips,
-														 List<Ship> excludeShips) {
+														 List<Ship> excludeShips,
+														 int limitTracks) {
 		// get ships that were in the departureBox
-		List<Ship> departingShips = getShipsInIntervalAndBox(interval, departureBox, includeShips, excludeShips);
+		List<Ship> departingShips = getShipsInIntervalAndBox(depInterval, 
+															 departureBox, 
+															 includeShips,
+															 excludeShips,
+															 -1);
 		
 		if(departingShips.isEmpty()) {
 			System.out.println("WARN: no departing ships found");
@@ -208,7 +258,12 @@ public class Miner {
 		}
 		
 		// among the departing ships, get those that were in the arrivalBox
-		List<Ship> arrivingShips = getShipsInIntervalAndBox(interval, arrivalBox, departingShips, null);
+		//List<Ship> arrivingShips = departingShips;
+		List<Ship> arrivingShips = getShipsInIntervalAndBox(analysisInterval, 
+															arrivalBox, 
+															departingShips, 
+															null, 
+															MAX_SHIPS_TO_ANALYSE);
 
 		if(arrivingShips.isEmpty()) {
 			System.out.println("WARN: no arriving ships found");
@@ -221,15 +276,20 @@ public class Miner {
 			System.out.println("");
 		}			
 		
-		List<ShipPosition> posList = new ArrayList<ShipPosition>();
+		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
 		for (Ship ship : arrivingShips) {
-			ShipTrack track = getShipTrackInIntervalAndStopInBox(ship, interval, arrivalBox, true);
-			posList.addAll(track.getPosList());
+			ShipTrack track = getShipTrackInIntervalAndBetweenBoxes(ship, 
+																	analysisInterval,
+																	departureBox,
+																	arrivalBox,
+																	true);
+			if(track != null) {
+				track.setMmsi(ship.getMmsi());
+				tracks.add(track);
+			}
 		}
-		
-		// SORT!!!!!!!!!!!!!!!!!!!!!!!!
-		
-		return posList;						
+				
+		return tracks;						
 	}
 		
 }
