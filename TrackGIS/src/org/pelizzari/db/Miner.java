@@ -22,7 +22,7 @@ public class Miner {
 	
 	final static int MIN_SHIP_TRACK_SIZE = 5;
 	final static int MAX_SHIPS_TO_ANALYSE = 5;
-	final static long ONE_DAY_IN_MILLISEC = 3600l*1000l*24l;
+	
 
 	Connection con;
 	
@@ -210,12 +210,12 @@ public class Miner {
 		}
 
 		if(!trackCrossedDepartureArea) { // if false, ship does not cross the departure area, something is wrong!
-			System.err.println("ERROR: "+ship+" does not cross departure "+arrivalBox);
+			System.err.println("WARN: "+ship+" does not cross departure "+arrivalBox);
 			return null;
 		}
 		
 		if(!trackCrossedArrivalArea) { // if false, ship does not cross the arrival area, something is wrong!
-			System.err.println("ERROR: "+ship+" does not cross arrival "+arrivalBox);
+			System.err.println("WARN: "+ship+" does not cross arrival "+arrivalBox);
 			return null;
 		}
 
@@ -232,7 +232,8 @@ public class Miner {
 			for (ShipPosition pos : track.getPosList()) {
 				long tsMillisec = pos.getTs().getTsMillisec();
 				long deltaTsMillisec = tsMillisec - firstTSMillisec;
-				long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*ONE_DAY_IN_MILLISEC); // norm to 24h
+				long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
+						Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
 				pos.setTs(new Timestamp(newTsMillisec));
 			}			
 		}
@@ -243,10 +244,10 @@ public class Miner {
 														 Box departureBox,
 														 Box arrivalBox,
 														 TimeInterval depInterval,
-														 TimeInterval analysisInterval,
+														 int voyageDurationInDays,
 														 List<Ship> includeShips,
 														 List<Ship> excludeShips,
-														 int limitTracks) {
+														 int limitTracks) throws Exception {
 		// get ships that were in the departureBox
 		List<Ship> departingShips = getShipsInIntervalAndBox(depInterval, 
 															 departureBox, 
@@ -260,7 +261,8 @@ public class Miner {
 		}
 		
 		// among the departing ships, get those that were in the arrivalBox
-		//List<Ship> arrivingShips = departingShips;
+		TimeInterval analysisInterval = new TimeInterval(depInterval.getStartTs(), 
+											voyageDurationInDays+depInterval.getDurationInDays());
 		List<Ship> arrivingShips = getShipsInIntervalAndBox(analysisInterval, 
 															arrivalBox, 
 															departingShips, 

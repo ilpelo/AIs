@@ -30,13 +30,14 @@ public class MineVoyages {
 
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+	final static int VOYAGE_DURATION_IN_DAYS = 15;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
 
 	final static String OUTPUT_FILE = "c:/master_data/PlaceMarkers.kml";
 	// final String OUTPUT_FILE = "/master_data/PlaceMarkers.kml";
 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		KMLGenerator kmlGenerator = null;
 		try {
@@ -77,47 +78,47 @@ public class MineVoyages {
 		
 
 		//// Departure
+		Box depBox = null;
 		
-		//depBox = new Box(gibraltarNW, gibraltarSE);
+		depBox = new Box(gibraltarNW, gibraltarSE);
 		//depBox = new Box(channelNW, channelSE);
-		Box depBox = new Box(suezNW, suezSE);	
-		
-		Timestamp startTS1 = null;
-		Timestamp startTS2 = null;
-		TimeInterval depInterval = null;
-		TimeInterval analysisInterval = null;
-		try {
-			startTS1 = new Timestamp(START_DT);
-			startTS2 = new Timestamp(startTS1.getTsMillisec()+(long)START_PERIOD_IN_DAYS*3600*24*1000);
-			Timestamp endTS1 = new Timestamp(startTS1.getTsMillisec()+(long)ANALYSIS_PERIOD_IN_DAYS*3600*24*1000);
-			depInterval = new TimeInterval(startTS1, startTS2);
-			analysisInterval = new TimeInterval(startTS1, endTS1);
-		} catch (Exception e) {
-			System.err.println("error parsing times");
-			e.printStackTrace();
-		}
-				
+		//depBox = new Box(suezNW, suezSE);	
+						
 		/// Arrival
+		Box arrBox = null;
 		
 		//arrBox = new Box(nyNW, nySE);
 		//arrBox = new Box(rioNW, rioSE);
 		//arrBox = new Box(saNW, saSE);
 		//arrBox = new Box(copenhagenNW, copenhagenSE);
 		//arrBox = new Box(goaNW, goaSE);
-		Box arrBox = new Box(gibraltarNW, gibraltarSE);
+		//arrBox = new Box(gibraltarNW, gibraltarSE);
+		arrBox = new Box(suezNW, suezSE);
 				
 		
 		/// Let's mine
 		
 		Miner miner = new Miner();
+
+		List<ShipTrack> allTracks = new ArrayList<ShipTrack>();
 		
-		List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
-				depBox, arrBox, depInterval, analysisInterval, null, null, 100);
+		TimeInterval depInterval = new TimeInterval(new Timestamp(START_DT), START_PERIOD_IN_DAYS);
+
+		for (int i = 0; i < ANALYSIS_PERIOD_IN_DAYS/START_PERIOD_IN_DAYS; i++) {
+			depInterval.shiftInterval(i*START_PERIOD_IN_DAYS);
+			System.out.println(">>> Period: "+depInterval);
+			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
+					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null, 100);
+			if(tracks != null) {
+				allTracks.addAll(tracks);			
+			}
+		}
+		
 		
 		kmlGenerator.addBox("Departure", depBox);
 		kmlGenerator.addBox("Arrival", arrBox);
 		Map map = new Map();
-		for (ShipTrack track : tracks) {
+		for (ShipTrack track : allTracks) {
 			map.plotTrack(track, Color.GREEN, track.getMmsi());
 			kmlGenerator.addTrack(track, track.getMmsi());
 		}
