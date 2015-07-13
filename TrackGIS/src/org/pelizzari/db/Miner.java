@@ -31,7 +31,7 @@ public class Miner {
 	}
 	
 	public static String convertIntoCommaSeparatedMMSIList(List<Ship> ships) {		
-		String mmsiList = "0";
+		String mmsiList = "-1";
 		for (Ship ship : ships) {
 			mmsiList = mmsiList + "," + ship.getMmsi();
 		}

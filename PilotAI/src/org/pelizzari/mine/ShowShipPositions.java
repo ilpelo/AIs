@@ -22,6 +22,7 @@ import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
 import org.pelizzari.kml.KMLGenerator;
 import org.pelizzari.ship.Ship;
+import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
@@ -29,7 +30,7 @@ import org.pelizzari.time.Timestamp;
 public class ShowShipPositions {
 
 	final static String START_DT = "2011-03-01 00:00:00";
-	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 20;
 
 	final static String OUTPUT_FILE = "c:/master_data/ShipPos";
 	
@@ -45,8 +46,9 @@ public class ShowShipPositions {
 
 		kmlGenerator.addIconStyle("targetStyle",
 				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
-				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
-			
+				//"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
+				"http://maps.google.com/mapfiles/kml/shapes/star.png");
+	
 		
 		Timestamp startTS = null;
 		TimeInterval analysisInterval = null;
@@ -57,22 +59,27 @@ public class ShowShipPositions {
 			System.err.println("error parsing times");
 			e.printStackTrace();
 		}
-						
+		
+		Box box = new Box(new Point(70, 1), new Point(-70, 80));
 		
 		/// Let's mine
 		
 		Miner miner = new Miner();
 		
-		ShipTrack track = null; 
-				//miner.getShipTrackInIntervalAndBetweenBoxes(
-				//new Ship(""+MMSI), analysisInterval, null, null);		
+		List<ShipPosition> posList = miner.getShipPositionsInIntervalAndBox(
+												analysisInterval,
+												box,
+												null,
+												null,
+												100000);
 		
-		// make segment to change timestamps based on speed (10 knots)
-		//track.computeTrackSegments(10f);
-		
-//		kmlGenerator.addTrack(track, ""+MMSI);
-//		
-//		kmlGenerator.saveKMLFile(OUTPUT_FILE+"_"+MMSI+".kml");
+		for (ShipPosition pos : posList) {
+			kmlGenerator.addPoint("targetStyle",  
+								  "",
+								  pos.getPoint().lat, 
+								  pos.getPoint().lon);
+		}
+		kmlGenerator.saveKMLFile(OUTPUT_FILE+".kml");
 		
 		System.out.println("Done\n");
 		
