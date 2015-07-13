@@ -127,28 +127,37 @@ public class Miner {
 	}
 
 	
-	/*
-	 * Warning: if one of the boxes is null, return the full track
-	 */
-	public ShipTrack getShipTrackInIntervalAndBetweenBoxes(Ship ship,
-														   TimeInterval interval,
-														   Box departureBox,
-														   Box arrivalBox) {
-		// get positions from DB
-		final String PERIOD_COND = getPeriodSQLCondition(interval);
-		final String MMSI_COND = "and mmsi = "+ship.getMmsi()+" ";		
+	public List<ShipPosition> getShipPositionsInIntervalAndBox(
+				   TimeInterval interval,  
+				   Box box, 
+				   List<Ship> includeShips,
+				   List<Ship> excludeShips,
+				   int limitPositions) {
+
+		final String GEO_COND = (box == null)?" ":getGeoSQLCondition(box);
 		
+		final String PERIOD_COND = getPeriodSQLCondition(interval);
+		
+		final String INCLUDE_MMSI_COND = getMmsiSQLCondition(includeShips, true);		
+		
+		final String EXCLUDE_MMSI_COND = getMmsiSQLCondition(excludeShips, false);
+		
+		final String LIMIT_POS = (limitPositions > 0)?"limit "+limitPositions+" ":"";		
+
 		final String SHIP_POSITION_QUERY = 
 				"SELECT ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
 				"FROM wpos "+
 			    "WHERE 1=1 "+
-				MMSI_COND+
+				INCLUDE_MMSI_COND+
+				EXCLUDE_MMSI_COND+
 				PERIOD_COND+
-			    "order by ts asc ";
-	
+				GEO_COND+
+				"order by ts asc "+
+				LIMIT_POS;
+		
 		String posQuery = SHIP_POSITION_QUERY;
 		System.out.println(posQuery);
-
+		
 		List<ShipPosition> posList = new ArrayList<ShipPosition>();
 		try {
 			Statement stmt = con.createStatement();
@@ -163,10 +172,60 @@ public class Miner {
 				posList.add(pos);					
 			}
 		} catch (SQLException e) {
-			System.err.println("Cannot get ship track");
+			System.err.println("Cannot get ship positions");
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		
+		return posList;
+	}
+
+	
+	
+	/*
+	 * Return the track of a ship that goes from a departure area to an arrival area in a given time interval.
+	 * Warning: if one of the boxes is null, return the full track
+	 */
+	public ShipTrack getShipTrackInIntervalAndBetweenBoxes(Ship ship,
+														   TimeInterval interval,
+														   Box departureBox,
+														   Box arrivalBox) {
+		// get positions from DB
+//		final String PERIOD_COND = getPeriodSQLCondition(interval);
+//		final String MMSI_COND = "and mmsi = "+ship.getMmsi()+" ";		
+//		
+//		final String SHIP_POSITION_QUERY = 
+//				"SELECT ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
+//				"FROM wpos "+
+//			    "WHERE 1=1 "+
+//				MMSI_COND+
+//				PERIOD_COND+
+//			    "order by ts asc ";
+//	
+//		String posQuery = SHIP_POSITION_QUERY;
+//		System.out.println(posQuery);
+
+		List<Ship> shipList = new ArrayList<Ship>();
+		shipList.add(ship);
+		List<ShipPosition> posList = getShipPositionsInIntervalAndBox(interval, null, shipList, null, -1);
+		
+//		try {
+//			Statement stmt = con.createStatement();
+//			ResultSet rs = stmt.executeQuery(posQuery);
+//			ShipPosition pos = null;
+//			while(rs.next()){
+//				float lat = rs.getFloat("lat");
+//				float lon = rs.getFloat("lon");
+//				int ts = rs.getInt("ts");
+//				Point posPoint = new Point(lat, lon);				
+//				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
+//				posList.add(pos);					
+//			}
+//		} catch (SQLException e) {
+//			System.err.println("Cannot get ship track");
+//			e.printStackTrace();
+//			System.exit(-1);
+//		}
 		
 		ShipTrack track = new ShipTrack();
 		
@@ -232,6 +291,19 @@ public class Miner {
 		return track;
 	}
 	
+	
+	/**
+	 * Return the list of tracks of ships that go from a departure area to an arrival area in a given time interval.
+	 * Warning: if one of the boxes is null, return the full track
+	 * @param departureBox
+	 * @param arrivalBox
+	 * @param depInterval period of time in which the ship is in the dep. area (at least 1 position)
+	 * @param voyageDurationInDays max duration of the voyage
+	 * @param includeShips
+	 * @param excludeShips
+	 * @return
+	 * @throws Exception
+	 */
 	public List<ShipTrack> getShipTracksInIntervalAndBetweenBoxes(
 														 Box departureBox,
 														 Box arrivalBox,

@@ -26,13 +26,12 @@ import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
-public class ShowShipTrack {
+public class ShowShipPositions {
 
-	final static int MMSI = 240028000; //235068861;
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
 
-	final static String OUTPUT_FILE = "c:/master_data/ShipTrack";
+	final static String OUTPUT_FILE = "c:/master_data/ShipPos";
 	
 	public static void main(String[] args) {
 
@@ -58,20 +57,22 @@ public class ShowShipTrack {
 			System.err.println("error parsing times");
 			e.printStackTrace();
 		}
+						
 		
 		/// Let's mine
 		
 		Miner miner = new Miner();
 		
-		ShipTrack track = miner.getShipTrackInIntervalAndBetweenBoxes(
-				new Ship(""+MMSI), analysisInterval, null, null);		
+		ShipTrack track = null; 
+				//miner.getShipTrackInIntervalAndBetweenBoxes(
+				//new Ship(""+MMSI), analysisInterval, null, null);		
 		
 		// make segment to change timestamps based on speed (10 knots)
 		//track.computeTrackSegments(10f);
 		
-		kmlGenerator.addTrack(track, ""+MMSI);
-		
-		kmlGenerator.saveKMLFile(OUTPUT_FILE+"_"+MMSI+".kml");
+//		kmlGenerator.addTrack(track, ""+MMSI);
+//		
+//		kmlGenerator.saveKMLFile(OUTPUT_FILE+"_"+MMSI+".kml");
 		
 		System.out.println("Done\n");
 		
