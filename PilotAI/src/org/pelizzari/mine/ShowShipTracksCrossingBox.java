@@ -26,15 +26,16 @@ import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
-public class ShowShipTrack {
+public class ShowShipTracksCrossingBox {
 
-	final static int MMSI = 240028000; //235068861;
 	final static String START_DT = "2011-03-01 00:00:00";
-	final static int ANALYSIS_PERIOD_IN_DAYS = 20;
-
-	final static String OUTPUT_FILE = "c:/master_data/ShipTrack";
+	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
+	final static int SHIPS_LIMIT = 20;
 	
-	public static void main(String[] args) {
+
+	final static String OUTPUT_FILE = "c:/master_data/ShipTracks";
+	
+	public static void main(String[] args) throws Exception {
 
 		KMLGenerator kmlGenerator = null;
 		try {
@@ -63,15 +64,14 @@ public class ShowShipTrack {
 		
 		Miner miner = new Miner();
 		
-		ShipTrack track = miner.getShipTrackInIntervalAndBetweenBoxes(
-				new Ship(""+MMSI), analysisInterval, null, null);		
+		List<ShipTrack> tracks = miner.getShipTracksInIntervalAndCrossingBox(
+				analysisInterval, Areas.GIBRALTAR, SHIPS_LIMIT);		
 		
-		// make segment to change timestamps based on speed (10 knots)
-		//track.computeTrackSegments(10f);
+		for (ShipTrack track : tracks) {
+			kmlGenerator.addTrack(track, track.getMmsi());			
+		}
 		
-		kmlGenerator.addTrack(track, ""+MMSI);
-		
-		kmlGenerator.saveKMLFile(OUTPUT_FILE+"_"+MMSI+".kml");
+		kmlGenerator.saveKMLFile(OUTPUT_FILE+".kml");
 		
 		System.out.println("Done\n");
 		

@@ -33,7 +33,8 @@ public class MineVoyages {
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 10;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 8;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 40;
+	final static int MAX_SHIPS_TO_ANALYSE = 20;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
@@ -53,51 +54,13 @@ public class MineVoyages {
 		kmlGenerator.addIconStyle("targetStyle",
 				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
-		
-		// Gibraltar
-		Point gibraltarNW = new Point(37, -10);
-		Point gibraltarSE = new Point(35, -5);
-		// Copenhagen
-		Point copenhagenNW = new Point(56, 12);
-		Point copenhagenSE = new Point(55, 14);
-		// Channel
-		Point channelNW = new Point(51, 1);
-		Point channelSE = new Point(50.5f, 2.5f);
-		// New York
-		Point nyNW = new Point(44, -77);
-		Point nySE = new Point(40, -70);
-		// Rio de Janeiro
-		Point rioNW = new Point(-21, -46);
-		Point rioSE = new Point(-26, -40);
-		// South Africa
-		Point saNW = new Point(-32, 17);
-		Point saSE = new Point(-36, 20);
-		// Suez
-		Point suezNW = new Point(32, 31.5f);
-		Point suezSE = new Point(29.5f, 33);
-		// Golf of Aden
-		Point goaNW = new Point(18, 50);
-		Point goaSE = new Point(9, 51);
-		
-
+				
 		//// Departure
-		Box depBox = null;
-		
-		depBox = new Box(gibraltarNW, gibraltarSE);
-		//depBox = new Box(channelNW, channelSE);
-		//depBox = new Box(suezNW, suezSE);	
+		Box depBox = Areas.GIBRALTAR;
 						
 		/// Arrival
-		Box arrBox = null;
-		
-		//arrBox = new Box(nyNW, nySE);
-		//arrBox = new Box(rioNW, rioSE);
-		//arrBox = new Box(saNW, saSE);
-		//arrBox = new Box(copenhagenNW, copenhagenSE);
-		//arrBox = new Box(goaNW, goaSE);
-		//arrBox = new Box(gibraltarNW, gibraltarSE);
-		arrBox = new Box(suezNW, suezSE);
-				
+		//Box arrBox = Areas.SUEZ;
+		Box arrBox = Areas.WEST_ATLANTIC;
 		
 		/// Let's mine
 		
@@ -111,7 +74,7 @@ public class MineVoyages {
 			depInterval.shiftInterval(i*START_PERIOD_IN_DAYS);
 			System.out.println(">>> Period: "+depInterval);
 			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
-					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null);
+					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null, MAX_SHIPS_TO_ANALYSE);
 			if(tracks != null) {
 				allTracks.addAll(tracks);			
 			}
