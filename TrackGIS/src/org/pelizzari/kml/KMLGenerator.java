@@ -122,7 +122,8 @@ public class KMLGenerator {
 			System.err.println("addTrack: track is null");
 			return;
 		}
-		List<ShipPosition> positions = track.getPosList();		
+		List<ShipPosition> positions = track.getPosList();
+		
 		for (ShipPosition pos : positions) {
 			long ts = pos.getTs().getTsMillisec();
 			Date date = new Date(ts);				

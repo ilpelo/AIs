@@ -33,7 +33,7 @@ public class MineVoyages {
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 10;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 40;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 20;
 	final static int MAX_SHIPS_TO_ANALYSE = 20;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
@@ -69,14 +69,18 @@ public class MineVoyages {
 		List<ShipTrack> allTracks = new ArrayList<ShipTrack>();
 		
 		TimeInterval depInterval = new TimeInterval(new Timestamp(START_DT), START_PERIOD_IN_DAYS);
-
+		
+		List<Ship> seenShips = new ArrayList<Ship>();
 		for (int i = 0; i < ANALYSIS_PERIOD_IN_DAYS/START_PERIOD_IN_DAYS; i++) {
-			depInterval.shiftInterval(i*START_PERIOD_IN_DAYS);
+			depInterval.shiftInterval(START_PERIOD_IN_DAYS);
 			System.out.println(">>> Period: "+depInterval);
 			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
-					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, null, MAX_SHIPS_TO_ANALYSE);
+					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, seenShips, MAX_SHIPS_TO_ANALYSE);
 			if(tracks != null) {
-				allTracks.addAll(tracks);			
+				for (ShipTrack track : tracks) {
+					seenShips.add(new Ship(track.getMmsi()));
+				}
+				allTracks.addAll(tracks);
 			}
 		}
 		

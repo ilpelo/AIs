@@ -118,7 +118,15 @@ public class ShipTrack {
 		}
 	}
 
-	public void reducePositions() {
+	/**
+	 * Remove from track the positions so that the rate does not go over the given one. 
+	 * @param maxRateIn
+	 */
+	public void reducePositions(float maxRateInPosPerHour) {
+		
+	}
+	
+	public void removeAlignedPositions() {
 		List<ShipPosition> reducedPosList = new ArrayList<ShipPosition>();
 		ShipPosition p1 = null;
 		ShipPosition p2 = null;
@@ -149,7 +157,7 @@ public class ShipTrack {
 			}
 		}
 		reducedPosList.add(p2);
-		posList = reducedPosList;
+		setPosList(reducedPosList);
 	}
 
 	// old version with angle and distance (in fact this is not a change of course!)
