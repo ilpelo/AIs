@@ -3,13 +3,20 @@ package org.pelizzari.gis;
 public class Box {
 
 	Point nw, se;
+	String name;
 	
-	public Box(float maxLat, float minLat, float maxLon, float minLon) {
+	public Box(float maxLat, float minLat, float maxLon, float minLon, String name) {
 		this.nw = new Point(maxLat, minLon);
-		this.se = new Point(minLat, maxLon);		
+		this.se = new Point(minLat, maxLon);
+		this.name = name;
 	}
 
+	// nameless box
 	public Box(Point p1, Point p2) {
+		this(p1, p2, "");
+	}
+	
+	public Box(Point p1, Point p2, String name) {
 //		float maxLat = p1.lat > p2.lat ? p1.lat : p2.lat;
 //		float maxLon = p1.lon > p2.lon ? p1.lon : p2.lon;
 //		float minLat = p1.lat < p2.lat ? p1.lat : p2.lat;
@@ -17,7 +24,8 @@ public class Box {
 		this(p1.lat > p2.lat ? p1.lat : p2.lat,
 			 p1.lat < p2.lat ? p1.lat : p2.lat,
 			 p1.lon > p2.lon ? p1.lon : p2.lon,
-			 p1.lon < p2.lon ? p1.lon : p2.lon);		
+			 p1.lon < p2.lon ? p1.lon : p2.lon,
+			 name);		
 	}
 	
 	// length is in degrees! (not km, miles, ...)
@@ -25,9 +33,14 @@ public class Box {
 		this(center.lat + halfSideLength,
 			 center.lat - halfSideLength,
 			 center.lon + halfSideLength,
-			 center.lon - halfSideLength);		
+			 center.lon - halfSideLength,
+			 "");		
 	}
 	
+	public String getName() {
+		return name;
+	}
+
 	public float getMinLat() {
 		return se.lat;
 	}

@@ -33,8 +33,8 @@ public class MineVoyages {
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 10;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 20;
-	final static int MAX_SHIPS_TO_ANALYSE = 20;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
+	final static int MAX_SHIPS_TO_ANALYSE = 2;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
@@ -95,11 +95,14 @@ public class MineVoyages {
 //		map.setVisible(true);
 		kmlGenerator.saveKMLFile(OUTPUT_KML_FILE);
 		
-		// Save track files
+		// Save track files and to DB
 		for (ShipTrack track : allTracks) {
 			FileWriter fw = new FileWriter(OUTPUT_DIR+"pos_"+track.getMmsi()+".csv");
 			track.saveTrack(fw);
 			fw.close();
+			//
+			// Normalize tracks (use compute segments)!!!
+			track.saveTrackToDB(depBox, arrBox);			
 		}		
 		System.out.println("Done\n");
 	}

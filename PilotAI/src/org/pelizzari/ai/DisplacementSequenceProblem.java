@@ -26,7 +26,9 @@ public class DisplacementSequenceProblem extends Problem implements
 
 	static ShipTrack targetTrack;
 	static ShipPosition startPosition;
-	static final boolean FROM_FILE = true;
+	
+	static final String DATA_STORAGE = "DB";
+
 	static final String FILE_DIR = "c:/master_data/";
 	static final String FILE_PREFIX = "pos_";
 	static final String FILE_EXT = ".csv";
@@ -42,7 +44,7 @@ public class DisplacementSequenceProblem extends Problem implements
 	// init target track, map, etc.
 	static {
 		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
-		if (!FROM_FILE) {
+		if (DATA_STORAGE.equals("VAR")) {
 			ShipTrack track = new ShipTrack();
 			Point p = null;
 			Point prevP = null;
@@ -59,7 +61,7 @@ public class DisplacementSequenceProblem extends Problem implements
 				track.addPosition(pos);
 			}
 			tracks.add(track);
-		} else {
+		} else if (DATA_STORAGE.equals("FILE")) {
 			try {
 				for (int i = 0; i < MMSIs.length; i++) {
 					ShipTrack track = new ShipTrack();
@@ -74,6 +76,8 @@ public class DisplacementSequenceProblem extends Problem implements
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		} else if (DATA_STORAGE.equals("DB")) {
+		
 		}
 		
 		List<ShipPosition> allPos = new ArrayList<ShipPosition>();

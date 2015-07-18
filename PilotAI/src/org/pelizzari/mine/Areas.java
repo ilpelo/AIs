@@ -34,8 +34,8 @@ public class Areas {
 	static Point westAtlanticSE = new Point(-70, -70);
 
 	
-	public final static Box GIBRALTAR = new Box(gibraltarNW, gibraltarSE);
-	public final static Box SUEZ = new Box(suezNW, suezSE);
-	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE);
+	public final static Box GIBRALTAR = new Box(gibraltarNW, gibraltarSE, "GIBRALTAR");
+	public final static Box SUEZ = new Box(suezNW, suezSE, "SUEZ");
+	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC");
 	
 }

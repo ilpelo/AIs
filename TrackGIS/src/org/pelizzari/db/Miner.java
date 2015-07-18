@@ -51,6 +51,12 @@ public class Miner {
 		return GEO_COND;
 	}
 
+	String getBoxNamesSQLCondition(Box depBox, Box arrBox) {
+		final String BOX_NAME_COND = 
+				"and dep = "+depBox.getName()+" "+		
+				"and arr = "+arrBox.getName()+" "+		
+		return BOX_NAME_COND;
+	}	
 	String getPeriodSQLCondition(TimeInterval interval) {
 		// get start and end TS of the interval
 		String startISODatetime = interval.getStartTsISO();
@@ -124,7 +130,37 @@ public class Miner {
 		return listOfShips;
 	}
 
+	List<ShipPosition> getShipPositions(String posQuery) {
+		List<ShipPosition> posList = new ArrayList<ShipPosition>();
+		try {
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(posQuery);
+			ShipPosition pos = null;
+			while(rs.next()){
+				float lat = rs.getFloat("lat");
+				float lon = rs.getFloat("lon");
+				int ts = rs.getInt("ts");
+				Point posPoint = new Point(lat, lon);				
+				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
+				posList.add(pos);					
+			}
+		} catch (SQLException e) {
+			System.err.println("Cannot get ship positions");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return posList;
+	}
 	
+	/**
+	 * Get ship positions from the wpos table
+	 * @param interval
+	 * @param box
+	 * @param includeShips
+	 * @param excludeShips
+	 * @param limitPositions
+	 * @return
+	 */
 	public List<ShipPosition> getShipPositionsInIntervalAndBox(
 				   TimeInterval interval,  
 				   Box box, 
@@ -156,28 +192,43 @@ public class Miner {
 		String posQuery = SHIP_POSITION_QUERY;
 		System.out.println(posQuery);
 		
-		List<ShipPosition> posList = new ArrayList<ShipPosition>();
-		try {
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(posQuery);
-			ShipPosition pos = null;
-			while(rs.next()){
-				float lat = rs.getFloat("lat");
-				float lon = rs.getFloat("lon");
-				int ts = rs.getInt("ts");
-				Point posPoint = new Point(lat, lon);				
-				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
-				posList.add(pos);					
-			}
-		} catch (SQLException e) {
-			System.err.println("Cannot get ship positions");
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		
+		List<ShipPosition> posList = getShipPositions(SHIP_POSITION_QUERY);
 		return posList;
 	}
 
+	public List<ShipPosition> getShipPositionsFromTracks(
+			   Box depBox,
+			   Box arrBox,
+			   List<Ship> includeShips,
+			   List<Ship> excludeShips,
+			   int limitPositions) {
+	
+	final String INCLUDE_MMSI_COND = getMmsiSQLCondition(includeShips, true);		
+	
+	final String EXCLUDE_MMSI_COND = getMmsiSQLCondition(excludeShips, false);
+	
+	final String BOX_NAMES_COND = getBoxNamesSQLCondition(depBox, arrBox);
+	
+	final String LIMIT_POS = (limitPositions > 0)?"limit "+limitPositions+" ":"";		
+
+	final String SHIP_POSITION_QUERY = 
+			"SELECT ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
+			"FROM tracks "+
+		    "WHERE 1=1 "+
+			INCLUDE_MMSI_COND+
+			EXCLUDE_MMSI_COND+
+			BOX_NAMES_COND+
+			"order by ts asc "+ // this is important: it sorts all positions regardless of mmsi
+								// tracks must have been speed normalized!
+			LIMIT_POS;
+	
+	String posQuery = SHIP_POSITION_QUERY;
+	System.out.println(posQuery);
+	
+	List<ShipPosition> posList = getShipPositions(SHIP_POSITION_QUERY);
+	
+	return posList;
+}
 	
 	
 	/*

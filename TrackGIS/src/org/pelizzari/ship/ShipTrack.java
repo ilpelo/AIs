@@ -5,12 +5,17 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.pelizzari.db.DBConnection;
 import org.pelizzari.gis.*;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
@@ -118,6 +123,35 @@ public class ShipTrack {
 		}
 	}
 
+	public void saveTrackToDB(Box depBox, Box arrBox) {
+		Connection con = DBConnection.getCon();
+		int writeCount = 0;
+		//int errCount = 0;
+				
+		final String TRACK_INSERT = 
+				"INSERT INTO tracks (mmsi, source, dep, arr, ts, lat, lon) "+
+				"VALUES ("+
+			    getMmsi() + ", " +
+				"null, " + // source
+				"'" + depBox.getName() + "', " +
+				"'" + arrBox.getName() + "', ";
+		
+		try {
+			for (ShipPosition pos : getPosList()) {
+				String values = pos.getTs().getTsMillisec()/1000 + "," + pos.point.lat + "," + pos.point.lon;
+				String insert = TRACK_INSERT + values + ")";
+				Statement stmt = con.createStatement();
+				stmt.executeUpdate(insert);	
+				writeCount++;
+			}
+			System.out.println("Written to DB " + writeCount + " lines");
+		} catch (SQLException e) {
+			System.err.println("Cannot write track to DB");
+			e.printStackTrace();
+		}
+	}	
+	
+	
 	/**
 	 * Remove from track the positions so that the rate does not go over the given one. 
 	 * @param maxRateIn
