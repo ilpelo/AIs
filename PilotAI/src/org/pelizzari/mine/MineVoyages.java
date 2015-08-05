@@ -30,11 +30,12 @@ import org.pelizzari.time.Timestamp;
 
 public class MineVoyages {
 
-	final static String START_DT = "2011-03-01 00:00:00";
+	final static String START_DT = "2011-01-01 00:00:00";
+	final static String YEAR_PERIOD = "WINTER";
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int VOYAGE_DURATION_IN_DAYS = 10;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
-	final static int MAX_SHIPS_TO_ANALYSE = 2;
+	final static int VOYAGE_DURATION_IN_DAYS = 20;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+	final static int MAX_SHIPS_TO_ANALYSE = 10;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
@@ -56,11 +57,14 @@ public class MineVoyages {
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
 				
 		//// Departure
-		Box depBox = Areas.GIBRALTAR;
+		//Box depBox = Areas.GIBRALTAR;
+		Box depBox = Areas.WEST_ATLANTIC;
 						
 		/// Arrival
 		//Box arrBox = Areas.SUEZ;
-		Box arrBox = Areas.WEST_ATLANTIC;
+		//Box arrBox = Areas.WEST_ATLANTIC;
+		//Box arrBox = Areas.RIO;
+		Box arrBox = Areas.GIBRALTAR;
 		
 		/// Let's mine
 		
@@ -102,7 +106,7 @@ public class MineVoyages {
 			fw.close();
 			//
 			// Normalize tracks (use compute segments)!!!
-			track.saveTrackToDB(depBox, arrBox);			
+			track.saveTrackToDB(depBox, arrBox, YEAR_PERIOD);			
 		}		
 		System.out.println("Done\n");
 	}

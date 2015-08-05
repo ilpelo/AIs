@@ -54,9 +54,10 @@ public class Miner {
 	String getBoxNamesSQLCondition(Box depBox, Box arrBox) {
 		final String BOX_NAME_COND = 
 				"and dep = "+depBox.getName()+" "+		
-				"and arr = "+arrBox.getName()+" "+		
+				"and arr = "+arrBox.getName()+" ";		
 		return BOX_NAME_COND;
-	}	
+	}
+	
 	String getPeriodSQLCondition(TimeInterval interval) {
 		// get start and end TS of the interval
 		String startISODatetime = interval.getStartTsISO();
@@ -64,8 +65,7 @@ public class Miner {
 
 		final String PERIOD_COND = 
 				"and date(from_unixtime(ts)) >= '"+startISODatetime+"' "+
-				"and date(from_unixtime(ts)) <= '"+endISODatetime+"' ";
-		
+				"and date(from_unixtime(ts)) <= '"+endISODatetime+"' ";	
 		return PERIOD_COND;		
 	}
 

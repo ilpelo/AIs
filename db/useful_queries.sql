@@ -4,19 +4,36 @@
 -- count positions per month
 select left(date(from_unixtime(ts)),7), count(*)
 from pos
+where source = 'L'
 group by left(date(from_unixtime(ts)),7) order by 1;
 
+-- count positions per source/year
+select left(date(from_unixtime(ts)),4), source, count(*)
+from pos
+where source = 'L'
+group by left(date(from_unixtime(ts)),4), source
+order by 1;
+
 -- count position per day
-select date(from_unixtime(ts)) "Date",
+select date_format(date(from_unixtime(ts)),'%Y%m') "Date",
 	   count(*) "Position count",
 	   truncate(max(lat),0) "Max lat",
 	   truncate(min(lat),0) "Min lat", 
 	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
 from pos 
 where 1=1
-and date(from_unixtime(ts)) >= '2013-03-01'
-and date(from_unixtime(ts)) < '2013-04-01'
-group by date(from_unixtime(ts)) order by 1;
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) < '2011-04-01'
+--group by date(from_unixtime(ts)) order by 1
+;
+
+-----------------------------------------------------------------
+-- BEWARE delete!
+--
+delete from pos
+where source = 'L';
+
+
 
 
 -- Table WPOS
@@ -94,4 +111,9 @@ order by 1 asc
 INTO OUTFILE '/tmp/pos.csv'
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
+
+-- Tracks table
+select * from tracks;
+delete from tracks;
+
 

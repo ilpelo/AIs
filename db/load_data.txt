@@ -1,5 +1,11 @@
 >>> Python script to generate load LRIT data statements (see load_lrit.py)
 
+ssh pelizan@tstatdata1 (use Keepass)
+cd /data1/LRIT Data/2011
+[pelizan@tstatdata1 2011]$ python load_lrit_2011.py > load.sql
+[pelizan@tstatdata1 2011]$ mysql ai < load.sql
+
+
 >>> Python script to generate decode AIS statements (see decode_ais.py)
 
 With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db

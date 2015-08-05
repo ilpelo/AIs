@@ -123,16 +123,17 @@ public class ShipTrack {
 		}
 	}
 
-	public void saveTrackToDB(Box depBox, Box arrBox) {
+	public void saveTrackToDB(Box depBox, Box arrBox, String yearPeriod) {
 		Connection con = DBConnection.getCon();
 		int writeCount = 0;
 		//int errCount = 0;
 				
 		final String TRACK_INSERT = 
-				"INSERT INTO tracks (mmsi, source, dep, arr, ts, lat, lon) "+
+				"INSERT INTO tracks (mmsi, source, period, dep, arr, ts, lat, lon) "+
 				"VALUES ("+
 			    getMmsi() + ", " +
 				"null, " + // source
+				"'" + yearPeriod+ "', " +
 				"'" + depBox.getName() + "', " +
 				"'" + arrBox.getName() + "', ";
 		

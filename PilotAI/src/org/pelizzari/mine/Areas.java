@@ -37,5 +37,6 @@ public class Areas {
 	public final static Box GIBRALTAR = new Box(gibraltarNW, gibraltarSE, "GIBRALTAR");
 	public final static Box SUEZ = new Box(suezNW, suezSE, "SUEZ");
 	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC");
+	public final static Box RIO = new Box(rioNW, rioSE, "RIO");
 	
 }

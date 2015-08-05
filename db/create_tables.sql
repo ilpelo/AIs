@@ -54,6 +54,7 @@ ts int not null, -- sec (not millisec!)
 lat double not null,
 lon double not null,
 source varchar(1),
+period varchar(30) not null,
 dep varchar(30) not null,
 arr varchar(30) not null,
 index index_mmsi (mmsi),
