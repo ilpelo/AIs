@@ -1,10 +1,15 @@
 >>> Python script to generate load LRIT data statements (see load_lrit.py)
 
+- Linux
 ssh pelizan@tstatdata1 (use Keepass)
 cd /data1/LRIT Data/2011
 [pelizan@tstatdata1 2011]$ python load_lrit_2011.py > load.sql
 [pelizan@tstatdata1 2011]$ mysql ai < load.sql
 
+- Windows
+
+
+--- Norway AIS data import
 
 >>> Python script to generate decode AIS statements (see decode_ais.py)
 
@@ -24,6 +29,21 @@ mysql> source C:\master_data\AIS\03-Mar\load_data.mysql
 Query OK, 179600 rows affected (1 min 20.37 sec)
 Records: 179600  Deleted: 0  Skipped: 0  Warnings: 0
 ...
+
+--- Exact Earth AIS data import
+
+>>> EE data is already in CSV format; use insert_ee.sql
+
+- edit the insert_ee.sql and set the correct file name
+- copy the "load infile..." command and run with mysql
+- run statement 1. of manip_data.sql
+
+>>> Copy to wpos
+
+- edit and run statement 2. of manip_data.sql
+
+
+
 
 
 

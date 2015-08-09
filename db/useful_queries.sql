@@ -2,17 +2,11 @@
 
 -- Table POS
 -- count positions per month
-select left(date(from_unixtime(ts)),7), count(*)
+select source, date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
 from pos
-where source = 'L'
-group by left(date(from_unixtime(ts)),7) order by 1;
-
--- count positions per source/year
-select left(date(from_unixtime(ts)),4), source, count(*)
-from pos
-where source = 'L'
-group by left(date(from_unixtime(ts)),4), source
-order by 1;
+-- where source = 'E'
+group by source, date_format(date(from_unixtime(ts)),'%Y%m')
+order by 2, 1;
 
 -- count position per day
 select date_format(date(from_unixtime(ts)),'%Y%m') "Date",
@@ -34,8 +28,6 @@ delete from pos
 where source = 'L';
 
 
-
-
 -- Table WPOS
 -- count positions between 2 dates
 select count(*)
@@ -43,6 +35,21 @@ from wpos
 where 1=1
 and date(from_unixtime(ts)) >= '2011-03-02'
 and date(from_unixtime(ts)) < '2011-03-03'
+;
+
+-- count position per day
+select date_format(date(from_unixtime(ts)),'%Y-%m-%d') "Date",
+	   source,
+	   count(*) "Position count",
+	   truncate(max(lat),0) "Max lat",
+	   truncate(min(lat),0) "Min lat", 
+	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
+from wpos 
+where 1=1
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) < '2011-04-01'
+group by date_format(date(from_unixtime(ts)),'%Y-%m-%d'), source
+order by 1, 2
 ;
 
 -- select timestamps of the last 10 positions in a time interval

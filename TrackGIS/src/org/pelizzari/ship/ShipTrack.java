@@ -104,6 +104,44 @@ public class ShipTrack {
 		}
 	}
 
+	/*
+	 * Loads a track from the TRACKS table in the db
+	 */
+	public void loadTrack(String yearPeriod, Box depBox, Box arrBox) {
+		Connection con = DBConnection.getCon();
+		int readCount = 0;
+				
+		final String TRACK_SELECT = 
+				"select ts, lat, lon " +
+				"from tracks " +
+				"where mmsi = " + getMmsi() +
+			    "and period = " + yearPeriod +
+				"and dep = " + depBox.getName() + 
+				"and arr = " + arrBox.getName() + 
+				"order by ts asc";
+		
+		try {
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(TRACK_SELECT);
+			ShipPosition pos = null;
+			while(rs.next()) {
+				float lat = rs.getFloat("lat");
+				float lon = rs.getFloat("lon");
+				int ts = rs.getInt("ts"); // in sec
+				Point posPoint = new Point(lat, lon);				
+				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
+				addPosition(pos);
+				readCount++;
+			}
+			System.out.println("Read " + readCount + " positions");			
+		} catch (SQLException e) {
+			System.err.println("Cannot get track positions from TRACKS table");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
+	
 	public void saveTrack(FileWriter fw) {
 		BufferedWriter w = new BufferedWriter(fw);
 		String line;

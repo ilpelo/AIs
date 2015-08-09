@@ -81,6 +81,47 @@ public class Miner {
 		return INCLUDE_MMSI_COND;
 	}
 	
+	public List<Ship> getShipsWithTracks(String yearPeriod, Box depBox, Box arrBox) {
+
+		final String SHIP_QUERY = 
+				"select distinct mmsi " +
+				"from tracks "+
+				"where period = " + yearPeriod +
+				"and dep = " + depBox.getName() + 
+				"and arr = " + arrBox.getName() + 
+				"order by mmsi asc";
+
+		String shipQuery = SHIP_QUERY;
+		System.out.println(shipQuery);
+
+		List<Ship> listOfShips = new ArrayList<Ship>();
+
+		try {
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(shipQuery);
+			while (rs.next()) {
+				String mmsi = rs.getString("mmsi");
+				Ship ship = new Ship(mmsi);
+				listOfShips.add(ship);
+			}
+		} catch (SQLException e) {
+			System.err.println("Cannot get ships");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
+		return listOfShips;
+	}
+	
+	/**
+	 * Get list of ships having at least one position in the box during the given time interval.
+	 * @param interval
+	 * @param box
+	 * @param includeShips
+	 * @param excludeShips
+	 * @param limitShips
+	 * @return
+	 */
 	public List<Ship> getShipsInIntervalAndBox(TimeInterval interval, 
 											   Box box, 
 											   List<Ship> includeShips,
@@ -129,7 +170,45 @@ public class Miner {
 		
 		return listOfShips;
 	}
-
+	
+	/*
+	 * Loads a fused track between 2 areas from the TRACKS table in the db
+	 */
+	public ShipTrack getTrackInPeriodAndBetweenBoxes(String yearPeriod, Box depBox, Box arrBox) {
+		Connection con = DBConnection.getCon();
+		int readCount = 0;				
+		final String FUSED_TRACK_SELECT = 
+				"select ts, lat, lon " +
+				"from tracks " +
+				"where period = '" + yearPeriod + "' " +
+				"and dep = '" + depBox.getName() + "' " +
+				"and arr = '" + arrBox.getName() + "' " + 
+				"order by ts asc";
+		System.out.println("Fused Track Query: " + FUSED_TRACK_SELECT);			
+		
+		ShipTrack track = new ShipTrack();
+		try {
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(FUSED_TRACK_SELECT);
+			ShipPosition pos = null;
+			while(rs.next()) {
+				float lat = rs.getFloat("lat");
+				float lon = rs.getFloat("lon");
+				int ts = rs.getInt("ts"); // in sec
+				Point posPoint = new Point(lat, lon);				
+				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
+				track.addPosition(pos);
+				readCount++;
+			}
+			System.out.println("Read " + readCount + " positions");			
+		} catch (SQLException e) {
+			System.err.println("Cannot get track positions from TRACKS table");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return track;
+	}
+	
 	List<ShipPosition> getShipPositions(String posQuery) {
 		List<ShipPosition> posList = new ArrayList<ShipPosition>();
 		try {
@@ -151,6 +230,7 @@ public class Miner {
 		}
 		return posList;
 	}
+	
 	
 	/**
 	 * Get ship positions from the wpos table

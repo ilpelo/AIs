@@ -7,10 +7,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.pelizzari.db.Miner;
+import org.pelizzari.gis.Box;
 import org.pelizzari.gis.Displacement;
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
+import org.pelizzari.mine.Areas;
+import org.pelizzari.ship.Ship;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.TrackError;
@@ -34,18 +38,19 @@ public class DisplacementSequenceProblem extends Problem implements
 	static final String FILE_EXT = ".csv";
 	static final String[] MMSIs = {"211394200", "212720000"};
 	
+	static final String YEAR_PERIOD = "WINTER";
+	static final Box  DEPARTURE_AREA = Areas.GIBRALTAR;
+	static final Box  ARRIVAL_AREA = Areas.SUEZ;
 	
-	static final float SPEED = 10; // knots
-	// static final float[] TRACK_LAT = {31f, 33f};
-	// static final float[] TRACK_LON = {-12f, -12.1f};
+	public static final float SPEED = 10; // knots
 	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };
 
 	// init target track, map, etc.
 	static {
-		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
+		//List<ShipTrack> tracks = new ArrayList<ShipTrack>();
+		ShipTrack track = new ShipTrack();
 		if (DATA_STORAGE.equals("VAR")) {
-			ShipTrack track = new ShipTrack();
 			Point p = null;
 			Point prevP = null;
 			for (int i = 0; i < TRACK_LON.length; i++) {
@@ -60,16 +65,16 @@ public class DisplacementSequenceProblem extends Problem implements
 				pos.setIndex(i);
 				track.addPosition(pos);
 			}
-			tracks.add(track);
+			//tracks.add(track);
 		} else if (DATA_STORAGE.equals("FILE")) {
 			try {
 				for (int i = 0; i < MMSIs.length; i++) {
-					ShipTrack track = new ShipTrack();
+					//ShipTrack track = new ShipTrack();
 					String fileName = FILE_DIR+FILE_PREFIX+MMSIs[i]+FILE_EXT;
 					FileReader fr = new FileReader(fileName);
 					track.loadTrack(fr);
 					fr.close();
-					tracks.add(track);
+					//tracks.add(track);
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -77,29 +82,37 @@ public class DisplacementSequenceProblem extends Problem implements
 				e.printStackTrace();
 			}
 		} else if (DATA_STORAGE.equals("DB")) {
-		
+			Miner miner = new Miner();
+//			List<Ship> ships = miner.getShipsWithTracks(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
+//			for (Ship ship : ships) {
+//				ShipTrack track = new ShipTrack();
+//				track.setMmsi(ship.getMmsi());
+//				track.loadTrack(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
+//				tracks.add(track);
+//			}			
+			track = miner.getTrackInPeriodAndBetweenBoxes(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);			
 		}
 		
-		List<ShipPosition> allPos = new ArrayList<ShipPosition>();
-		// WARNING: overwrite timestamps!!! use fixed speed SPEED, then merge the tracks into a single one 
-		for (ShipTrack track : tracks) {
-			track.computeTrackSegments(SPEED);
-			allPos.addAll(track.getPosList());
-		}
-		ShipTrack mergedTrack = new ShipTrack();
-		mergedTrack.setPosList(allPos);
+//		List<ShipPosition> allPos = new ArrayList<ShipPosition>();
+//		// WARNING: overwrite timestamps!!! use fixed speed SPEED, then merge the tracks into a single one 
+//		for (ShipTrack track : tracks) {
+//			track.computeTrackSegments(SPEED);
+//			allPos.addAll(track.getPosList());
+//		}
+//		ShipTrack mergedTrack = new ShipTrack();
+//		mergedTrack.setPosList(allPos);
 		
 		//DisplacementSequence displSeq = mergedTrack.computeDisplacements();
 		//displSeq = displSeq.increaseDisplacements(2);			
 //		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
 //				displSeq, SPEED);
-		targetTrack = mergedTrack;
+		targetTrack = track;
 		
 		// set start position close to the first position of the track (0.1 deg North)
-		Point startPoint = new Point(mergedTrack.getFirstPosition().getPoint().lat+0.1f,
-									 mergedTrack.getFirstPosition().getPoint().lon);
-		startPosition = new ShipPosition(startPoint, mergedTrack.getFirstPosition().getTs());
-		System.out.println("Problem initialized; Target " + mergedTrack);
+		Point startPoint = new Point(track.getFirstPosition().getPoint().lat+0.1f,
+									 track.getFirstPosition().getPoint().lon);
+		startPosition = new ShipPosition(startPoint, track.getFirstPosition().getTs());
+		System.out.println("Problem initialized; Target " + track);
 	}
 
 	// ind is the individual to be evaluated.

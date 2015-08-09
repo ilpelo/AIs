@@ -27,10 +27,17 @@ import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
 
+
+/**
+ * Show on the map the positions in a given time range.
+ * Result is saved in c:/master_data/ShipPos.kml
+ * @author andrea@pelizzari.org
+ *
+ */
 public class ShowShipPositions {
 
-	final static String START_DT = "2011-03-01 00:00:00";
-	final static int ANALYSIS_PERIOD_IN_DAYS = 20;
+	final static String START_DT = "2011-01-01 00:00:00";
+	final static int ANALYSIS_PERIOD_IN_DAYS = 3;
 
 	final static String OUTPUT_FILE = "c:/master_data/ShipPos";
 	
