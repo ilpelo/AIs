@@ -14,6 +14,7 @@ import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
 import org.pelizzari.ship.Ship;
 import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipPositionList;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.time.TimeInterval;
 import org.pelizzari.time.Timestamp;
@@ -172,9 +173,9 @@ public class Miner {
 	}
 	
 	/*
-	 * Loads a fused track between 2 areas from the TRACKS table in the db
+	 * Loads a merged track between 2 areas from the TRACKS table in the db
 	 */
-	public ShipTrack getTrackInPeriodAndBetweenBoxes(String yearPeriod, Box depBox, Box arrBox) {
+	public ShipPositionList getMergedShipTracksInPeriodAndBetweenBoxes(String yearPeriod, Box depBox, Box arrBox) {
 		Connection con = DBConnection.getCon();
 		int readCount = 0;				
 		final String FUSED_TRACK_SELECT = 
@@ -186,7 +187,7 @@ public class Miner {
 				"order by ts asc";
 		System.out.println("Fused Track Query: " + FUSED_TRACK_SELECT);			
 		
-		ShipTrack track = new ShipTrack();
+		ShipPositionList mergedTrack = new ShipPositionList();
 		try {
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(FUSED_TRACK_SELECT);
@@ -197,7 +198,7 @@ public class Miner {
 				int ts = rs.getInt("ts"); // in sec
 				Point posPoint = new Point(lat, lon);				
 				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
-				track.addPosition(pos);
+				mergedTrack.addPosition(pos);
 				readCount++;
 			}
 			System.out.println("Read " + readCount + " positions");			
@@ -206,7 +207,7 @@ public class Miner {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		return track;
+		return mergedTrack;
 	}
 	
 	List<ShipPosition> getShipPositions(String posQuery) {

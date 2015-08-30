@@ -24,8 +24,10 @@ import org.pelizzari.time.Timestamp;
  * @author andrea@pelizzari.org
  *
  */
-public class ShipTrack {
-
+public class ShipTrack extends ShipPositionList {
+	
+	public static final float REFERENCE_SPEED_IN_KNOTS = 10; // knots, used to normalize tracks
+	
 	final float SEGMENT_PRECISION = 0.01f; // alignment parameter
 	// used to read the input file with ship positions
 	private static Pattern SHIP_POSITION = Pattern
@@ -35,8 +37,6 @@ public class ShipTrack {
 	HeadingSequence headingSeq; // this sequence has length = length(ShipTrack) - 1;
 	ChangeOfHeadingSequence changeOfHeadingSeq; // this sequence has length = length(ShipTrack) - 2;
 
-	// list of positions of this track
-	List<ShipPosition> posList = new ArrayList<ShipPosition>();
 	// list of segments of this track
 	List<ShipTrackSegment> segList = new ArrayList<ShipTrackSegment>();
 	// average speed
@@ -45,27 +45,10 @@ public class ShipTrack {
 	String mmsi = null;
 	
 	public ShipTrack() {
+		super();
 		// nothing
 	}
 
-	public void addPosition(ShipPosition pos) {
-		posList.add(pos);
-	}
-
-	public void addPosition(int ts, float lat, float lon) {
-		Timestamp timestamp = new Timestamp(ts);
-		Point point = new Point(lat, lon);
-		ShipPosition pos = new ShipPosition(point, timestamp);
-		addPosition(pos);
-	}
-
-	public ShipPosition getFirstPosition() {
-		return posList.get(0);
-	}
-
-	public ShipPosition getLastPosition() {
-		return posList.get(posList.size() - 1);
-	}
 
 	/*
 	 * Loads a track from an input CSV file: see pattern SHIP_POSITION
@@ -101,43 +84,6 @@ public class ShipTrack {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	}
-
-	/*
-	 * Loads a track from the TRACKS table in the db
-	 */
-	public void loadTrack(String yearPeriod, Box depBox, Box arrBox) {
-		Connection con = DBConnection.getCon();
-		int readCount = 0;
-				
-		final String TRACK_SELECT = 
-				"select ts, lat, lon " +
-				"from tracks " +
-				"where mmsi = " + getMmsi() +
-			    "and period = " + yearPeriod +
-				"and dep = " + depBox.getName() + 
-				"and arr = " + arrBox.getName() + 
-				"order by ts asc";
-		
-		try {
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery(TRACK_SELECT);
-			ShipPosition pos = null;
-			while(rs.next()) {
-				float lat = rs.getFloat("lat");
-				float lon = rs.getFloat("lon");
-				int ts = rs.getInt("ts"); // in sec
-				Point posPoint = new Point(lat, lon);				
-				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
-				addPosition(pos);
-				readCount++;
-			}
-			System.out.println("Read " + readCount + " positions");			
-		} catch (SQLException e) {
-			System.err.println("Cannot get track positions from TRACKS table");
-			e.printStackTrace();
-			System.exit(-1);
 		}
 	}
 
@@ -396,34 +342,46 @@ public class ShipTrack {
 		return reconstructedTrack;
 	}
 	
-	public List<ShipTrackSegment> computeTrackSegments(float speed) {
+
+	/**
+	 * Compute the list of segments corresponding to the positions of this track.
+	 *
+	 * WARNING: overwrite the position timestamps to match the speed parameter
+	 * and start journey on the reference timestamp. 
+	 *
+	 * @param speed
+	 * @return
+	 */
+	public List<ShipTrackSegment> computeTrackSegmentsAndNormalizeTime(Timestamp referenceStartTS, 
+																	   float speed) {
 		if(segList.size() == 0) {
 			ShipPosition prevPos = null;
 			for (ShipPosition pos : posList) {
 				if (prevPos != null) {
 					segList.add(new ShipTrackSegment(prevPos, pos, speed));
+				} else {
+					pos.setTs(referenceStartTS);
 				}
 				prevPos = pos;
 			}
 		}
 		return segList;
 	}
-
 	
 	public List<ShipTrackSegment> getSegList() {
 		return segList;
 	}
 
-	public float computeTotalDistance() {
-		float distance = 0;
+	public float computeLengthInMiles() {
+		float lengthInMiles = 0;
 		ShipPosition prevPos = null;
 		for (ShipPosition pos : posList) {
 			if (prevPos != null) {
-				distance += prevPos.point.distanceInMiles(pos.point); // in nm
+				lengthInMiles += prevPos.point.distanceInMiles(pos.point); // in nm
 			}
 			prevPos = pos;
 		}
-		return distance;
+		return lengthInMiles;
 	}
 	
 	// in knots (miles/hours)
@@ -431,22 +389,22 @@ public class ShipTrack {
 		if(avgSpeed != -1) {
 			return avgSpeed;
 		}
-		float distance = computeTotalDistance();
+		float distance = computeLengthInMiles();
 		float duration = (getLastPosition().ts.getTsMillisec() - getFirstPosition().ts.getTsMillisec())
 				/ 3600000f; // in hours
 		avgSpeed = distance / duration;
 		return avgSpeed;
 	}
 	
-	public TrackError computeTrackError(ShipTrack targetTrack, boolean debug) throws Exception {
+	public TrackError computeTrackError(ShipPositionList trainingPosList, boolean debug) throws Exception {
 		TrackError trackError = new TrackError(this, debug);
-		trackError.computeSegmentErrorVector(targetTrack);
+		trackError.computeSegmentErrorVector(trainingPosList);
 		trackError.computeStatsForFitness();
 		return trackError;		
 	}
 
-	public TrackError computeTrackError(ShipTrack targetTrack) throws Exception {
-		return computeTrackError(targetTrack, false);		
+	public TrackError computeTrackError(ShipPositionList trainingPosList) throws Exception {
+		return computeTrackError(trainingPosList, false);		
 	}
 	
 	public int countChangeOfHeadingOverLimit(float thresholdAngle) {
@@ -473,18 +431,18 @@ public class ShipTrack {
 	/*
 	 * Normalize timestamps: first position at Epoch 00:00, last at Epoch 24:00
 	 */
-	public void timeNormalize() {
-		long firstTSMillisec = getFirstPosition().getTs().getTsMillisec();
-		long lastTSMillisec = getLastPosition().getTs().getTsMillisec();
-		long durationInMillisec = lastTSMillisec - firstTSMillisec;
-		for (ShipPosition pos : getPosList()) {
-			long tsMillisec = pos.getTs().getTsMillisec();
-			long deltaTsMillisec = tsMillisec - firstTSMillisec;
-			long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
-					Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
-			pos.setTs(new Timestamp(newTsMillisec));
-		}	
-	}
+//	public void timeNormalize() {
+//		long firstTSMillisec = getFirstPosition().getTs().getTsMillisec();
+//		long lastTSMillisec = getLastPosition().getTs().getTsMillisec();
+//		long durationInMillisec = lastTSMillisec - firstTSMillisec;
+//		for (ShipPosition pos : getPosList()) {
+//			long tsMillisec = pos.getTs().getTsMillisec();
+//			long deltaTsMillisec = tsMillisec - firstTSMillisec;
+//			long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
+//					Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
+//			pos.setTs(new Timestamp(newTsMillisec));
+//		}	
+//	}
 	
 	/*
 	 * Normalize timestamps based on the track distance and fixed speed: first position at Epoch 00:00, last at Epoch 24:00
@@ -504,56 +462,7 @@ public class ShipTrack {
 //		}	
 //	}
 
-	public List<ShipPosition> getPosListInInterval(TimeInterval interval) {
-		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
-		for (ShipPosition pos : posList) {
-			if(interval.isWithinInterval(pos.getTs())) {
-				filteredPosList.add(pos);
-			}
-		}
-		return filteredPosList;
-	}	
-		
-	
-	/**
-	 * Return the list of positions that have a timestamp within the interval and are within the box, 
-	 */
-	public List<ShipPosition> getPosListInIntervalAndBox(TimeInterval interval, Box box) {
-		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
-		for (ShipPosition pos : posList) {
-			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
-				filteredPosList.add(pos);
-			}
-		}
-		return filteredPosList;
-	}
 
-
-	public List<ShipPosition> getPosListInIntervalAndBoxAndCloseToSegment(TimeInterval interval,
-																	Box box,
-																	Point p1,
-																	Point p2,
-																	float maxSquaredDistance) {
-		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
-		for (ShipPosition pos : posList) {
-			if(interval.isWithinInterval(pos.getTs()) && box.isWithinBox(pos.point)) {
-				float squaredDistance = pos.point.approxSquaredDistanceToSegment(p1, p2);
-				if(squaredDistance <= maxSquaredDistance) {
-					filteredPosList.add(pos);
-				}
-			}
-		}
-		return filteredPosList;
-	}	
-	
-	public List<ShipPosition> getPosList() {
-		return posList;
-	}
-
-	public void setPosList(List<ShipPosition> posList) {
-		this.posList = posList;
-	}
-	
 
 	public String getMmsi() {
 		return mmsi;

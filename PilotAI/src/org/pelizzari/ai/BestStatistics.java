@@ -94,17 +94,17 @@ public class BestStatistics extends Statistics {
 		map = new Map();
 		map1 = new Map();
 		DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
-		map.plotTrack(prob.getTargetTrack(), Color.GREEN);
-		map1.plotTrack(prob.getTargetTrack(), Color.GREEN);
+		map.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
+		map1.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
 		map.setVisible(true);
 		// target displacements
-		state.output.println("Target track: \n" + prob.getTargetTrack(), popLog);
-		DisplacementSequence displSeq = prob.getTargetTrack().computeDisplacements();
-		state.output.println("Target displacements: \n" + displSeq, popLog);
-		HeadingSequence headSeq = prob.getTargetTrack().computeHeadingSequence();
-		state.output.println("Target heading sequence: \n" + headSeq, popLog);		
-		ChangeOfHeadingSequence cohSeq = prob.getTargetTrack().computeChangeOfHeadingSequence();
-		state.output.println("Target change of heading sequence: \n" + cohSeq, popLog);		
+//		state.output.println("Target track: \n" + prob.getTargetTrack(), popLog);
+//		DisplacementSequence displSeq = prob.getTargetTrack().computeDisplacements();
+//		state.output.println("Target displacements: \n" + displSeq, popLog);
+//		HeadingSequence headSeq = prob.getTargetTrack().computeHeadingSequence();
+//		state.output.println("Target heading sequence: \n" + headSeq, popLog);		
+//		ChangeOfHeadingSequence cohSeq = prob.getTargetTrack().computeChangeOfHeadingSequence();
+//		state.output.println("Target change of heading sequence: \n" + cohSeq, popLog);		
 	}
 
 	public void postEvaluationStatistics(final EvolutionState state) {
@@ -183,7 +183,7 @@ public class BestStatistics extends Statistics {
 				
 				TrackError trackError = null;
 				try {
-					trackError = bestTrack.computeTrackError(prob.getTargetTrack(), DEBUG);
+					trackError = bestTrack.computeTrackError(prob.getTrainingShipPositionList(), DEBUG);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -41,12 +41,13 @@ public class MineVoyages {
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 10;
 	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
-	final static int MAX_SHIPS_TO_ANALYSE = 2;
+	final static int MAX_SHIPS_TO_ANALYSE = 3;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
 
 	final static String OUTPUT_KML_FILE = OUTPUT_DIR+"tracks.kml";
+	final static String REFERENCE_START_DT = "2000-01-03 00:00:00"; // reference start date of all tracks
 	
 	public static void main(String[] args) throws Exception {
 
@@ -105,17 +106,25 @@ public class MineVoyages {
 //		map.setVisible(true);
 		kmlGenerator.saveKMLFile(OUTPUT_KML_FILE);
 		
+		// compute average length to be used to normalize the tracks
+		// Save track files and to DB
+		float avgLength = 0;
+		for (ShipTrack track : allTracks) {
+			avgLength += track.computeLengthInMiles();			
+		}
+		avgLength = avgLength / allTracks.size();
+		System.out.println(">>> Average length: "+avgLength);
+		
 		// Save track files and to DB
 		for (ShipTrack track : allTracks) {
 			FileWriter fw = new FileWriter(OUTPUT_DIR+"pos_"+track.getMmsi()+".csv");
 			track.saveTrack(fw);
 			fw.close();
 			//
-			// Normalize tracks (use compute segments)!!!
-			track.computeTrackSegments(DisplacementSequenceProblem.SPEED);
+			// Normalize tracks (use compute segments to overwrite timestamps)!!!
+			track.computeTrackSegmentsAndNormalizeTime(new Timestamp(REFERENCE_START_DT), ShipTrack.REFERENCE_SPEED_IN_KNOTS);
 			track.saveTrackToDB(depBox, arrBox, YEAR_PERIOD);			
-		}		
+		}
 		System.out.println("Done\n");
 	}
-
 }

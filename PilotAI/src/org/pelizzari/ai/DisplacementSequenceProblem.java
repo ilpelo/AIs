@@ -16,6 +16,7 @@ import org.pelizzari.gis.Point;
 import org.pelizzari.mine.Areas;
 import org.pelizzari.ship.Ship;
 import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipPositionList;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.TrackError;
 import org.pelizzari.time.Timestamp;
@@ -28,7 +29,8 @@ import ec.vector.*;
 public class DisplacementSequenceProblem extends Problem implements
 		SimpleProblemForm {
 
-	static ShipTrack targetTrack;
+	static ShipPositionList trainingShipPositionList;
+
 	static ShipPosition startPosition;
 	
 	static final String DATA_STORAGE = "DB";
@@ -42,45 +44,49 @@ public class DisplacementSequenceProblem extends Problem implements
 	static final Box  DEPARTURE_AREA = Areas.GIBRALTAR;
 	static final Box  ARRIVAL_AREA = Areas.SUEZ;
 	
-	public static final float SPEED = 10; // knots
-	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
-	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };
+//	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
+//	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };
 
 	// init target track, map, etc.
 	static {
 		//List<ShipTrack> tracks = new ArrayList<ShipTrack>();
-		ShipTrack track = new ShipTrack();
+		ShipPositionList shipPositionList = new ShipPositionList();
 		if (DATA_STORAGE.equals("VAR")) {
-			Point p = null;
-			Point prevP = null;
-			for (int i = 0; i < TRACK_LON.length; i++) {
-				p = new Point(TRACK_LAT[i], TRACK_LON[i]);
-				int duration = 0;
-				if (i > 0) {
-					duration = (int) (prevP.distanceInMiles(p) / SPEED * 3600000f);
-				}
-				prevP = p;
-				Timestamp ts = new Timestamp(100000 + i * duration);
-				ShipPosition pos = new ShipPosition(p, ts);
-				pos.setIndex(i);
-				track.addPosition(pos);
-			}
+			System.err.println("VAR not supported");
+//			Point p = null;
+//			Point prevP = null;
+//			for (int i = 0; i < TRACK_LON.length; i++) {
+//				p = new Point(TRACK_LAT[i], TRACK_LON[i]);
+//				int ts = 0;
+//				if (i > 0) {
+//					durationInSeconds = (int) (prevP.distanceInMiles(p) / SPEED * 3600f);
+//				} else {
+//					// set 
+//				}
+//				// this is WRONG, but I do not use it anymore
+//				Timestamp ts = new Timestamp(100000 + i * durationInSeconds);
+//				prevP = p;				
+//				ShipPosition pos = new ShipPosition(p, ts);
+//				pos.setIndex(i);
+//				track.addPosition(pos);
+//			}
 			//tracks.add(track);
 		} else if (DATA_STORAGE.equals("FILE")) {
-			try {
-				for (int i = 0; i < MMSIs.length; i++) {
-					//ShipTrack track = new ShipTrack();
-					String fileName = FILE_DIR+FILE_PREFIX+MMSIs[i]+FILE_EXT;
-					FileReader fr = new FileReader(fileName);
-					track.loadTrack(fr);
-					fr.close();
-					//tracks.add(track);
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			System.err.println("FILE not supported");
+//			try {
+//				for (int i = 0; i < MMSIs.length; i++) {
+//					//ShipTrack track = new ShipTrack();
+//					String fileName = FILE_DIR+FILE_PREFIX+MMSIs[i]+FILE_EXT;
+//					FileReader fr = new FileReader(fileName);
+//					track.loadTrack(fr);
+//					fr.close();
+//					//tracks.add(track);
+//				}
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 		} else if (DATA_STORAGE.equals("DB")) {
 			Miner miner = new Miner();
 //			List<Ship> ships = miner.getShipsWithTracks(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
@@ -90,7 +96,7 @@ public class DisplacementSequenceProblem extends Problem implements
 //				track.loadTrack(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
 //				tracks.add(track);
 //			}			
-			track = miner.getTrackInPeriodAndBetweenBoxes(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);			
+			trainingShipPositionList = miner.getMergedShipTracksInPeriodAndBetweenBoxes(YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);			
 		}
 		
 //		List<ShipPosition> allPos = new ArrayList<ShipPosition>();
@@ -106,13 +112,14 @@ public class DisplacementSequenceProblem extends Problem implements
 		//displSeq = displSeq.increaseDisplacements(2);			
 //		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
 //				displSeq, SPEED);
-		targetTrack = track;
+//		targetTrack = track;
 		
 		// set start position close to the first position of the track (0.1 deg North)
-		Point startPoint = new Point(track.getFirstPosition().getPoint().lat+0.1f,
-									 track.getFirstPosition().getPoint().lon);
-		startPosition = new ShipPosition(startPoint, track.getFirstPosition().getTs());
-		System.out.println("Problem initialized; Target " + track);
+		// TBD: use the average of the first positions of the input tracks 
+		Point startPoint = new Point(trainingShipPositionList.getFirstPosition().getPoint().lat+0.1f,
+				trainingShipPositionList.getFirstPosition().getPoint().lon);
+		startPosition = new ShipPosition(startPoint, trainingShipPositionList.getFirstPosition().getTs());
+		System.out.println("Problem initialized; training position list: " + trainingShipPositionList);
 	}
 
 	// ind is the individual to be evaluated.
@@ -132,7 +139,7 @@ public class DisplacementSequenceProblem extends Problem implements
 		// compute fitness
 		TrackError trackError = null;
 		try {
-			trackError = trackInd.computeTrackError(targetTrack);
+			trackError = trackInd.computeTrackError(trainingShipPositionList);
 		} catch (Exception e) {
 			state.output.fatal("computeTrackError: "+e, null);
 			e.printStackTrace();
@@ -150,7 +157,7 @@ public class DisplacementSequenceProblem extends Problem implements
 		// trackError.headingError() +
 		//trackError.destinationError() +
 		//trackError.getAvgSquaredDistanceAllSegments() +
-		trackError.getNoCoverageError() +
+		trackError.getCoverageError() +
 		//trackError.avgTotalSegmentError() +
 		0f;
 
@@ -194,12 +201,12 @@ public class DisplacementSequenceProblem extends Problem implements
 					.getAllele();
 			displSeq.add(displ);
 		}
-		track = ShipTrack.reconstructShipTrack(startPosition, displSeq, SPEED);
+		track = ShipTrack.reconstructShipTrack(startPosition, displSeq, ShipTrack.REFERENCE_SPEED_IN_KNOTS);
 		return track;
 	}
 
-	public ShipTrack getTargetTrack() {
-		return targetTrack;
+	public static ShipPositionList getTrainingShipPositionList() {
+		return trainingShipPositionList;
 	}
 
 }

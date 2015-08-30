@@ -12,7 +12,7 @@ public class ShipTrackSegment {
 	Point center;
 	float length = 0; // length of the segment (in degrees)
 	float lengthInMiles = 0; // length of the segment (in miles)
-	int duration = 0; // difference of the timestamp of the start and end positions
+	int durationInSeconds = 0; // difference of the timestamp of the start and end positions
 	
 	List<ShipPosition> targetPosList;
 	float[] squaredDistanceOfTargetPositionArray;
@@ -22,14 +22,21 @@ public class ShipTrackSegment {
 	float maxSquaredDistanceToTargetPositions = 0f;
 	float squaredDistanceOfSegmentEndToLastTargetPosition = 0f;
 
+	/**
+	 * Create a segment with the given position.
+	 * WARNING: overwrite timestamp of p2 based on the given speed.
+	 * @param p1
+	 * @param p2
+	 * @param speedInKnots
+	 */
 	public ShipTrackSegment(ShipPosition p1, ShipPosition p2, float speedInKnots) {
 		this.p1 = p1;
 		this.p2 = p2;
 		center = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
 		length = p1.point.distance(p2.point);
 		lengthInMiles = p1.point.distanceInMiles(p2.point);
-		duration = (int) (lengthInMiles / speedInKnots * 3600000f); // in seconds
-		setP2Timestamp(speedInKnots);
+		durationInSeconds = (int) (lengthInMiles / speedInKnots * 3600f); // in seconds
+		p2.setTs(p1.ts.getTsMillisec()+durationInSeconds*1000);
 	}
 	
 	/*
@@ -84,10 +91,6 @@ public class ShipTrackSegment {
 	public void setTargetPosList(List<ShipPosition> targetPosList) {
 		this.targetPosList = targetPosList;
 		numberOfCoveredTargetPositions = targetPosList.size();
-	}
-
-	public void setP2Timestamp(float avgSpeedInKnots) {
-		p2.setTs(p1.ts.getTsMillisec()+duration);
 	}
 
 	public ShipPosition getP1() {
@@ -147,7 +150,7 @@ public class ShipTrackSegment {
 	
 	public String toString() {
 		String s = "Segment: ";
-		s = s + p1 + " --- " + p2 +", l = "+ length + " deg, d = " + duration + " s" + "\n";
+		s = s + p1 + " --- " + p2 +", l = "+ length + " deg, d = " + durationInSeconds + " s" + "\n";
 		if(targetPosList != null) {
 			int i = 0;
 			for (ShipPosition targetPos : targetPosList) {

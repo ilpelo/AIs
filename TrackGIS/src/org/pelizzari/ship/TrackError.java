@@ -17,7 +17,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 0.01f; // position is not too far if < threshold
+	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 0.001f; // position is not too far if < threshold
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
@@ -31,7 +31,7 @@ public class TrackError {
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
 	// the target positions used to compute the fitness 
-	ShipTrack targetTrack;
+	ShipPositionList trainingPosList;
 	// the destination of our journey (!) 
 	ShipPosition destinationPos;
 	// a measure of the error of each position of the baseTrack
@@ -81,16 +81,17 @@ public class TrackError {
 	 * @param targetTrack
 	 * @throws Exception
 	 */
-	public void computeSegmentErrorVector(ShipTrack targetTrack) throws Exception {
+	public void computeSegmentErrorVector(ShipPositionList trainingPosList) throws Exception {
 		// store destination
-		this.targetTrack = targetTrack;
-		float targetAvgSpeed = targetTrack.computeAverageSpeed();
-		if(targetAvgSpeed == 0) {
-			System.err.println("computeErrorVector: average speed is zero");
-			throw new Exception("Zero Average Speed");
-		}			
-		// use the average speed to set the timestamps of each position of the base track
-		baseTrack.computeTrackSegments(targetAvgSpeed);
+		this.trainingPosList = trainingPosList;
+//		float targetAvgSpeed = targetTrack.computeAverageSpeed();
+//		if(targetAvgSpeed == 0) {
+//			System.err.println("computeErrorVector: average speed is zero");
+//			throw new Exception("Zero Average Speed");
+//		}			
+		// use the reference speed to set the timestamps of each position of the base track
+		baseTrack.computeTrackSegmentsAndNormalizeTime(trainingPosList.getFirstPosition().getTs(),
+													   ShipTrack.REFERENCE_SPEED_IN_KNOTS);
 		//
 		//int i = 0;
 //		int totCoveredPositions = 0;
@@ -102,7 +103,7 @@ public class TrackError {
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInInterval(interval);
 			List<ShipPosition> targetPosList = 
-					targetTrack.getPosListInIntervalAndBoxAndCloseToSegment(
+					trainingPosList.getPosListInIntervalAndBoxAndCloseToSegment(
 							seg.getTimeInterval(),
 							box,
 							seg.p1.point, seg.p2.point, 
@@ -159,6 +160,7 @@ public class TrackError {
 
 	
 	public void computeStatsForFitness() {
+		noCoverageSegmentCounter = 0;
 		int coveredTargetPositionCount = 0;
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {
 			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
@@ -167,7 +169,7 @@ public class TrackError {
 				noCoverageSegmentCounter++;
 			}
 		}
-		targetPositionCoverage = (float) coveredTargetPositionCount / targetTrack.getPosList().size();
+		targetPositionCoverage = (float) coveredTargetPositionCount / trainingPosList.getPosList().size();
 		avgTargetPositionCoverageBySegment = targetPositionCoverage / baseTrack.getSegList().size();
 	}
 	
@@ -229,10 +231,10 @@ public class TrackError {
 //	}
 	
 	/**
-	 * This should return a high value if the average coverage by segment of the target positions is bad
+	 * This should return a high value if the coverage of the target positions is bad
 	 * @return
 	 */
-	public float getNoCoverageError() {
+	public float getCoverageError() {
 //		float noCoverageError = 0f;
 //
 ////		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
@@ -240,8 +242,8 @@ public class TrackError {
 ////		}
 //		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
 		//return noCoverageError;
-		//return 1f-targetPositionCoverage; //+noCoverageError;
-		return 1f-avgTargetPositionCoverageBySegment; //+noCoverageError;
+		return 1f-targetPositionCoverage; //+noCoverageError;
+		//return 1f-avgTargetPositionCoverageBySegment;
 	}
 
 	public int getNumberOfTrackSegments() {
@@ -265,7 +267,7 @@ public class TrackError {
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
 		s = s + "headingError = " + headingError() + "\n";		
 		//s = s + "destinationError = " + destinationError() + "\n";		
-		s = s + "noCoverageError = " + getNoCoverageError() + "\n";	
+		s = s + "noCoverageError = " + getCoverageError() + "\n";	
 		s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
 		return s;
 	}

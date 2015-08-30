@@ -5,7 +5,7 @@
 select source, date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
 from pos
 -- where source = 'E'
-group by source, date_format(date(from_unixtime(ts)),'%Y%m')
+group by source, date_format(date(from_unixtime(ts)),'%Y-%m')
 order by 2, 1;
 
 -- count position per day

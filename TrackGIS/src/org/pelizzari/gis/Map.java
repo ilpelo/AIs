@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 
 import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipPositionList;
 import org.pelizzari.ship.ShipTrack;
 
 import eu.jacquet80.minigeo.MapWindow;
@@ -61,14 +62,21 @@ public class Map extends MapWindow {
 	// }
 	// }
 
-	public void plotTrack(ShipTrack track, Color color) {
-		plotTrack(track, color, null);
+	public void plotShipPositions(ShipPositionList posList, Color color) {
+		plotShipPositions(posList, color, null, false);
 	}
 	
-	public void plotTrack(ShipTrack track, Color color, String lastPositionLabel) {
+	public void plotTrack(ShipTrack track, Color color, String label) {
+		plotShipPositions(track, color, label, true);
+	}
+	
+	public void plotShipPositions(ShipPositionList posList, 
+								  Color color,
+								  String lastPositionLabel,
+								  boolean showSegments) {
 		Point cur, prec = null;
 		try {
-			Iterator<ShipPosition> posItr = track.getPosList().iterator();
+			Iterator<ShipPosition> posItr = posList.getPosList().iterator();
 			while (posItr.hasNext()) {
 				ShipPosition pos = posItr.next();
 				double lat = pos.getPoint().lat;
@@ -77,13 +85,13 @@ public class Map extends MapWindow {
 				// lon);
 				cur = new Point(lat, lon);
 				//String label = ""+pos.getIndex();
-				String label = ""+pos.getTs().getTsMillisec();
+				String label = ""+pos.getTs(); //.getTsMillisec();
 				if(lastPositionLabel != null && !posItr.hasNext()) {
 					label = lastPositionLabel;
 				}
 				POI posPoi = new POI(cur, label);
 				addPOI(posPoi);                
-				if (prec != null) {
+				if (showSegments && prec != null) {
 					addSegment(new Segment(prec, cur, color));
 				}
 				prec = cur;
