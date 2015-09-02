@@ -36,16 +36,17 @@ import org.pelizzari.time.Timestamp;
  */
 public class MineVoyages {
 
-	final static String START_DT = "2011-01-01 00:00:00";
+	final static String START_DT = "2011-03-01 00:00:00";
 	final static String YEAR_PERIOD = "WINTER";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 10;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 4;
-	final static int MAX_SHIPS_TO_ANALYSE = 3;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+	final static int MAX_SHIPS_TO_ANALYSE = 10;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
 
+	final static boolean KML_FILE_WITH_DATES = false;
 	final static String OUTPUT_KML_FILE = OUTPUT_DIR+"tracks.kml";
 	final static String REFERENCE_START_DT = "2000-01-03 00:00:00"; // reference start date of all tracks
 	
@@ -64,12 +65,16 @@ public class MineVoyages {
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
 				
 		//// Departure
-		Box depBox = Areas.GIBRALTAR;
+		Box depBox = Areas.CAPETOWN;
+		//Box depBox = Areas.GIBRALTAR;
 		//Box depBox = Areas.WEST_ATLANTIC;
 						
 		/// Arrival
-		Box arrBox = Areas.SUEZ;
+		//Box arrBox = Areas.FINISTERRE;
+		//Box arrBox = Areas.SUEZ;
 		//Box arrBox = Areas.WEST_ATLANTIC;
+		Box arrBox = Areas.REUNION;
+		//Box arrBox = Areas.NOVASCOTIA;
 		//Box arrBox = Areas.RIO;
 		//Box arrBox = Areas.GIBRALTAR;
 		
@@ -91,6 +96,9 @@ public class MineVoyages {
 					seenShips.add(new Ship(track.getMmsi()));
 				}
 				allTracks.addAll(tracks);
+				if(allTracks.size() >= MAX_SHIPS_TO_ANALYSE) {
+					break;
+				}
 			}
 			depInterval.shiftInterval(START_PERIOD_IN_DAYS);
 		}
@@ -101,11 +109,10 @@ public class MineVoyages {
 		Map map = new Map();
 		for (ShipTrack track : allTracks) {
 			map.plotTrack(track, Color.GREEN, track.getMmsi());
-			kmlGenerator.addTrack(track, track.getMmsi());
+			kmlGenerator.addTrack(track, track.getMmsi(), KML_FILE_WITH_DATES);
 		}
 //		map.setVisible(true);
-		kmlGenerator.saveKMLFile(OUTPUT_KML_FILE);
-		
+				
 		// compute average length to be used to normalize the tracks
 		// Save track files and to DB
 		float avgLength = 0;
@@ -115,9 +122,16 @@ public class MineVoyages {
 		avgLength = avgLength / allTracks.size();
 		System.out.println(">>> Average length: "+avgLength);
 		
+		// Save to KML
+		System.out.println(">>> Saving to KML: "+OUTPUT_KML_FILE);
+		kmlGenerator.saveKMLFile(OUTPUT_KML_FILE);
+
+		
 		// Save track files and to DB
 		for (ShipTrack track : allTracks) {
-			FileWriter fw = new FileWriter(OUTPUT_DIR+"pos_"+track.getMmsi()+".csv");
+			String fileName = OUTPUT_DIR+"pos_"+track.getMmsi()+".csv";
+			System.out.println(">>> Saving to CSV: "+fileName);
+			FileWriter fw = new FileWriter(fileName);
 			track.saveTrack(fw);
 			fw.close();
 			//

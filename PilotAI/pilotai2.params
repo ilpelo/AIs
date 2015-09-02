@@ -18,7 +18,7 @@ exch		= ec.simple.SimpleExchanger
 
 
 # relevant parameters
-generations	= 5000
+generations	= 1000
 pop.subpop.0.size = 1000
 # the crossover likelihood
 pop.subpop.0.species.pipe.source.0.likelihood = 0.5
@@ -32,8 +32,8 @@ pop.subpop.0.species.min-initial-size = 5
 pop.subpop.0.species.max-initial-size = 10
 
 # min/max displacement (absolute values MUST be the same)
-pop.subpop.0.species.min-gene	= -5.0
-pop.subpop.0.species.max-gene	= +5.0
+pop.subpop.0.species.min-gene	= -10.0
+pop.subpop.0.species.max-gene	= +10.0
 
 
 quit-on-run-complete	= true

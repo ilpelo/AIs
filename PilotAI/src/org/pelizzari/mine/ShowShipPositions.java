@@ -36,7 +36,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class ShowShipPositions {
 
-	final static String START_DT = "2011-01-01 00:00:00";
+	final static String START_DT = "2011-03-01 00:00:00";
 	final static int ANALYSIS_PERIOD_IN_DAYS = 3;
 
 	final static String OUTPUT_FILE = "c:/master_data/ShipPos";
@@ -67,7 +67,7 @@ public class ShowShipPositions {
 			e.printStackTrace();
 		}
 		
-		Box box = new Box(new Point(70, 1), new Point(-70, 80));
+		Box box = new Box(new Point(70, -60), new Point(-70, 80));
 		
 		/// Let's mine
 		

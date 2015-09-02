@@ -117,7 +117,7 @@ public class KMLGenerator {
 		placemark.appendChild(lineString);
 	}
 	
-	public void addTrack(ShipTrack track, String label) {
+	public void addTrack(ShipTrack track, String label, boolean withDates) {
 		if (track == null) {
 			System.err.println("addTrack: track is null");
 			return;
@@ -128,13 +128,17 @@ public class KMLGenerator {
 			long ts = pos.getTs().getTsMillisec();
 			Date date = new Date(ts);				
 			addPoint("targetStyle",  
-					date.toString(),
+					withDates?date.toString():"",
 					pos.getPoint().lat, 
 					pos.getPoint().lon);
 		}
 		addLineString(label, track.getPosList());
 	}
 
+	public void addTrack(ShipTrack track, String label) {
+		addTrack(track, label, true);
+	}
+	
 	public void saveKMLFile(String file) {
 		Source src = new DOMSource(getDoc());
 		File kmlFile = new File(file);
