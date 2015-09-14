@@ -40,6 +40,8 @@ public class TrackError {
 	float targetPositionCoverage = 0;
 	// target positions coverage (0.0-1.0) averaged over number of segments
 	float avgTargetPositionCoverageBySegment = 0;
+	// variance of the squared distance to the target points, averaged over number of segments
+	float avgVarianceOfDistanceToTargetPositionsBySegment = 0;
 	// number of segments with no coverage of target positions
 	float noCoverageSegmentCounter = 0;
 	// average squared distance of the target positions to the segments for the whole baseTrack
@@ -90,8 +92,11 @@ public class TrackError {
 //			throw new Exception("Zero Average Speed");
 //		}			
 		// use the reference speed to set the timestamps of each position of the base track
-		baseTrack.computeTrackSegmentsAndNormalizeTime(trainingPosList.getFirstPosition().getTs(),
-													   ShipTrack.REFERENCE_SPEED_IN_KNOTS);
+//		baseTrack.computeTrackSegmentsAndNormalizeTime(trainingPosList.getFirstPosition().getTs(),
+//													   ShipTrack.REFERENCE_SPEED_IN_KNOTS);
+		// keep the timestamps set during reconstruction and based on the duration of the real voyage
+		baseTrack.computeTrackSegments();
+		
 		//
 		//int i = 0;
 //		int totCoveredPositions = 0;
@@ -101,16 +106,22 @@ public class TrackError {
 			Box box = makeSegmentBox(seg);
 			// filter position of target track and compute total squared distance to segment
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
-			//List<ShipPosition> targetPosList = targetTrack.getPosListInInterval(interval);
-			List<ShipPosition> targetPosList = 
-					trainingPosList.getPosListInIntervalAndBoxAndCloseToSegment(
-							seg.getTimeInterval(),
-							box,
-							seg.p1.point, seg.p2.point, 
-							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
+			
+			// use this if you want to get only position that correspond to the temporal interval of the segment
+			List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
+			
+			// use this if you want to get only positions within a "corridor" of width NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE  
+//			List<ShipPosition> targetPosList = 
+//					trainingPosList.getPosListInIntervalAndBoxAndCloseToSegment(
+//							seg.getTimeInterval(),
+//							box,
+//							seg.p1.point, seg.p2.point, 
+//							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
+			
 			seg.setTargetPosList(targetPosList);
 			seg.computeDistanceToTargetPositions();
 			seg.computeStatsForFitness();
+			
 			// increase total covered positions
 			//totCoveredPositions += nCoveredPos;
 //			float totSquaredDistanceBySegment = 0;
@@ -162,15 +173,18 @@ public class TrackError {
 	public void computeStatsForFitness() {
 		noCoverageSegmentCounter = 0;
 		int coveredTargetPositionCount = 0;
+		float sumSegVariance = 0;
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {
 			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
 			coveredTargetPositionCount += segTargetPosCounter;
 			if(segTargetPosCounter == 0) {
 				noCoverageSegmentCounter++;
 			}
+			sumSegVariance += seg.getVarSquaredDistanceToTargetPositions();
 		}
 		targetPositionCoverage = (float) coveredTargetPositionCount / trainingPosList.getPosList().size();
 		avgTargetPositionCoverageBySegment = targetPositionCoverage / baseTrack.getSegList().size();
+		avgVarianceOfDistanceToTargetPositionsBySegment = sumSegVariance / baseTrack.getSegList().size();
 	}
 	
 	/**
@@ -246,6 +260,15 @@ public class TrackError {
 		//return 1f-avgTargetPositionCoverageBySegment;
 	}
 
+	
+	/**
+	 * This should return a high value if the variance of the target position distance to each segment is high
+	 * @return
+	 */
+	public float getVarianceError() {
+		return avgVarianceOfDistanceToTargetPositionsBySegment;
+	}	
+	
 	public int getNumberOfTrackSegments() {
 		return baseTrack.posList.size();
 	}
@@ -269,6 +292,7 @@ public class TrackError {
 		//s = s + "destinationError = " + destinationError() + "\n";		
 		s = s + "noCoverageError = " + getCoverageError() + "\n";	
 		s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
+		s = s + "varianceError = " + getVarianceError() + "\n"; 
 		return s;
 	}
 }

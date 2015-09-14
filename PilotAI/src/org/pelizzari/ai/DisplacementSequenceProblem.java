@@ -31,7 +31,7 @@ public class DisplacementSequenceProblem extends Problem implements
 
 	static ShipPositionList trainingShipPositionList;
 
-	static ShipPosition startPosition;
+	static ShipPosition startPosition, endPosition;
 	
 	static final String DATA_STORAGE = "DB";
 
@@ -114,11 +114,16 @@ public class DisplacementSequenceProblem extends Problem implements
 //				displSeq, SPEED);
 //		targetTrack = track;
 		
-		// set start position close to the first position of the track (0.1 deg North)
+		// set START position close to the first position of the track (0.1 deg North)
 		// TBD: use the average of the first positions of the input tracks 
 		Point startPoint = new Point(trainingShipPositionList.getFirstPosition().getPoint().lat+0.1f,
 				trainingShipPositionList.getFirstPosition().getPoint().lon);
 		startPosition = new ShipPosition(startPoint, trainingShipPositionList.getFirstPosition().getTs());
+		// set END position close to the last position of the track (0.1 deg North)
+		// TBD: use the average of the last positions of the input tracks 
+		Point endPoint = new Point(trainingShipPositionList.getLastPosition().getPoint().lat+0.1f,
+				trainingShipPositionList.getLastPosition().getPoint().lon);
+		endPosition = new ShipPosition(startPoint, trainingShipPositionList.getLastPosition().getTs());
 		System.out.println("Problem initialized; training position list: " + trainingShipPositionList);
 	}
 
@@ -157,7 +162,8 @@ public class DisplacementSequenceProblem extends Problem implements
 		// trackError.headingError() +
 		//trackError.destinationError() +
 		//trackError.getAvgSquaredDistanceAllSegments() +
-		trackError.getCoverageError() +
+		//trackError.getCoverageError() +
+		trackError.getVarianceError() +
 		//trackError.avgTotalSegmentError() +
 		0f;
 
@@ -201,7 +207,7 @@ public class DisplacementSequenceProblem extends Problem implements
 					.getAllele();
 			displSeq.add(displ);
 		}
-		track = ShipTrack.reconstructShipTrack(startPosition, displSeq, ShipTrack.REFERENCE_SPEED_IN_KNOTS);
+		track = ShipTrack.reconstructShipTrack(startPosition, endPosition.getTs(), displSeq);
 		return track;
 	}
 

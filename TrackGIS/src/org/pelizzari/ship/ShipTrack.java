@@ -328,6 +328,14 @@ public class ShipTrack extends ShipPositionList {
 //		return reconstructedTrack;
 //	}
 
+	/**
+	 * Reconstruct the track based on a the given sequence of displacements and firstPosition.
+	 * Compute Timestamps based on the given speed.
+	 * @param startPosition
+	 * @param displSeq
+	 * @param speed
+	 * @return
+	 */
 	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
 												 DisplacementSequence displSeq,
 												 float speed) {
@@ -341,6 +349,46 @@ public class ShipTrack extends ShipPositionList {
 		}
 		return reconstructedTrack;
 	}
+
+	/**
+	 * Reconstruct the track based on a the given sequence of displacements and firstPosition.
+	 * Set the timestamps according to the cumulative distance and the effective duration of the voyage.
+	 * @param startPosition
+	 * @param endTs
+	 * @param displSeq
+	 * @return
+	 */
+	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
+													Timestamp endTs, 
+													DisplacementSequence displSeq) {
+		// first reconstruct track based on displacement; do not bother about timestamps
+		ShipTrack reconstructedTrack = new ShipTrack();
+		reconstructedTrack.addPosition(startPosition);
+		ShipPosition pos = startPosition;
+		for(Displacement displ : displSeq) {
+			ShipPosition nextPos = pos.computeNextPosition(displ);
+			reconstructedTrack.addPosition(nextPos);
+			pos = nextPos;
+		}
+		// set the timestamps: use the cumulative distance from the start to compute the elapsed time 
+		float totalLengthInMiles = reconstructedTrack.computeLengthInMiles();
+		long startTsInMillisec = startPosition.getTs().getTsMillisec();
+		long totalDurationInMillisec = endTs.getTsMillisec() - startTsInMillisec;
+		ShipPosition prevPos = null;
+		float cumulativeDistanceInMiles = 0;
+		for(ShipPosition pos1 : reconstructedTrack.getPosList()) {
+			if (prevPos != null) {
+				float distanceInMiles = prevPos.getPoint().distanceInMiles(pos1.getPoint());
+				cumulativeDistanceInMiles += distanceInMiles;
+				long relativeDurationInMillisec = (long) (totalDurationInMillisec * cumulativeDistanceInMiles / totalLengthInMiles);
+				pos1.setTs(startTsInMillisec + relativeDurationInMillisec);
+			}
+			prevPos = pos1;
+		}
+		// force last position to have the same timestamp as the last position of the target track
+		reconstructedTrack.getLastPosition().setTs(endTs.getTsMillisec());
+		return reconstructedTrack;
+	}	
 	
 
 	/**
@@ -362,6 +410,25 @@ public class ShipTrack extends ShipPositionList {
 				} else {
 					pos.setTs(referenceStartTS);
 				}
+				prevPos = pos;
+			}
+		}
+		return segList;
+	}
+	
+	/**
+	 * Compute the list of segments corresponding to the positions of this track.
+	 * Keep the position timestamps.
+	 *
+	 * @return
+	 */
+	public List<ShipTrackSegment> computeTrackSegments() {
+		if(segList.size() == 0) {
+			ShipPosition prevPos = null;
+			for (ShipPosition pos : posList) {
+				if (prevPos != null) {
+					segList.add(new ShipTrackSegment(prevPos, pos));
+				} 
 				prevPos = pos;
 			}
 		}

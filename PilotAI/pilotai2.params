@@ -18,7 +18,7 @@ exch		= ec.simple.SimpleExchanger
 
 
 # relevant parameters
-generations	= 1000
+generations	= 100
 pop.subpop.0.size = 1000
 # the crossover likelihood
 pop.subpop.0.species.pipe.source.0.likelihood = 0.5

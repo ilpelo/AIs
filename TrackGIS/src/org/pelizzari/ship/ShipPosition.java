@@ -30,8 +30,8 @@ public class ShipPosition {
 		this.ts = ts;
 	}
 
-	public void setTs(long tsEpoch) {
-		this.ts = new Timestamp(tsEpoch);
+	public void setTs(long tsEpochInMillisec) {
+		this.ts = new Timestamp(tsEpochInMillisec);
 	}	
 	
 	public int getIndex() {
@@ -65,17 +65,44 @@ public class ShipPosition {
 											new Timestamp(ts.getTsMillisec() + (int)(coc.distance/speedInKnots*3600000f)));
 		return pos;
 	}
-		
-	public ShipPosition computeNextPosition(Displacement displ, float speedInKnots) {
+
+	
+	/**
+	 * Compute the next position using the given displacement and timestamp 
+	 * @param displ
+	 * @param ts
+	 * @return
+	 */
+	public ShipPosition computeNextPosition(Displacement displ, Timestamp ts) {
 		float nextLat = point.lat + displ.deltaLat;
 		float nextLon = point.lon + displ.deltaLon;
 		Point nextPoint = new Point(nextLat, nextLon);
-		float distance = point.distanceInMiles(nextPoint);
+		ShipPosition nextPos = new ShipPosition(nextPoint, ts);
+		return nextPos;
+	}	
+	
+	/**
+	 * Compute the next position using the given displacement; same timestamp as this position 
+	 * @param displ
+	 * @return
+	 */
+	public ShipPosition computeNextPosition(Displacement displ) {
+		return computeNextPosition(displ, getTs());
+	}
+
+	/**
+	 * Compute the next position using the given displacement; set the timestamp based on the speed
+	 * @param displ
+	 * @param speedInKnots
+	 * @return
+	 */
+	public ShipPosition computeNextPosition(Displacement displ, float speedInKnots) {
+		ShipPosition nextPos = computeNextPosition(displ);
+		float distance = point.distanceInMiles(nextPos.getPoint());
 		Timestamp nextTs = new Timestamp(ts.getTsMillisec() + (int)(distance/speedInKnots*3600000f));
-		ShipPosition nextPos = new ShipPosition(nextPoint, nextTs);
+		nextPos.setTs(nextTs);
 		return nextPos;
 	}
-	
 	
 	/*
 	 * Returns the ChangeOfCourse needed to reach the position pos from the current position.

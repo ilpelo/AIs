@@ -20,8 +20,20 @@ public class ShipTrackSegment {
 	float avgSquaredDistanceToTargetPositions = 0f;
 	float minSquaredDistanceToTargetPositions = 0f;
 	float maxSquaredDistanceToTargetPositions = 0f;
+	float varSquaredDistanceToTargetPositions = 0f;
 	float squaredDistanceOfSegmentEndToLastTargetPosition = 0f;
 
+	
+	public ShipTrackSegment(ShipPosition p1, ShipPosition p2) {
+		this.p1 = p1;
+		this.p2 = p2;
+		center = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
+		length = p1.point.distance(p2.point);
+		lengthInMiles = p1.point.distanceInMiles(p2.point);
+		durationInSeconds = (int) ((p2.getTs().getTsMillisec() - p1.getTs().getTsMillisec()) / 1000); // in seconds
+	}
+	
+	
 	/**
 	 * Create a segment with the given position.
 	 * WARNING: overwrite timestamp of p2 based on the given speed.
@@ -30,11 +42,12 @@ public class ShipTrackSegment {
 	 * @param speedInKnots
 	 */
 	public ShipTrackSegment(ShipPosition p1, ShipPosition p2, float speedInKnots) {
-		this.p1 = p1;
-		this.p2 = p2;
-		center = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
-		length = p1.point.distance(p2.point);
-		lengthInMiles = p1.point.distanceInMiles(p2.point);
+//		this.p1 = p1;
+//		this.p2 = p2;
+//		center = new Point((p1.point.lat + p2.point.lat)/2, (p1.point.lon + p2.point.lon)/2);
+//		length = p1.point.distance(p2.point);
+//		lengthInMiles = p1.point.distanceInMiles(p2.point);
+		this(p1, p2);
 		durationInSeconds = (int) (lengthInMiles / speedInKnots * 3600f); // in seconds
 		p2.setTs(p1.ts.getTsMillisec()+durationInSeconds*1000);
 	}
@@ -68,6 +81,7 @@ public class ShipTrackSegment {
 		if(numberOfCoveredTargetPositions == 0) {
 			return;
 		}
+		// mean, min, and max distance
 		minSquaredDistanceToTargetPositions = Float.MAX_VALUE;
 		maxSquaredDistanceToTargetPositions = 0;
 		float sumSquaredDistance = 0;
@@ -82,6 +96,14 @@ public class ShipTrackSegment {
 			sumSquaredDistance += squaredDistance;
 		}
 		avgSquaredDistanceToTargetPositions = sumSquaredDistance/numberOfCoveredTargetPositions;
+		//
+		// variance
+		float sumVariance = 0;
+		for (float sqrDist : squaredDistanceOfTargetPositionArray) {
+			sumVariance += (avgSquaredDistanceToTargetPositions - sqrDist) * 
+					(avgSquaredDistanceToTargetPositions - sqrDist); 
+		}
+		varSquaredDistanceToTargetPositions = sumVariance/numberOfCoveredTargetPositions;
 	}
 	
 	public List<ShipPosition> getTargetPosList() {
@@ -117,53 +139,68 @@ public class ShipTrackSegment {
 		return numberOfCoveredTargetPositions;
 	}
 
-	public void setNumberOfCoveredTargetPositions(int numberOfTargetPositions) {
-		this.numberOfCoveredTargetPositions = numberOfTargetPositions;
-	}
+//	public void setNumberOfCoveredTargetPositions(int numberOfTargetPositions) {
+//		this.numberOfCoveredTargetPositions = numberOfTargetPositions;
+//	}
 
 	public float getAvgSquaredDistanceToTargetPositions() {
 		return avgSquaredDistanceToTargetPositions;
 	}
 
-	public void setAvgSquaredDistanceToTargetPositions(
-			float avgSquaredDistanceToTargetPositions) {
-		this.avgSquaredDistanceToTargetPositions = avgSquaredDistanceToTargetPositions;
-	}
+//	public void setAvgSquaredDistanceToTargetPositions(
+//			float avgSquaredDistanceToTargetPositions) {
+//		this.avgSquaredDistanceToTargetPositions = avgSquaredDistanceToTargetPositions;
+//	}
 
 	public float getMinSquaredDistanceToTargetPositions() {
 		return minSquaredDistanceToTargetPositions;
 	}
 
-	public void setMinSquaredDistanceToTargetPositions(
-			float minSquaredDistanceToTargetPositions) {
-		this.minSquaredDistanceToTargetPositions = minSquaredDistanceToTargetPositions;
-	}
+//	public void setMinSquaredDistanceToTargetPositions(
+//			float minSquaredDistanceToTargetPositions) {
+//		this.minSquaredDistanceToTargetPositions = minSquaredDistanceToTargetPositions;
+//	}
 
 	public float getMaxSquaredDistanceToTargetPositions() {
 		return maxSquaredDistanceToTargetPositions;
 	}
 
-	public void setMaxSquaredDistanceToTargetPositions(
-			float maxSquaredDistanceToTargetPositions) {
-		this.maxSquaredDistanceToTargetPositions = maxSquaredDistanceToTargetPositions;
+//	public void setMaxSquaredDistanceToTargetPositions(
+//			float maxSquaredDistanceToTargetPositions) {
+//		this.maxSquaredDistanceToTargetPositions = maxSquaredDistanceToTargetPositions;
+//	}
+	
+	public float getVarSquaredDistanceToTargetPositions() {
+		return varSquaredDistanceToTargetPositions;
 	}
 	
 	public String toString() {
 		String s = "Segment: ";
 		s = s + p1 + " --- " + p2 +", l = "+ length + " deg, d = " + durationInSeconds + " s" + "\n";
-		if(targetPosList != null) {
-			int i = 0;
-			for (ShipPosition targetPos : targetPosList) {
-				s = s + "Covered Pos: " + targetPos + 
-						", d^2="+ squaredDistanceOfTargetPositionArray[i] + "\n";
-				i++;
-			}
+		if(targetPosList != null && targetPosList.size() > 0) {
+//			int i = 0;
+//			for (ShipPosition targetPos : targetPosList) {
+//				s = s + "Covered Pos: " + targetPos + 
+//						", d^2="+ squaredDistanceOfTargetPositionArray[i] + "\n";
+//				i++;
+//			}
+			s = s + "Total covered posistions: " + targetPosList.size() + "\n"; 
+			
+			ShipPosition firstCoveredPos = targetPosList.get(0);
+			s = s + "First covered pos: " + firstCoveredPos + 
+					", d^2="+ squaredDistanceOfTargetPositionArray[0] + "\n";
+			
+			ShipPosition lastCoveredPos = targetPosList.get(targetPosList.size()-1);
+			s = s + "Last covered pos: " + lastCoveredPos + 
+					", d^2="+ squaredDistanceOfTargetPositionArray[targetPosList.size()-1] + "\n";
+			
 			s = s + "Squared distance: avg=" + avgSquaredDistanceToTargetPositions +
 					", min=" + minSquaredDistanceToTargetPositions +
 					", max=" + maxSquaredDistanceToTargetPositions +
 					", to segment end=" + squaredDistanceOfSegmentEndToLastTargetPosition + "\n";		
+		} else {
+			s = s + "No position covered!\n";
 		}
 		return s;
 	}
-	
 }
