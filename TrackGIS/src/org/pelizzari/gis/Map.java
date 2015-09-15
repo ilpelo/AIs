@@ -74,7 +74,11 @@ public class Map extends MapWindow {
 								  Color color,
 								  String lastPositionLabel,
 								  boolean showSegments) {
+		final int N_LABELS = 10;
+		int nPos = posList.getPosList().size();
+		int skipNPos = nPos <= N_LABELS ? 1 : nPos / N_LABELS;
 		Point cur, prec = null;
+		int i = 0;
 		try {
 			Iterator<ShipPosition> posItr = posList.getPosList().iterator();
 			while (posItr.hasNext()) {
@@ -84,8 +88,11 @@ public class Map extends MapWindow {
 				// System.out.println("ts " + ts + " lat " + lat + " lon "+
 				// lon);
 				cur = new Point(lat, lon);
-				//String label = ""+pos.getIndex();
-				String label = ""+pos.getTs(); //.getTsMillisec();
+				//String label = ""+pos.getIndex();				
+				String label = "";
+				if(i % skipNPos == 0) {
+					label = ""+pos.getTs(); //.getTsMillisec();
+				}
 				if(lastPositionLabel != null && !posItr.hasNext()) {
 					label = lastPositionLabel;
 				}
@@ -95,6 +102,7 @@ public class Map extends MapWindow {
 					addSegment(new Segment(prec, cur, color));
 				}
 				prec = cur;
+				i++;
 			}
 			// System.out.println("Read " + readCount + " lines; ignored " +
 			// errCount);

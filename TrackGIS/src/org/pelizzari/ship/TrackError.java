@@ -40,6 +40,8 @@ public class TrackError {
 	float targetPositionCoverage = 0;
 	// target positions coverage (0.0-1.0) averaged over number of segments
 	float avgTargetPositionCoverageBySegment = 0;
+	// average squared distance to the target points, averaged over number of segments
+	float avgAvgSquaredDistanceToTargetPositionsBySegment = 0;
 	// variance of the squared distance to the target points, averaged over number of segments
 	float avgVarianceOfDistanceToTargetPositionsBySegment = 0;
 	// number of segments with no coverage of target positions
@@ -173,17 +175,19 @@ public class TrackError {
 	public void computeStatsForFitness() {
 		noCoverageSegmentCounter = 0;
 		int coveredTargetPositionCount = 0;
-		float sumSegVariance = 0;
+		float sumSegVariance = 0, sumSegAvgSquaredDistance = 0;
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {
 			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
 			coveredTargetPositionCount += segTargetPosCounter;
 			if(segTargetPosCounter == 0) {
 				noCoverageSegmentCounter++;
 			}
+			sumSegAvgSquaredDistance += seg.getAvgSquaredDistanceToTargetPositions();
 			sumSegVariance += seg.getVarSquaredDistanceToTargetPositions();
 		}
 		targetPositionCoverage = (float) coveredTargetPositionCount / trainingPosList.getPosList().size();
 		avgTargetPositionCoverageBySegment = targetPositionCoverage / baseTrack.getSegList().size();
+		avgAvgSquaredDistanceToTargetPositionsBySegment = sumSegAvgSquaredDistance / baseTrack.getSegList().size();
 		avgVarianceOfDistanceToTargetPositionsBySegment = sumSegVariance / baseTrack.getSegList().size();
 	}
 	
@@ -262,6 +266,14 @@ public class TrackError {
 
 	
 	/**
+	 * This should return a high value if the average distance to the target positions for each segment is high
+	 * @return
+	 */
+	public float getAvgDistanceError() {
+		return avgAvgSquaredDistanceToTargetPositionsBySegment;
+	}	
+		
+	/**
 	 * This should return a high value if the variance of the target position distance to each segment is high
 	 * @return
 	 */
@@ -275,6 +287,11 @@ public class TrackError {
 	
 	public float getAvgSquaredDistanceAllSegments() {
 		return avgSquaredDistanceAllSegments;
+	}
+
+	
+	public float getAvgAvgSquaredDistanceToTargetPositionsBySegment() {
+		return avgAvgSquaredDistanceToTargetPositionsBySegment;
 	}
 
 
@@ -292,6 +309,7 @@ public class TrackError {
 		//s = s + "destinationError = " + destinationError() + "\n";		
 		s = s + "noCoverageError = " + getCoverageError() + "\n";	
 		s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
+		s = s + "avgSegmentSquaredDistanceError = " + getAvgDistanceError() + "\n"; 
 		s = s + "varianceError = " + getVarianceError() + "\n"; 
 		return s;
 	}

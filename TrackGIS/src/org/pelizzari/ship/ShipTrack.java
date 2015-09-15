@@ -138,11 +138,39 @@ public class ShipTrack extends ShipPositionList {
 	
 	
 	/**
-	 * Remove from track the positions so that the rate does not go over the given one. 
-	 * @param maxRateIn
+	 * Remove from track any duplicated positions within the given time window.
+	 * As a result, the MAX rate will be 1 position every timeWindowInSeconds. 
+	 * @param timeWindowInSeconds
 	 */
-	public void reducePositions(float maxRateInPosPerHour) {
-		
+	public void reducePositionDensity(int timeWindowInSeconds) {
+		List<ShipPosition> reducedPosList = new ArrayList<ShipPosition>();		
+		for(ShipPosition pos : posList) {
+			int posCounterInTimeWindow = countPositionsInInterval(
+					pos.getTs().getTsMillisec()-timeWindowInSeconds*1000, 
+					pos.getTs().getTsMillisec());
+			if(posCounterInTimeWindow <= 1) {
+				reducedPosList.add(pos);
+			}
+		}
+		posList = reducedPosList;	
+	}
+	
+	
+	/**
+	 * Return the number of positions within the given time interval (unix epoch in millisec).
+	 * @param startTsInMillis
+	 * @param endTsInMillis
+	 * @return
+	 */
+	public int countPositionsInInterval(long startTsInMillis, long endTsInMillis) {
+		int posCounter = 0;
+		for(ShipPosition pos : posList) {
+			if(pos.getTs().getTsMillisec() > startTsInMillis && 
+			   pos.getTs().getTsMillisec() <= endTsInMillis) {
+				posCounter++;
+			}
+		}
+		return posCounter;
 	}
 	
 	public void removeAlignedPositions() {

@@ -164,6 +164,7 @@ public class DisplacementSequenceProblem extends Problem implements
 		//trackError.getAvgSquaredDistanceAllSegments() +
 		//trackError.getCoverageError() +
 		trackError.getVarianceError() +
+		//trackError.getAvgDistanceError() +
 		//trackError.avgTotalSegmentError() +
 		0f;
 

@@ -139,10 +139,10 @@ public class BestStatistics extends Statistics {
 	public void drawOnMap(ShipTrack track, EvolutionState state, boolean lastGen) {
 		Color trackColor = lastGen?Color.PINK:Color.GRAY;
 		map.plotTrack(track, trackColor, ""+state.generation);
-		drawSegmentBoxes(track, map);
+		//drawSegmentBoxes(track, map);
 		if(lastGen) {
 			map1.plotTrack(track, Color.PINK, ""+state.generation);
-			drawSegmentBoxes(track, map1);
+			//drawSegmentBoxes(track, map1);
 			map1.setVisible(true);
 			// set up imageFile					
 			map1.saveAsImage(imageFile);

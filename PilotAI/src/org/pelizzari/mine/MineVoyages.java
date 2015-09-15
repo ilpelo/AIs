@@ -39,16 +39,18 @@ public class MineVoyages {
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static String YEAR_PERIOD = "WINTER";
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int VOYAGE_DURATION_IN_DAYS = 10;
+	final static int VOYAGE_DURATION_IN_DAYS = 7;
 	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
 	final static int MAX_SHIPS_TO_ANALYSE = 10;
+	final static int MAX_RATE_IN_SECONDS = 60; // max 1 position every 1 minute
+
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
 
 	final static boolean KML_FILE_WITH_DATES = false;
 	final static String OUTPUT_KML_FILE = OUTPUT_DIR+"tracks.kml";
-	final static String REFERENCE_START_DT = "2000-01-03 00:00:00"; // reference start date of all tracks
+	final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
 	
 	public static void main(String[] args) throws Exception {
 
@@ -103,6 +105,15 @@ public class MineVoyages {
 			depInterval.shiftInterval(START_PERIOD_IN_DAYS);
 		}
 		
+		// reduce position density
+		System.out.println(">>> Reducing position density ");
+		for (ShipTrack track : allTracks) {
+			int nPosBefore = track.getPosList().size();
+			track.reducePositionDensity(MAX_RATE_IN_SECONDS);
+			int nPosAfter = track.getPosList().size();
+			System.out.println(track.getMmsi() + ", positions: " + nPosBefore + " > " + nPosAfter);		
+		}		
+		
 		// Make KML
 		kmlGenerator.addBox("Departure", depBox);
 		kmlGenerator.addBox("Arrival", arrBox);
@@ -115,12 +126,12 @@ public class MineVoyages {
 				
 		// compute average length to be used to normalize the tracks
 		// Save track files and to DB
-		float avgLength = 0;
-		for (ShipTrack track : allTracks) {
-			avgLength += track.computeLengthInMiles();			
-		}
-		avgLength = avgLength / allTracks.size();
-		System.out.println(">>> Average length: "+avgLength);
+//		float avgLength = 0;
+//		for (ShipTrack track : allTracks) {
+//			avgLength += track.computeLengthInMiles();			
+//		}
+//		avgLength = avgLength / allTracks.size();
+//		System.out.println(">>> Average length: "+avgLength);
 		
 		// Save to KML
 		System.out.println(">>> Saving to KML: "+OUTPUT_KML_FILE);
