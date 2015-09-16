@@ -37,13 +37,27 @@ import org.pelizzari.time.Timestamp;
 public class MineVoyages {
 
 	final static String START_DT = "2011-03-01 00:00:00";
-	final static String YEAR_PERIOD = "WINTER";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 7;
 	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
-	final static int MAX_SHIPS_TO_ANALYSE = 10;
+	final static int MAX_SHIPS_TO_ANALYSE = 1;
 	final static int MAX_RATE_IN_SECONDS = 60; // max 1 position every 1 minute
 
+	final static String YEAR_PERIOD = "WINTER1";
+	
+	//// Departure
+	final static Box DEP_BOX = Areas.CAPETOWN;
+	//Box depBox = Areas.GIBRALTAR;
+	//Box depBox = Areas.WEST_ATLANTIC;
+					
+	/// Arrival
+	//Box arrBox = Areas.FINISTERRE;
+	//Box arrBox = Areas.SUEZ;
+	//Box arrBox = Areas.WEST_ATLANTIC;
+	final static Box ARR_BOX = Areas.REUNION;
+	//Box arrBox = Areas.NOVASCOTIA;
+	//Box arrBox = Areas.RIO;
+	//Box arrBox = Areas.GIBRALTAR;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";
@@ -66,19 +80,6 @@ public class MineVoyages {
 				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
 				
-		//// Departure
-		Box depBox = Areas.CAPETOWN;
-		//Box depBox = Areas.GIBRALTAR;
-		//Box depBox = Areas.WEST_ATLANTIC;
-						
-		/// Arrival
-		//Box arrBox = Areas.FINISTERRE;
-		//Box arrBox = Areas.SUEZ;
-		//Box arrBox = Areas.WEST_ATLANTIC;
-		Box arrBox = Areas.REUNION;
-		//Box arrBox = Areas.NOVASCOTIA;
-		//Box arrBox = Areas.RIO;
-		//Box arrBox = Areas.GIBRALTAR;
 		
 		/// Let's mine
 		
@@ -92,7 +93,7 @@ public class MineVoyages {
 		for (int i = 0; i < ANALYSIS_PERIOD_IN_DAYS/START_PERIOD_IN_DAYS; i++) {
 			System.out.println(">>> Period: "+depInterval);
 			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
-					depBox, arrBox, depInterval, VOYAGE_DURATION_IN_DAYS, null, seenShips, MAX_SHIPS_TO_ANALYSE);
+					DEP_BOX, ARR_BOX, depInterval, VOYAGE_DURATION_IN_DAYS, null, seenShips, MAX_SHIPS_TO_ANALYSE);
 			if(tracks != null) {
 				for (ShipTrack track : tracks) {
 					seenShips.add(new Ship(track.getMmsi()));
@@ -115,8 +116,8 @@ public class MineVoyages {
 		}		
 		
 		// Make KML
-		kmlGenerator.addBox("Departure", depBox);
-		kmlGenerator.addBox("Arrival", arrBox);
+		kmlGenerator.addBox("Departure", DEP_BOX);
+		kmlGenerator.addBox("Arrival", ARR_BOX);
 		Map map = new Map();
 		for (ShipTrack track : allTracks) {
 			map.plotTrack(track, Color.GREEN, track.getMmsi());
@@ -148,7 +149,7 @@ public class MineVoyages {
 			//
 			// Normalize tracks (use compute segments to overwrite timestamps)!!!
 			track.computeTrackSegmentsAndNormalizeTime(new Timestamp(REFERENCE_START_DT), ShipTrack.REFERENCE_SPEED_IN_KNOTS);
-			track.saveTrackToDB(depBox, arrBox, YEAR_PERIOD);			
+			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD);			
 		}
 		System.out.println("Done\n");
 	}

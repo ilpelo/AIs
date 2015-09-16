@@ -1,6 +1,6 @@
 breedthreads	= 1
 evalthreads	= 1
-seed.0		= 5361
+seed.0		= 5362
 
 state		= ec.simple.SimpleEvolutionState
 pop			= ec.Population
@@ -18,7 +18,7 @@ exch		= ec.simple.SimpleExchanger
 
 
 # relevant parameters
-generations	= 100
+generations	= 500
 pop.subpop.0.size = 1000
 # the crossover likelihood
 pop.subpop.0.species.pipe.source.0.likelihood = 0.5

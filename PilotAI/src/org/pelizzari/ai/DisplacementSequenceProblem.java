@@ -40,7 +40,7 @@ public class DisplacementSequenceProblem extends Problem implements
 	static final String FILE_EXT = ".csv";
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
-	static final String YEAR_PERIOD = "WINTER";
+	static final String YEAR_PERIOD = "WINTER1";
 	static final Box  DEPARTURE_AREA = Areas.CAPETOWN;
 	static final Box  ARRIVAL_AREA = Areas.REUNION;
 	
@@ -158,15 +158,7 @@ public class DisplacementSequenceProblem extends Problem implements
 //		float noCoverageError = trackError.getNoCoverageError();
 		// int numberOfSegments = trackError.getTrackSize();
 
-		float error =
-		// trackError.headingError() +
-		//trackError.destinationError() +
-		//trackError.getAvgSquaredDistanceAllSegments() +
-		//trackError.getCoverageError() +
-		trackError.getVarianceError() +
-		//trackError.getAvgDistanceError() +
-		//trackError.avgTotalSegmentError() +
-		0f;
+		float error = trackError.getError();
 
 		if (!(displSeqInd.fitness instanceof SimpleFitness))
 			state.output.fatal("evaluate: not a SimpleFitness", null);

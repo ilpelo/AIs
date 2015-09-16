@@ -35,7 +35,7 @@ public class TrackError {
 	// the destination of our journey (!) 
 	ShipPosition destinationPos;
 	// a measure of the error of each position of the baseTrack
-	float[] segmentErrorVector;
+	//float[] segmentErrorVector;
 	// target positions coverage (0.0-1.0)
 	float targetPositionCoverage = 0;
 	// target positions coverage (0.0-1.0) averaged over number of segments
@@ -56,7 +56,7 @@ public class TrackError {
 		this.debug = debug;
 		baseTrack = track;
 		int size = baseTrack.getPosList().size();
-		segmentErrorVector = new float[size];
+		//segmentErrorVector = new float[size];
 		//if(debug) extraInfo = new String[size];
 	}
 	
@@ -105,7 +105,8 @@ public class TrackError {
 //		float totSquaredDistance = 0;
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {			
 			// bounding box of the 2 positions of the GA track (including a frame)
-			Box box = makeSegmentBox(seg);
+			//Box box = makeSegmentBox(seg);
+			
 			// filter position of target track and compute total squared distance to segment
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			
@@ -179,7 +180,7 @@ public class TrackError {
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {
 			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
 			coveredTargetPositionCount += segTargetPosCounter;
-			if(segTargetPosCounter == 0) {
+			if(segTargetPosCounter <= 1) { // segment should cover at least 2 positions
 				noCoverageSegmentCounter++;
 			}
 			sumSegAvgSquaredDistance += seg.getAvgSquaredDistanceToTargetPositions();
@@ -191,25 +192,25 @@ public class TrackError {
 		avgVarianceOfDistanceToTargetPositionsBySegment = sumSegVariance / baseTrack.getSegList().size();
 	}
 	
-	/**
-	 * Sum up all segment errors (no average).
-	 * @return
-	 */
-	public float totalSegmentError() {
-		float sumErrors = 0;
-		for (int i = 0; i < segmentErrorVector.length; i++) {
-			sumErrors += segmentErrorVector[i];
-		}
-		return sumErrors;
-	}
-
-	/**
-	 * Average segment error (total seg. err. / n. of segments).
-	 * @return
-	 */
-	public float avgTotalSegmentError() {
-		return totalSegmentError() / segmentErrorVector.length;
-	}
+//	/**
+//	 * Sum up all segment errors (no average).
+//	 * @return
+//	 */
+//	public float totalSegmentError() {
+//		float sumErrors = 0;
+//		for (int i = 0; i < segmentErrorVector.length; i++) {
+//			sumErrors += segmentErrorVector[i];
+//		}
+//		return sumErrors;
+//	}
+//
+//	/**
+//	 * Average segment error (total seg. err. / n. of segments).
+//	 * @return
+//	 */
+//	public float avgTotalSegmentError() {
+//		return totalSegmentError() / segmentErrorVector.length;
+//	}
 	
 //	public float meanSquaredLocError() {
 //		float meanError = 0;
@@ -259,11 +260,28 @@ public class TrackError {
 ////			noCoverageError = BAD_TRACK_FITNESS;
 ////		}
 //		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
-		//return noCoverageError;
-		return 1f-targetPositionCoverage; //+noCoverageError;
+		
+		return noCoverageSegmentCounter*10; // artificially high
+		
+		//return 1f-targetPositionCoverage;
+				
 		//return 1f-avgTargetPositionCoverageBySegment;
 	}
 
+	public float getError() {
+		float error =
+			// trackError.headingError() +
+			//trackError.destinationError() +
+			//trackError.getAvgSquaredDistanceAllSegments() +
+			getCoverageError() +
+			getVarianceError() +
+			//trackError.getAvgDistanceError() +
+			//trackError.avgTotalSegmentError() +
+			0f;
+		return error;
+	}
+
+	
 	
 	/**
 	 * This should return a high value if the average distance to the target positions for each segment is high
@@ -303,14 +321,15 @@ public class TrackError {
 		s = s + "Target track positions coverage = " + targetPositionCoverage*100 + " %\n";		
 		//s = s + "meanSquaredLocError = " + meanSquaredLocError() + "\n";		
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
-		s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
+		//s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
 		s = s + "headingError = " + headingError() + "\n";		
 		//s = s + "destinationError = " + destinationError() + "\n";		
 		s = s + "noCoverageError = " + getCoverageError() + "\n";	
-		s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
+		//s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
 		s = s + "avgSegmentSquaredDistanceError = " + getAvgDistanceError() + "\n"; 
 		s = s + "varianceError = " + getVarianceError() + "\n"; 
+		s = s + "error for fitness = " + getError() + "\n"; 
 		return s;
 	}
 }
