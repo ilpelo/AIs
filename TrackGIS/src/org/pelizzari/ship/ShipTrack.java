@@ -515,7 +515,21 @@ public class ShipTrack extends ShipPositionList {
 		return cohOverLimitCount;
 	}
 
+	public float sumChangeOfHeading() {
+		if(changeOfHeadingSeq == null) {
+			computeChangeOfHeadingSequence();
+		}
+		float sumChangeOfHeading = 0;
+		for (ChangeOfHeading coh : changeOfHeadingSeq) {
+			sumChangeOfHeading += Math.abs(coh.changeOfHeading);
+		}
+		return sumChangeOfHeading;
+	}	
+	
 	public ChangeOfHeadingSequence getChangeOfHeadingSeq() {
+		if(changeOfHeadingSeq == null) {
+			computeChangeOfHeadingSequence();
+		}
 		return changeOfHeadingSeq;
 	}
 

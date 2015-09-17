@@ -23,7 +23,7 @@ public class TrackError {
 														  	
 	final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
 	final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
-	final static float HEADING_ERROR_AMPLIFIER = 10E4f; // multiply by the number of  changes of heading over the limit 
+	final static float HEADING_ERROR_FACTOR = 1f/20f; // multiply by the number of  changes of heading over the limit 
 	final static float BAD_TRACK_SEGMENT_FITNESS = 10E3f; // artificially high distance for segment that does not follow the target path
 	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
 	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
@@ -111,8 +111,12 @@ public class TrackError {
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			
 			// use this if you want to get only position that correspond to the temporal interval of the segment
-			List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
-			
+			//List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
+
+			// use this if you want to get only position that correspond to the temporal interval of the segment
+			// and are located on the perpendicular stripe
+			List<ShipPosition> targetPosList = trainingPosList.getPosListInIntervalAndOnStripe(seg);
+	
 			// use this if you want to get only positions within a "corridor" of width NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE  
 //			List<ShipPosition> targetPosList = 
 //					trainingPosList.getPosListInIntervalAndBoxAndCloseToSegment(
@@ -236,12 +240,16 @@ public class TrackError {
 //		return meanError;
 //	}
 	
-
+	/**
+	 * This should return a high value if the average change of heading is big
+	 * @return
+	 */
 	public float headingError() {
-		int cohOnceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(MAX_CHANGE_OF_HEADING_ANGLE);
-		int cohTwiceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(2*MAX_CHANGE_OF_HEADING_ANGLE);
-		return (cohOnceOverLimitCount * HEADING_ERROR_AMPLIFIER +
-			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100) / (float) getNumberOfTrackSegments();
+		return HEADING_ERROR_FACTOR * baseTrack.sumChangeOfHeading() / getNumberOfTrackSegments();
+//		int cohOnceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(MAX_CHANGE_OF_HEADING_ANGLE);
+//		int cohTwiceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(2*MAX_CHANGE_OF_HEADING_ANGLE);
+//		return (cohOnceOverLimitCount * HEADING_ERROR_AMPLIFIER +
+//			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100) / (float) getNumberOfTrackSegments();
 	}
 	
 //	public float destinationError() {
@@ -268,9 +276,10 @@ public class TrackError {
 		//return 1f-avgTargetPositionCoverageBySegment;
 	}
 
+	
 	public float getError() {
 		float error =
-			// trackError.headingError() +
+			headingError() +
 			//trackError.destinationError() +
 			//trackError.getAvgSquaredDistanceAllSegments() +
 			getCoverageError() +
@@ -298,6 +307,7 @@ public class TrackError {
 	public float getVarianceError() {
 		return avgVarianceOfDistanceToTargetPositionsBySegment;
 	}	
+
 	
 	public int getNumberOfTrackSegments() {
 		return baseTrack.posList.size();

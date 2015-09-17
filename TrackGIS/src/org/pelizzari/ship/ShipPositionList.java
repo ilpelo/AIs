@@ -40,6 +40,27 @@ public class ShipPositionList {
 	public ShipPosition getLastPosition() {
 		return posList.get(posList.size() - 1);
 	}
+
+	
+	/**
+	 * Select ship positions only if they are in the time interval of the segment and they are located
+	 * in the stripe perpendicular to the segment. 
+	 * @param segment
+	 * @return
+	 * @throws Exception
+	 */
+	public List<ShipPosition> getPosListInIntervalAndOnStripe(ShipTrackSegment segment) throws Exception {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		TimeInterval interval = segment.getTimeInterval(); 
+		for (ShipPosition pos : posList) {
+			if(interval.isWithinInterval(pos.getTs()) && 
+			   segment.isWithinPerpendicularStripe(pos.point)) {
+				filteredPosList.add(pos);
+			}
+		}
+		return filteredPosList;
+	}	
+			
 	
 	public List<ShipPosition> getPosListInInterval(TimeInterval interval) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();

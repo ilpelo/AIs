@@ -53,7 +53,7 @@ public class ShipTrackSegment {
 	}
 	
 	/*
-	 * Compute the distance to the target points and store the values in an array
+	 * Compute the distance to the target points and store the values in an array.
 	 */
 	public void computeDistanceToTargetPositions() {
 		if(targetPosList == null || targetPosList.size() == 0) {
@@ -104,6 +104,18 @@ public class ShipTrackSegment {
 					(avgSquaredDistanceToTargetPositions - sqrDist); 
 		}
 		varSquaredDistanceToTargetPositions = sumVariance/numberOfCoveredTargetPositions;
+	}
+		
+	/**
+	 * Return if a point is located within the stripe perpendicular to this segment or not.
+	 * @param p
+	 * @return
+	 */
+	public boolean isWithinPerpendicularStripe(Point p) {
+		boolean isWithin = false;
+		Point intersectionPoint = p.computeIntersectionOfPerpendicular(p1.point, p2.point);
+		isWithin = intersectionPoint.isOnSegment(p1.point, p2.point);
+		return isWithin;
 	}
 	
 	public List<ShipPosition> getTargetPosList() {
