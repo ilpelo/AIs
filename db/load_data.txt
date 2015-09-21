@@ -1,3 +1,8 @@
+Data Load log
+
+
+
+
 >>> Python script to generate load LRIT data statements (see load_lrit.py)
 
 - Linux
@@ -14,9 +19,17 @@ cd /data1/LRIT Data/2011
 >>> Python script to generate decode AIS statements (see decode_ais.py)
 
 With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db
-Edit the dir where the AIS data is and save.
-Run the script.
-Copy the output and paste it into a DOS command window.
+Run the scripts:
+
+[pelizan@tstatdata1 2011]$ pwd
+/data1/sat-ais/2011
+[pelizan@tstatdata1 2011]$ source decode-all-months-2011
+...
+[pelizan@tstatdata1 2012]$ pwd
+/data1/sat-ais/2012
+[pelizan@tstatdata1 2012]$ source decode-all-months-2012
+...
+
 
 >>> Python script to generate load AIS data statements (see load_ais.py)
 
