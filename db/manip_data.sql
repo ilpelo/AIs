@@ -2,6 +2,10 @@
 update pos set source = 'N';
 
 
+
+--------------------------------------------------------------
+-- Exact Earth data
+
 -- 1. 
 -- insert into pos from temp table for eE AIS data
 insert into pos
@@ -13,7 +17,6 @@ select mmsi,
 from tpos
 where mmsi <> 0
   and lat <> ''
-
   and lon <> ''
   and ts <> '';
 
@@ -28,8 +31,9 @@ where mmsi <> 0
 insert into wpos
 select distinct * from pos
 where 1=1
-and date(from_unixtime(ts)) >= '2011-02-01'
-and date(from_unixtime(ts)) < '2011-07-01'
+and date(from_unixtime(ts)) >= '2011-07-01'
+and date(from_unixtime(ts)) < '2013-01-01'
+and source = 'N'
 ;
 --and lat < 45
 --and lat > 30

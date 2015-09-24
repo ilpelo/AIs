@@ -79,14 +79,39 @@ into:
 [pelizan@tstatdata1 sat-ais]$ mysql ai < load_data_ee_2011.mysql
 ...
 [pelizan@tstatdata1 sat-ais]$ mysql ai < load_data_ee_2012.mysql
-
+... (10 min)
 
 3. run statement 1. of manip_data.sql
 
+mysql> select now();
++---------------------+
+| now()               |
++---------------------+
+| 2015-09-24 10:47:41 |
++---------------------+
+1 row in set (0.02 sec)
+
+mysql> insert into pos
+    -> select mmsi,
+    ->        unix_timestamp(str_to_date(ts, '%Y%m%d_%H%i%s')),
+    ->    cast(lat as decimal(24,21)),
+    ->    cast(lon as decimal(24,21)),
+    ->    'E'
+    -> from tpos
+    -> where mmsi <> 0
+    ->   and lat <> ''
+    ->   and lon <> ''
+    ->   and ts <> '';
+
+
 >>> Copy to wpos
 
-- edit and run statement 2. of manip_data.sql
-
+- use the python script to create the mysql scripts:
+[pelizan@tstatdata1 script]$ python transfer_pos2wpos.py 2011 > transfer_pos2wpos_2011.mysql
+[pelizan@tstatdata1 script]$ mysql ai < transfer_pos2wpos_2011.mysql
+...
+[pelizan@tstatdata1 script]$ python transfer_pos2wpos.py 2012 > transfer_pos2wpos_2012.mysql
+[pelizan@tstatdata1 script]$ mysql ai < transfer_pos2wpos_2012.mysql
 
 
 
