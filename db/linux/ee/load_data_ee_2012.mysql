@@ -1,0 +1,100 @@
+select 'load /data1/sat-ais/emsa_atlantic_201201_201206.csv' as '';
+load data infile '/data1/sat-ais/emsa_atlantic_201201_201206.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+select 'load /data1/sat-ais/emsa_atlantic_201207_201212.csv' as '';
+load data infile '/data1/sat-ais/emsa_atlantic_201207_201212.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+select 'load /data1/sat-ais/emsa_india_201201_201206.csv' as '';
+load data infile '/data1/sat-ais/emsa_india_201201_201206.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+select 'load /data1/sat-ais/emsa_india_201207_201212.csv' as '';
+load data infile '/data1/sat-ais/emsa_india_201207_201212.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+
+
+select 'load /data1/sat-ais/emsa_med_201201_201206.csv' as '';
+load data infile '/data1/sat-ais/emsa_med_201201_201206.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+
+
+select 'load /data1/sat-ais/emsa_med_201207_201212.csv' as '';
+load data infile '/data1/sat-ais/emsa_med_201207_201212.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+select 'load /data1/sat-ais/emsa_north_201201_201206.csv' as '';
+load data infile '/data1/sat-ais/emsa_north_201201_201206.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+
+select 'load /data1/sat-ais/emsa_north_201207_201212.csv' as '';
+load data infile '/data1/sat-ais/emsa_north_201207_201212.csv' into table tpos fields terminated by ',' enclosed by '"' lines terminated by '\r\n' ignore 1 lines (
+mmsi, @dummy, @dummy, ts, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, lon, lat,
+@dummy, @dummy, @dummy, @dummy, @dummy,
+@dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+;
+

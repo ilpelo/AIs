@@ -1,7 +1,9 @@
-Data Load log
+GIT repository
+https://github.com/ilpelo/AIs.git
 
 
-
+-----------------------------------------------------------------------------------------
+--- Load LRIT data on LINUX
 
 >>> Python script to generate load LRIT data statements (see load_lrit.py)
 
@@ -12,44 +14,74 @@ cd /data1/LRIT Data/2011
 [pelizan@tstatdata1 2011]$ mysql ai < load.sql
 
 - Windows
+...
 
+-----------------------------------------------------------------------------------------
+--- Norway AIS data import on LINUX
 
---- Norway AIS data import
-
+Follow the steps below. The scripts make use of these 2 python programs:
 >>> Python script to generate decode AIS statements (see decode_ais.py)
-
-With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db
-Run the scripts:
-
-[pelizan@tstatdata1 2011]$ pwd
-/data1/sat-ais/2011
-[pelizan@tstatdata1 2011]$ source decode-all-months-2011
-...
-[pelizan@tstatdata1 2012]$ pwd
-/data1/sat-ais/2012
-[pelizan@tstatdata1 2012]$ source decode-all-months-2012
-...
-
-
 >>> Python script to generate load AIS data statements (see load_ais.py)
 
-With Python IDE open the script in C:\Users\andrea>cd C:\Users\andrea\git\AIs\db
-Edit the dir where the AIS data is and save.
-Run the python script: the mysql script load_data.mysql is written in the data dir.
-Run the script in mysql client.
+1. Copy the content of this folder:
 
-mysql> source C:\master_data\AIS\03-Mar\load_data.mysql
-Query OK, 179600 rows affected (1 min 20.37 sec)
-Records: 179600  Deleted: 0  Skipped: 0  Warnings: 0
+C:\Users\pelizan\dev\git\AIs_new\db\linux
+into: 
+[pelizan@tstatdata1 script]$ pwd
+/data1/script
+
+2. Run the scripts to write in each data dir the specific decode script for the month
+[pelizan@tstatdata1 script]$ pwd
+/data1/script
+[pelizan@tstatdata1 script]$ source make-decode-java-script-2011
+...
+[pelizan@tstatdata1 script]$ source make-decode-java-script-2012
 ...
 
+3. Run the decode scripts for each month
+[pelizan@tstatdata1 script]$ pwd
+/data1/script
+[pelizan@tstatdata1 script]$ source decode-all-months-2011
+...
+[pelizan@tstatdata1 script]$ source decode-all-months-2012
+...
+
+4. Make the load data sql scripts
+[pelizan@tstatdata1 script]$ source make-load-data-mysql-script-2011
+...
+[pelizan@tstatdata1 script]$ source make-load-data-mysql-script-2012
+...
+
+5. Run the data load scripts with mysql
+[pelizan@tstatdata1 script]$ source load-all-months-2011
+...
+[pelizan@tstatdata1 script]$ source load-all-months-2012
+...
+
+6. Set the SOURCE field
+mysql> update pos set source = 'N' where source is null;
+
+-----------------------------------------------------------------------------------------
 --- Exact Earth AIS data import
 
->>> EE data is already in CSV format; use insert_ee.sql
+>>> EE data is already in CSV format; use as reference insert_ee.sql for the insert command
 
-- edit the insert_ee.sql and set the correct file name
-- copy the "load infile..." command and run with mysql
-- run statement 1. of manip_data.sql
+1. Copy the load scripts from GIT (https://github.com/ilpelo/AIs) to the data dir:
+C:\Users\pelizan\dev\git\AIs_new\db\linux\ee\load_data_ee_2011.mysql
+C:\Users\pelizan\dev\git\AIs_new\db\linux\ee\load_data_ee_2012.mysql
+
+into: 
+[pelizan@tstatdata1 sat-ais]$ pwd
+/data1/sat-ais
+
+2. run the load scripts with mysql
+
+[pelizan@tstatdata1 sat-ais]$ mysql ai < load_data_ee_2011.mysql
+...
+[pelizan@tstatdata1 sat-ais]$ mysql ai < load_data_ee_2012.mysql
+
+
+3. run statement 1. of manip_data.sql
 
 >>> Copy to wpos
 

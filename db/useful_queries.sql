@@ -1,10 +1,20 @@
 -- Useful queries
 
 -- Table POS
+-- count positions per year
+select source, date_format(date(from_unixtime(ts)),'%Y') "Year", count(*)
+from pos
+where 1=1
+group by source, date_format(date(from_unixtime(ts)),'%Y')
+order by 2, 1;
+
 -- count positions per month
 select source, date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
 from pos
--- where source = 'E'
+where 1=1
+-- and source = 'E'
+and date(from_unixtime(ts)) >= '2011-08-01'
+and date(from_unixtime(ts)) < '2011-09-01'
 group by source, date_format(date(from_unixtime(ts)),'%Y-%m')
 order by 2, 1;
 
@@ -24,8 +34,11 @@ and date(from_unixtime(ts)) < '2011-04-01'
 -----------------------------------------------------------------
 -- BEWARE delete!
 --
-delete from pos
-where source = 'L';
+--delete from pos
+--where source = 'L'
+--;
+
+--drop table pos;
 
 
 -- Table WPOS
@@ -37,6 +50,16 @@ and date(from_unixtime(ts)) >= '2011-03-02'
 and date(from_unixtime(ts)) < '2011-03-03'
 ;
 
+-- count positions per month
+select source, date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
+from wpos
+where 1=1
+-- and source = 'E'
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) < '2011-04-01'
+group by source, date_format(date(from_unixtime(ts)),'%Y-%m')
+order by 2, 1;
+
 -- count position per day
 select date_format(date(from_unixtime(ts)),'%Y-%m-%d') "Date",
 	   source,
@@ -46,7 +69,7 @@ select date_format(date(from_unixtime(ts)),'%Y-%m-%d') "Date",
 	   truncate(max(lon),0)-truncate(min(lon),0) "Coverage lon"
 from wpos 
 where 1=1
-and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) >= '2011-03-01'
 and date(from_unixtime(ts)) < '2011-04-01'
 group by date_format(date(from_unixtime(ts)),'%Y-%m-%d'), source
 order by 1, 2
@@ -120,7 +143,20 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
 
 -- Tracks table
-select * from tracks;
-delete from tracks;
+select * from tracks
+where 
+--period = 'WINTER1'
+dep = 'GIBRALTAR'
+;
+
+select count(*) from tracks;
+
+delete from tracks
+where 
+--dep = 'GIBRALTAR'
+arr = 'GOA'
+--period = 'WINTER1'
+;
+
 
 

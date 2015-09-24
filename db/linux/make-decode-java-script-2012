@@ -1,0 +1,13 @@
+python decode_ais.py /data1/sat-ais/2012/01-Jan > /data1/sat-ais/2012/01-Jan/2012-01-decode
+python decode_ais.py /data1/sat-ais/2012/02-Feb > /data1/sat-ais/2012/02-Feb/2012-02-decode
+python decode_ais.py /data1/sat-ais/2012/03-Mar > /data1/sat-ais/2012/03-Mar/2012-03-decode
+python decode_ais.py /data1/sat-ais/2012/04-Apr > /data1/sat-ais/2012/04-Apr/2012-04-decode
+python decode_ais.py /data1/sat-ais/2012/05-May > /data1/sat-ais/2012/05-May/2012-05-decode
+python decode_ais.py /data1/sat-ais/2012/06-Jun > /data1/sat-ais/2012/06-Jun/2012-06-decode
+python decode_ais.py /data1/sat-ais/2012/07-Jul > /data1/sat-ais/2012/07-Jul/2012-07-decode
+python decode_ais.py /data1/sat-ais/2012/08-Aug > /data1/sat-ais/2012/08-Aug/2012-08-decode
+python decode_ais.py /data1/sat-ais/2012/09-Sep > /data1/sat-ais/2012/09-Sep/2012-09-decode
+python decode_ais.py /data1/sat-ais/2012/10-Oct > /data1/sat-ais/2012/10-Oct/2012-10-decode
+python decode_ais.py /data1/sat-ais/2012/11-Nov > /data1/sat-ais/2012/11-Nov/2012-11-decode
+python decode_ais.py /data1/sat-ais/2012/12-Dec > /data1/sat-ais/2012/12-Dec/2012-12-decode
+

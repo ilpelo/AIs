@@ -1,7 +1,7 @@
-cd /data1/sat-ais/2011/01-Jan ; source /data1/sat-ais/2011/01-Jan/2011-05-decode
-cd /data1/sat-ais/2011/02-Feb ; source /data1/sat-ais/2011/02-Feb/2011-05-decode
-cd /data1/sat-ais/2011/03-Mar ; source /data1/sat-ais/2011/03-Mar/2011-05-decode
-cd /data1/sat-ais/2011/04-Apr ; source /data1/sat-ais/2011/04-Apr/2011-05-decode
+cd /data1/sat-ais/2011/01-Jan ; source /data1/sat-ais/2011/01-Jan/2011-01-decode
+cd /data1/sat-ais/2011/02-Feb ; source /data1/sat-ais/2011/02-Feb/2011-02-decode
+cd /data1/sat-ais/2011/03-Mar ; source /data1/sat-ais/2011/03-Mar/2011-03-decode
+cd /data1/sat-ais/2011/04-Apr ; source /data1/sat-ais/2011/04-Apr/2011-04-decode
 cd /data1/sat-ais/2011/05-May ; source /data1/sat-ais/2011/05-May/2011-05-decode
 cd /data1/sat-ais/2011/06-Jun ; source /data1/sat-ais/2011/06-Jun/2011-06-decode
 cd /data1/sat-ais/2011/07-Jul ; source /data1/sat-ais/2011/07-Jul/2011-07-decode

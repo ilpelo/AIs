@@ -1,3 +1,7 @@
+-- Set the Norway Sat-AIS source
+update pos set source = 'N';
+
+
 -- 1. 
 -- insert into pos from temp table for eE AIS data
 insert into pos
@@ -9,13 +13,14 @@ select mmsi,
 from tpos
 where mmsi <> 0
   and lat <> ''
+
   and lon <> ''
   and ts <> '';
 
 
 -- 2.
 -- load positions from pos table into wpos
-drop table wpos;
+--drop table wpos;
 
 -- create table wpos (see create_table.sql)
 
@@ -23,10 +28,12 @@ drop table wpos;
 insert into wpos
 select distinct * from pos
 where 1=1
-and date(from_unixtime(ts)) >= '2011-01-02'
-and date(from_unixtime(ts)) < '2011-04-01'
-and lat < 45
-and lat > 30
-and lon < 40
-and lon > -10;
+and date(from_unixtime(ts)) >= '2011-02-01'
+and date(from_unixtime(ts)) < '2011-07-01'
+;
+--and lat < 45
+--and lat > 30
+--and lon < 40
+--and lon > -10
+;
 
