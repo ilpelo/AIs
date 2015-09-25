@@ -21,12 +21,14 @@ public class TrackError {
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
-	final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
-	final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
-	final static float HEADING_ERROR_FACTOR = 1f/20f; // multiply by the number of  changes of heading over the limit 
-	final static float BAD_TRACK_SEGMENT_FITNESS = 10E3f; // artificially high distance for segment that does not follow the target path
-	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
-	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
+	//final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
+	//final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
+//	final static float BAD_TRACK_SEGMENT_FITNESS = 10E3f; // artificially high distance for segment that does not follow the target path
+//	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
+//	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
+	
+	final static float HEADING_ERROR_FACTOR = 1f/10f; // multiply by the number of  changes of heading over the limit 
+	final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
@@ -261,7 +263,15 @@ public class TrackError {
 	 * This should return a high value if the coverage of the target positions is bad
 	 * @return
 	 */
-	public float getCoverageError() {
+	public float getSegmentCoverageError() {
+		return noCoverageSegmentCounter*10; // artificially high
+	}
+
+	/**
+	 * This should return a high value if the overall coverage of the target positions is bad
+	 * @return
+	 */
+	public float getTotalCoverageError() {
 //		float noCoverageError = 0f;
 //
 ////		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
@@ -269,22 +279,22 @@ public class TrackError {
 ////		}
 //		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
 		
-		return noCoverageSegmentCounter*10; // artificially high
-		
-		//return 1f-targetPositionCoverage;
+		// good = 0.0, bad = 1.0 * factor
+		return (1f-targetPositionCoverage)*TOTAL_COVERAGE_ERROR_FACTOR; // artificially high
 				
 		//return 1f-avgTargetPositionCoverageBySegment;
 	}
-
+	
 	
 	public float getError() {
 		float error =
 			headingError() +
 			//trackError.destinationError() +
 			//trackError.getAvgSquaredDistanceAllSegments() +
-			getCoverageError() +
-			getVarianceError() +
-			//trackError.getAvgDistanceError() +
+			getSegmentCoverageError() +
+			getTotalCoverageError() +
+			//getVarianceError() +
+			getAvgDistanceError() +
 			//trackError.avgTotalSegmentError() +
 			0f;
 		return error;
@@ -335,7 +345,8 @@ public class TrackError {
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
 		s = s + "headingError = " + headingError() + "\n";		
 		//s = s + "destinationError = " + destinationError() + "\n";		
-		s = s + "noCoverageError = " + getCoverageError() + "\n";	
+		s = s + "segmentCoverageError = " + getSegmentCoverageError() + "\n";	
+		s = s + "totalCoverageError = " + getTotalCoverageError() + "\n";	
 		//s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
 		s = s + "avgSegmentSquaredDistanceError = " + getAvgDistanceError() + "\n"; 
 		s = s + "varianceError = " + getVarianceError() + "\n"; 

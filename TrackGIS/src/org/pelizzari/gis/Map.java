@@ -74,7 +74,7 @@ public class Map extends MapWindow {
 								  Color color,
 								  String lastPositionLabel,
 								  boolean showSegments) {
-		final int N_LABELS = 10;
+		final int N_LABELS = 4;
 		int nPos = posList.getPosList().size();
 		int skipNPos = nPos <= N_LABELS ? 1 : nPos / N_LABELS;
 		Point cur, prec = null;

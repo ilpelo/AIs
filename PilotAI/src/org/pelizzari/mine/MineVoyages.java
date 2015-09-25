@@ -36,28 +36,29 @@ import org.pelizzari.time.Timestamp;
  */
 public class MineVoyages {
 
-	final static String START_DT = "2011-03-01 00:00:00";
+	final static String START_DT = "2011-01-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int VOYAGE_DURATION_IN_DAYS = 7;
+	final static int VOYAGE_DURATION_IN_DAYS = 15;
 	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
-	final static int MAX_SHIPS_TO_ANALYSE = 1;
+	final static int MAX_SHIPS_TO_ANALYSE = 20;
 	final static int MAX_RATE_IN_SECONDS = 60; // max 1 position every 1 minute
 
-	final static String YEAR_PERIOD = "WINTER1";
+	final static String YEAR_PERIOD = "SUMMER";
 	
 	//// Departure
-	final static Box DEP_BOX = Areas.CAPETOWN;
-	//Box depBox = Areas.GIBRALTAR;
+	//final static Box DEP_BOX = Areas.CAPETOWN;
+	final static Box DEP_BOX = Areas.GIBRALTAR;
 	//Box depBox = Areas.WEST_ATLANTIC;
 					
 	/// Arrival
 	//Box arrBox = Areas.FINISTERRE;
 	//Box arrBox = Areas.SUEZ;
 	//Box arrBox = Areas.WEST_ATLANTIC;
-	final static Box ARR_BOX = Areas.REUNION;
+	//final static Box ARR_BOX = Areas.REUNION;
+	//final static Box ARR_BOX = Areas.GOA;
 	//Box arrBox = Areas.NOVASCOTIA;
-	//Box arrBox = Areas.RIO;
-	//Box arrBox = Areas.GIBRALTAR;
+	//final static Box ARR_BOX = Areas.WEST_ATLANTIC;
+	final static Box ARR_BOX = Areas.RIO;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
 	// final String OUTPUT_DIR = "/master_data/";

@@ -54,5 +54,6 @@ public class Areas {
 	public final static Box REUNION = new Box(reunionNW, reunionSE, "REUNION");
 	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC");
 	public final static Box RIO = new Box(rioNW, rioSE, "RIO");
+	public final static Box GOA = new Box(goaNW, goaSE, "GOA");
 	
 }
