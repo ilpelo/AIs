@@ -40,14 +40,15 @@ public class DisplacementSequenceProblem extends Problem implements
 	static final String FILE_EXT = ".csv";
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
-	static final String YEAR_PERIOD = "WINTER";
-	static final Box  DEPARTURE_AREA = 
+	static final String YEAR_PERIOD = "SUMMER";
+	static final Box DEPARTURE_AREA = 
 			Areas.GIBRALTAR; 
 			//Areas.CAPETOWN;
-	static final Box  ARRIVAL_AREA = 
+	static final Box ARRIVAL_AREA = 
 			//Areas.GOA;
 			//Areas.REUNION;
-			Areas.RIO;
+			//Areas.RIO;
+			Areas.GUADELOUPE;
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };
@@ -118,6 +119,11 @@ public class DisplacementSequenceProblem extends Problem implements
 //		targetTrack = ShipTrack.reconstructShipTrack(track.getFirstPosition(),
 //				displSeq, SPEED);
 //		targetTrack = track;
+		
+		if(trainingShipPositionList.getPosList().size() == 0) {
+			System.err.println("No positions matching the criteria");
+			System.exit(-1);
+		}
 		
 		// set START position close to the first position of the track (0.1 deg North)
 		// TBD: use the average of the first positions of the input tracks 

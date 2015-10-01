@@ -44,6 +44,10 @@ public class Areas {
 	// Reunion
 	static Point reunionNW = new Point(-20, 52);
 	static Point reunionSE = new Point(-27, 57);
+	// Guadeloupe
+	static Point guadeloupeNW = new Point(17.27f, -62.9f);
+	static Point guadeloupeSE = new Point(15.8f, -59.7f);
+	
 
 	
 	public final static Box GIBRALTAR = new Box(gibraltarNW, gibraltarSE, "GIBRALTAR");
@@ -55,5 +59,6 @@ public class Areas {
 	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC");
 	public final static Box RIO = new Box(rioNW, rioSE, "RIO");
 	public final static Box GOA = new Box(goaNW, goaSE, "GOA");
+	public final static Box GUADELOUPE = new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE");
 	
 }

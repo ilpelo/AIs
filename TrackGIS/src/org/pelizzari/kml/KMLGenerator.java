@@ -31,6 +31,9 @@ import org.w3c.dom.Element;
 public class KMLGenerator {
 	Document doc;
 	Element docNode;
+	
+	// print position with MMSI and then skip ... positions
+	static final int MMSI_LABEL_SKIP_INTERVAL = 30;
 
 	/**
 	 * @throws ParserConfigurationException
@@ -124,13 +127,19 @@ public class KMLGenerator {
 		}
 		List<ShipPosition> positions = track.getPosList();
 		
+		int i = 0;
 		for (ShipPosition pos : positions) {
 			long ts = pos.getTs().getTsMillisec();
-			Date date = new Date(ts);				
+			Date date = new Date(ts);
+			String posLabel = withDates?date.toString():"";
+			if(i % MMSI_LABEL_SKIP_INTERVAL == 0) {
+				posLabel = posLabel + " " + track.getMmsi(); 
+			}
 			addPoint("targetStyle",  
-					withDates?date.toString():"",
+					posLabel,
 					pos.getPoint().lat, 
 					pos.getPoint().lon);
+			i++;
 		}
 		addLineString(label, track.getPosList());
 	}

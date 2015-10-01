@@ -1,8 +1,6 @@
 -- Set the Norway Sat-AIS source
 update pos set source = 'N';
 
-
-
 --------------------------------------------------------------
 -- Exact Earth data
 
@@ -40,4 +38,14 @@ and source = 'N'
 --and lon < 40
 --and lon > -10
 ;
+
+---------------------------------------------------
+-- Tracks table
+
+update tracks
+set period = 'WINTER'
+where dep = 'GIBRALTAR'
+and arr = 'RIO';
+
+
 
