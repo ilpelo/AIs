@@ -154,7 +154,8 @@ select count(*) from tracks;
 delete from tracks
 where 
 --dep = 'GIBRALTAR'
-arr = 'GOA'
+--arr = 'GUADELOUPE'
+arr = 'REUNION'
 --period = 'WINTER1'
 ;
 

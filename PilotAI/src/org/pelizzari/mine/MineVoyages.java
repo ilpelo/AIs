@@ -36,29 +36,35 @@ import org.pelizzari.time.Timestamp;
  */
 public class MineVoyages {
 
-	final static String START_DT = "2011-06-01 00:00:00";
+	final static String START_DT = "2011-01-01 00:00:00";
 	final static int START_PERIOD_IN_DAYS = 4;
 	final static int VOYAGE_DURATION_IN_DAYS = 15;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 30;
+	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
 	final static int MAX_SHIPS_TO_ANALYSE = 50;
 	final static int MAX_RATE_IN_SECONDS = 60; // max 1 position every 1 minute
 
-	final static String YEAR_PERIOD = "SUMMER";
+	final static String YEAR_PERIOD = "WINTER";
+	
+	static final String[] EXCLUDE_MMSI_LIST = {};
+	
+	// GIB-Guadalupe SUMMER 2011-06-01 2 months
+	//static final String[] EXCLUDE_MMSI_LIST = {"247456000", "247601000", "247585000", "636090262", 
+	//	"235051085", "235010170", "375443000", "235054581"};
 	
 	//// Departure
-	//final static Box DEP_BOX = Areas.CAPETOWN;
-	final static Box DEP_BOX = Areas.GIBRALTAR;
+	final static Box DEP_BOX = Areas.CAPETOWN;
+	//final static Box DEP_BOX = Areas.GIBRALTAR;
 	//Box depBox = Areas.WEST_ATLANTIC;
 					
 	/// Arrival
 	//Box arrBox = Areas.FINISTERRE;
 	//Box arrBox = Areas.SUEZ;
 	//Box arrBox = Areas.WEST_ATLANTIC;
-	//final static Box ARR_BOX = Areas.REUNION;
+	final static Box ARR_BOX = Areas.REUNION;
 	//final static Box ARR_BOX = Areas.GOA;
 	//Box arrBox = Areas.NOVASCOTIA;
 	//final static Box ARR_BOX = Areas.WEST_ATLANTIC;
-	final static Box ARR_BOX = Areas.GUADELOUPE;
+	//final static Box ARR_BOX = Areas.GUADELOUPE;
 	//final static Box ARR_BOX = Areas.RIO;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
@@ -92,6 +98,10 @@ public class MineVoyages {
 		TimeInterval depInterval = new TimeInterval(new Timestamp(START_DT), START_PERIOD_IN_DAYS);
 		
 		List<Ship> seenShips = new ArrayList<Ship>();
+		// add the list of ships to be excluded to the seenShip arraylist in order to filter them out
+		for (String mmsi : EXCLUDE_MMSI_LIST) {
+			seenShips.add(new Ship(mmsi));
+		}		
 		for (int i = 0; i < ANALYSIS_PERIOD_IN_DAYS/START_PERIOD_IN_DAYS; i++) {
 			System.out.println(">>> Period: "+depInterval);
 			List<ShipTrack> tracks = miner.getShipTracksInIntervalAndBetweenBoxes(
