@@ -31,6 +31,7 @@ public class ShowShipTracksCrossingBox {
 	final static String START_DT = "2011-03-01 00:00:00";
 	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
 	final static int SHIPS_LIMIT = 20;
+	final static Box BOX = Areas.getBox("GIBRALTAR");
 	
 
 	final static String OUTPUT_FILE = "c:/master_data/ShipTracks";
@@ -65,7 +66,7 @@ public class ShowShipTracksCrossingBox {
 		Miner miner = new Miner();
 		
 		List<ShipTrack> tracks = miner.getShipTracksInIntervalAndCrossingBox(
-				analysisInterval, Areas.GIBRALTAR, SHIPS_LIMIT);		
+				analysisInterval, BOX, SHIPS_LIMIT);		
 		
 		for (ShipTrack track : tracks) {
 			kmlGenerator.addTrack(track, track.getMmsi());			

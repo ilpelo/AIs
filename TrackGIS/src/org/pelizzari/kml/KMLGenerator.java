@@ -33,7 +33,7 @@ public class KMLGenerator {
 	Element docNode;
 	
 	// print position with MMSI and then skip ... positions
-	static final int MMSI_LABEL_SKIP_INTERVAL = 30;
+	static final int MMSI_LABEL_SKIP_INTERVAL = 15;
 
 	/**
 	 * @throws ParserConfigurationException

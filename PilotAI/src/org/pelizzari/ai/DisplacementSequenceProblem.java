@@ -42,13 +42,13 @@ public class DisplacementSequenceProblem extends Problem implements
 	
 	static final String YEAR_PERIOD = "SUMMER";
 	static final Box DEPARTURE_AREA = 
-			Areas.GIBRALTAR; 
+			Areas.getBox("GIBRALTAR"); 
 			//Areas.CAPETOWN;
 	static final Box ARRIVAL_AREA = 
 			//Areas.GOA;
 			//Areas.REUNION;
 			//Areas.RIO;
-			Areas.GUADELOUPE;
+			Areas.getBox("GUADELOUPE");
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };

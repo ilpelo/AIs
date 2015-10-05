@@ -1,0 +1,8 @@
+start_dt = 2011-01-01
+voyage_duration_in_days = 15
+analysis_period_in_days = 10
+max_ships_to_analyse = 1
+year_period = WINTER
+exclude_mmsi_list = -1
+dep_box = CAPETOWN
+arr_box = REUNION

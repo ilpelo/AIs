@@ -1,12 +1,17 @@
 package org.pelizzari.mine;
 
+import java.applet.AppletStub;
 import java.awt.Color;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -36,23 +41,23 @@ import org.pelizzari.time.Timestamp;
  */
 public class MineVoyages {
 
-	final static String START_DT = "2011-01-01 00:00:00";
+	// consider this period to detect ships with a position in the departure area
 	final static int START_PERIOD_IN_DAYS = 4;
-	final static int VOYAGE_DURATION_IN_DAYS = 15;
-	final static int ANALYSIS_PERIOD_IN_DAYS = 10;
-	final static int MAX_SHIPS_TO_ANALYSE = 50;
-	final static int MAX_RATE_IN_SECONDS = 60; // max 1 position every 1 minute
-
-	final static String YEAR_PERIOD = "WINTER";
+	final static int MAX_RATE_IN_SECONDS = 600; // max 1 position every 10 minutes
 	
-	static final String[] EXCLUDE_MMSI_LIST = {};
+	static String START_DT; // = "2011-01-01 00:00:00";
+	static int VOYAGE_DURATION_IN_DAYS; // = 15;
+	static int ANALYSIS_PERIOD_IN_DAYS; // = 10;
+	static int MAX_SHIPS_TO_ANALYSE; // = 50;
+	static String YEAR_PERIOD; // = "WINTER";
+	static String[] EXCLUDE_MMSI_LIST; // = {};
 	
 	// GIB-Guadalupe SUMMER 2011-06-01 2 months
 	//static final String[] EXCLUDE_MMSI_LIST = {"247456000", "247601000", "247585000", "636090262", 
 	//	"235051085", "235010170", "375443000", "235054581"};
 	
 	//// Departure
-	final static Box DEP_BOX = Areas.CAPETOWN;
+	static Box DEP_BOX; // = Areas.CAPETOWN;
 	//final static Box DEP_BOX = Areas.GIBRALTAR;
 	//Box depBox = Areas.WEST_ATLANTIC;
 					
@@ -60,7 +65,7 @@ public class MineVoyages {
 	//Box arrBox = Areas.FINISTERRE;
 	//Box arrBox = Areas.SUEZ;
 	//Box arrBox = Areas.WEST_ATLANTIC;
-	final static Box ARR_BOX = Areas.REUNION;
+	static Box ARR_BOX; // = Areas.REUNION;
 	//final static Box ARR_BOX = Areas.GOA;
 	//Box arrBox = Areas.NOVASCOTIA;
 	//final static Box ARR_BOX = Areas.WEST_ATLANTIC;
@@ -68,14 +73,51 @@ public class MineVoyages {
 	//final static Box ARR_BOX = Areas.RIO;
 
 	final static String OUTPUT_DIR = "c:/master_data/";
-	// final String OUTPUT_DIR = "/master_data/";
-
+	static String OUTPUT_KML_FILE; // = OUTPUT_DIR+"tracks.kml";
+		
 	final static boolean KML_FILE_WITH_DATES = false;
-	final static String OUTPUT_KML_FILE = OUTPUT_DIR+"tracks.kml";
 	final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
+	
+	
+	static void loadProps(String absolutePathToPropFile) {
+		Properties prop = new Properties();
+		InputStream input = null;
+
+		try {
+
+			input = new FileInputStream(absolutePathToPropFile);
+
+			prop.load(input);
+			START_DT = prop.getProperty("start_dt") + " 00:00:00";
+			VOYAGE_DURATION_IN_DAYS = Integer.parseInt(prop.getProperty("voyage_duration_in_days"));
+			ANALYSIS_PERIOD_IN_DAYS = Integer.parseInt(prop.getProperty("analysis_period_in_days"));
+			MAX_SHIPS_TO_ANALYSE = Integer.parseInt(prop.getProperty("max_ships_to_analyse"));
+			YEAR_PERIOD = prop.getProperty("year_period");
+			EXCLUDE_MMSI_LIST = prop.getProperty("exclude_mmsi_list").split(",");
+			DEP_BOX = Areas.getBox(prop.getProperty("dep_box"));
+			ARR_BOX = Areas.getBox(prop.getProperty("arr_box"));			
+		} catch (IOException ex) {
+			System.err.println("Cannot read properties: "+absolutePathToPropFile);
+			ex.printStackTrace();			
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		OUTPUT_KML_FILE = OUTPUT_DIR + DEP_BOX.getName() + "_" + ARR_BOX.getName() + "_" +
+				YEAR_PERIOD + "_tracks.kml";
+	}
+	
 	
 	public static void main(String[] args) throws Exception {
 
+		
+		loadProps(args[0]);
+		
 		KMLGenerator kmlGenerator = null;
 		try {
 			kmlGenerator = new KMLGenerator();

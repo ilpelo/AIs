@@ -1,5 +1,8 @@
 package org.pelizzari.mine;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.pelizzari.gis.Box;
 import org.pelizzari.gis.Point;
 
@@ -48,17 +51,24 @@ public class Areas {
 	static Point guadeloupeNW = new Point(17.27f, -62.9f);
 	static Point guadeloupeSE = new Point(15.8f, -59.7f);
 	
-
 	
-	public final static Box GIBRALTAR = new Box(gibraltarNW, gibraltarSE, "GIBRALTAR");
-	public final static Box FINISTERRE = new Box(finisterreNW, finisterreSE, "FINISTERRE");
-	public final static Box NOVASCOTIA = new Box(novascotiaNW, novascotiaSE, "NOVASCOTIA");
-	public final static Box SUEZ = new Box(suezNW, suezSE, "SUEZ");
-	public final static Box CAPETOWN = new Box(capetownNW, capetownSE, "CAPETOWN");
-	public final static Box REUNION = new Box(reunionNW, reunionSE, "REUNION");
-	public final static Box WEST_ATLANTIC= new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC");
-	public final static Box RIO = new Box(rioNW, rioSE, "RIO");
-	public final static Box GOA = new Box(goaNW, goaSE, "GOA");
-	public final static Box GUADELOUPE = new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE");
+	public static Map<String, Box> boxes = new HashMap<String, Box>();
+	
+	static {
+		boxes.put("GIBRALTAR", new Box(gibraltarNW, gibraltarSE, "GIBRALTAR"));
+		boxes.put("FINISTERRE", new Box(finisterreNW, finisterreSE, "FINISTERRE"));
+		boxes.put("NOVASCOTIA", new Box(novascotiaNW, novascotiaSE, "NOVASCOTIA"));
+		boxes.put("SUEZ", new Box(suezNW, suezSE, "SUEZ"));
+		boxes.put("CAPETOWN", new Box(capetownNW, capetownSE, "CAPETOWN"));
+		boxes.put("REUNION", new Box(reunionNW, reunionSE, "REUNION"));
+		boxes.put("WEST_ATLANTIC", new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC"));
+		boxes.put("RIO", new Box(rioNW, rioSE, "RIO"));
+		boxes.put("GOA", new Box(goaNW, goaSE, "GOA"));
+		boxes.put("GUADELOUPE", new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE"));		
+	}
+	
+	public static Box getBox(String boxName) {
+		return boxes.get(boxName);
+	}
 	
 }
