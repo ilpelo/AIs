@@ -50,8 +50,13 @@ public class Areas {
 	// Guadeloupe
 	static Point guadeloupeNW = new Point(17.27f, -62.9f);
 	static Point guadeloupeSE = new Point(15.8f, -59.7f);
-	
-	
+	// Calais
+	static Point calaisNW = new Point(51.33f, 0.95f);
+	static Point calaisSE = new Point(50.61f, 2.58f);
+	// Red Sea
+	static Point redseaNW = new Point(20, 38);
+	static Point redseaSE = new Point(17, 42);
+		
 	public static Map<String, Box> boxes = new HashMap<String, Box>();
 	
 	static {
@@ -65,6 +70,10 @@ public class Areas {
 		boxes.put("RIO", new Box(rioNW, rioSE, "RIO"));
 		boxes.put("GOA", new Box(goaNW, goaSE, "GOA"));
 		boxes.put("GUADELOUPE", new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE"));		
+		String areaName = "CALAIS";
+		boxes.put(areaName, new Box(calaisNW, calaisSE, areaName));		
+		areaName = "REDSEA";
+		boxes.put(areaName, new Box(redseaNW, redseaSE, areaName));		
 	}
 	
 	public static Box getBox(String boxName) {

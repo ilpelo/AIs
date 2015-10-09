@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -58,20 +60,7 @@ public class MineVoyages {
 	
 	//// Departure
 	static Box DEP_BOX; // = Areas.CAPETOWN;
-	//final static Box DEP_BOX = Areas.GIBRALTAR;
-	//Box depBox = Areas.WEST_ATLANTIC;
-					
-	/// Arrival
-	//Box arrBox = Areas.FINISTERRE;
-	//Box arrBox = Areas.SUEZ;
-	//Box arrBox = Areas.WEST_ATLANTIC;
 	static Box ARR_BOX; // = Areas.REUNION;
-	//final static Box ARR_BOX = Areas.GOA;
-	//Box arrBox = Areas.NOVASCOTIA;
-	//final static Box ARR_BOX = Areas.WEST_ATLANTIC;
-	//final static Box ARR_BOX = Areas.GUADELOUPE;
-	//final static Box ARR_BOX = Areas.RIO;
-
 	final static String OUTPUT_DIR = "c:/master_data/";
 	static String OUTPUT_KML_FILE; // = OUTPUT_DIR+"tracks.kml";
 		
@@ -94,8 +83,8 @@ public class MineVoyages {
 			MAX_SHIPS_TO_ANALYSE = Integer.parseInt(prop.getProperty("max_ships_to_analyse"));
 			YEAR_PERIOD = prop.getProperty("year_period");
 			EXCLUDE_MMSI_LIST = prop.getProperty("exclude_mmsi_list").split(",");
-			DEP_BOX = Areas.getBox(prop.getProperty("dep_box"));
-			ARR_BOX = Areas.getBox(prop.getProperty("arr_box"));			
+			DEP_BOX = getBox(prop, "dep_box");
+			ARR_BOX = getBox(prop, "arr_box");
 		} catch (IOException ex) {
 			System.err.println("Cannot read properties: "+absolutePathToPropFile);
 			ex.printStackTrace();			
@@ -112,11 +101,30 @@ public class MineVoyages {
 				YEAR_PERIOD + "_tracks.kml";
 	}
 	
+	static Box getBox(Properties prop, String boxParam) {		
+//		// lat1,lon1,lat2,lon2 : ne (lat, lon), sw (lat, lon)
+//		String[] boxCoordStr = prop.getProperty(boxParam).split(",");
+//		float[] boxCoord = new float[boxCoordStr.length];
+//		for (int i = 0; i < boxCoordStr.length; i++) {
+//			boxCoord[i] = Float.parseFloat(boxCoordStr[i]);			
+//		}
+//		Box box = new Box(new Point(boxCoord[0], boxCoord[1]),
+//						  new Point(boxCoord[2], boxCoord[3]));
+		Box box = Areas.getBox(boxParam);
+		return box;
+	}
+	
 	
 	public static void main(String[] args) throws Exception {
 
+		if(args.length != 1) {
+			System.err.println("Usage: prog properties_file");
+			System.exit(-1);
+		}
+		String absPathPropFile = args[0];
+		loadProps(absPathPropFile);
 		
-		loadProps(args[0]);
+		Date startDate = new java.util.Date();
 		
 		KMLGenerator kmlGenerator = null;
 		try {
@@ -203,8 +211,13 @@ public class MineVoyages {
 			//
 			// Normalize tracks (use compute segments to overwrite timestamps)!!!
 			track.computeTrackSegmentsAndNormalizeTime(new Timestamp(REFERENCE_START_DT), ShipTrack.REFERENCE_SPEED_IN_KNOTS);
-			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD);			
+			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD, startDate.getTime()/1000);			
 		}
-		System.out.println("Done\n");
+		Date endDate = new Date();
+		long duration  = endDate.getTime() - startDate.getTime();
+		long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+		System.out.println("Done, duration (min): "+diffInMinutes);
+		
+		System.exit(0);
 	}
 }

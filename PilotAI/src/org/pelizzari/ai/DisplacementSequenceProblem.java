@@ -41,14 +41,10 @@ public class DisplacementSequenceProblem extends Problem implements
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
 	static final String YEAR_PERIOD = "SUMMER";
-	static final Box DEPARTURE_AREA = 
-			Areas.getBox("GIBRALTAR"); 
-			//Areas.CAPETOWN;
-	static final Box ARRIVAL_AREA = 
-			//Areas.GOA;
-			//Areas.REUNION;
-			//Areas.RIO;
-			Areas.getBox("GUADELOUPE");
+//	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
+	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };

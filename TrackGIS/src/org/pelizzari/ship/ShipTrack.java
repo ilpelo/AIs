@@ -107,19 +107,20 @@ public class ShipTrack extends ShipPositionList {
 		}
 	}
 
-	public void saveTrackToDB(Box depBox, Box arrBox, String yearPeriod) {
+	public void saveTrackToDB(Box depBox, Box arrBox, String yearPeriod, long insertTs) {
 		Connection con = DBConnection.getCon();
 		int writeCount = 0;
 		//int errCount = 0;
 				
 		final String TRACK_INSERT = 
-				"INSERT INTO tracks (mmsi, source, period, dep, arr, ts, lat, lon) "+
+				"INSERT INTO tracks (mmsi, source, period, dep, arr, insert_ts, ts, lat, lon) "+
 				"VALUES ("+
 			    getMmsi() + ", " +
 				"null, " + // source
 				"'" + yearPeriod+ "', " +
 				"'" + depBox.getName() + "', " +
-				"'" + arrBox.getName() + "', ";
+				"'" + arrBox.getName() + "', " +
+				insertTs + ", ";
 		
 		try {
 			for (ShipPosition pos : getPosList()) {

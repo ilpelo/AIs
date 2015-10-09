@@ -21,6 +21,7 @@ import org.pelizzari.gis.Box;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.ShipVoyage;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -120,6 +121,10 @@ public class KMLGenerator {
 		placemark.appendChild(lineString);
 	}
 	
+	public void addComment(String comment) {
+		
+	}
+	
 	public void addTrack(ShipTrack track, String label, boolean withDates) {
 		if (track == null) {
 			System.err.println("addTrack: track is null");
@@ -142,6 +147,9 @@ public class KMLGenerator {
 			i++;
 		}
 		addLineString(label, track.getPosList());
+//		Comment trackDescription = doc.createComment(track.toString());
+//		Element element = doc.getDocumentElement();
+//		element.getParentNode().insertBefore(trackDescription, element);
 	}
 
 	public void addTrack(ShipTrack track, String label) {

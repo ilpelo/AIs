@@ -8,11 +8,16 @@ import java.awt.Color;
 import java.io.*;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.pelizzari.gis.Box;
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
+import org.pelizzari.kml.KMLGenerator;
 import org.pelizzari.ship.ChangeOfHeadingSequence;
 import org.pelizzari.ship.HeadingSequence;
+import org.pelizzari.ship.ShipPosition;
+import org.pelizzari.ship.ShipPositionList;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.ShipTrackSegment;
 import org.pelizzari.ship.TrackError;
@@ -42,6 +47,9 @@ public class BestStatistics extends Statistics {
 	// the filename where the final map is saved
 	public static final String P_IMGFILE = "image-file";
 	File imageFile;
+	// KML file
+	static final String FILE_DIR = "c:/master_data/";
+	public static final String KML_OUTFILE = "AIs-result";	
 
 	public void setup(final EvolutionState state, final Parameter base) {
 		// DO NOT FORGET to call super.setup(...) !!
@@ -154,6 +162,30 @@ public class BestStatistics extends Statistics {
 		}			
 	}
 	
+	public void makeKML(ShipPositionList trainingPositionList, ShipTrack bestTrack) {
+		KMLGenerator kmlGenerator = null;
+		try {
+			kmlGenerator = new KMLGenerator();
+		} catch (ParserConfigurationException e1) {
+			e1.printStackTrace();
+		}
+		kmlGenerator.addIconStyle("trainingPositionStyle",
+				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
+				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
+		
+		for(ShipPosition pos: trainingPositionList.getPosList()) {
+			kmlGenerator.addPoint("trainingPositionStyle", "", pos.getPoint().lat, pos.getPoint().lon);
+		}
+		
+		kmlGenerator.addTrack(bestTrack, "");		
+		kmlGenerator.saveKMLFile(FILE_DIR+"/"+KML_OUTFILE+".kml");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void showBestIndividual(EvolutionState state 
 //									      int genCount,
 //									      int genMax,
@@ -175,7 +207,7 @@ public class BestStatistics extends Statistics {
 			simplyTheBest.printIndividualForHumans(state, popLog);
 						
 			// build ship track using the winner's displacements
-			// and starting from the first position if the Target track
+			// and starting from the first position of the Target track
 			if (state.evaluator.p_problem instanceof DisplacementSequenceProblem) {
 				DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
 				ShipTrack bestTrack = prob.makeTrack(state, (GeneVectorIndividual)simplyTheBest);
@@ -191,6 +223,9 @@ public class BestStatistics extends Statistics {
 				state.output.println(""+trackError, popLog);
 				
 				drawOnMap(bestTrack, state, lastGen);
+				if(lastGen) {
+					makeKML(prob.getTrainingShipPositionList(), bestTrack);
+				}
 			}
 		}
 		genCount++;
