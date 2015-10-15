@@ -41,9 +41,10 @@ public class BestStatistics extends Statistics {
 	// Output params
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
-	public static final int GEN_OUTPUT_RATE = 3000; // print log every Nth
+	public static final int GEN_OUTPUT_RATE = 10; // print log every Nth
 													// generations
 	public static Map map, map1;
+	//public KMLGenerator kmlGenerator;
 	// the filename where the final map is saved
 	public static final String P_IMGFILE = "image-file";
 	File imageFile;
@@ -98,13 +99,33 @@ public class BestStatistics extends Statistics {
 						".png";
 		imageFile = new File(fileName);
 		state.output.println("Map image: " + imageFile.getAbsolutePath(), popLog);	
-		// init Map and show target track
+		// init Map
 		map = new Map();
 		map1 = new Map();
+		// init KML
+		KMLGenerator kmlGenerator = null;
+		try {
+			kmlGenerator = new KMLGenerator();
+		} catch (ParserConfigurationException e1) {
+			e1.printStackTrace();
+		}
+		kmlGenerator.addIconStyle("trainingPositionStyle",
+				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
+				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
+		
+		// show training positions
 		DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
 		map.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
 		map1.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
 		map.setVisible(true);
+		// on KML too
+		for(ShipPosition pos: prob.getTrainingShipPositionList().getPosList()) {
+			kmlGenerator.addPoint("trainingPositionStyle", "", pos.getPoint().lat, pos.getPoint().lon);
+		}
+		String kmlFile = FILE_DIR+KML_OUTFILE+"_trainingset.kml";
+		System.out.println("Saving KML: "+kmlFile);
+		kmlGenerator.saveKMLFile(kmlFile);
+		
 		// target displacements
 //		state.output.println("Target track: \n" + prob.getTargetTrack(), popLog);
 //		DisplacementSequence displSeq = prob.getTargetTrack().computeDisplacements();
@@ -148,12 +169,25 @@ public class BestStatistics extends Statistics {
 		Color trackColor = lastGen?Color.PINK:Color.GRAY;
 		map.plotTrack(track, trackColor, ""+state.generation);
 		//drawSegmentBoxes(track, map);
+		// make KML
+		KMLGenerator kmlGenerator1 = null;
+		try {
+			kmlGenerator1 = new KMLGenerator();
+		} catch (ParserConfigurationException e1) {
+			e1.printStackTrace();
+		}
+		kmlGenerator1.addTrack(track, "");
+		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+state.generation+".kml";
+		System.out.println("Saving KML: "+kmlFile1);
+		kmlGenerator1.saveKMLFile(kmlFile1);
+		// save map image
 		if(lastGen) {
 			map1.plotTrack(track, Color.PINK, ""+state.generation);
 			//drawSegmentBoxes(track, map1);
 			map1.setVisible(true);
-			// set up imageFile					
+			// set up imageFile		
 			map1.saveAsImage(imageFile);
+			// flush
 			try {
 				System.in.read();
 			} catch (IOException e) {
@@ -162,29 +196,21 @@ public class BestStatistics extends Statistics {
 		}			
 	}
 	
-	public void makeKML(ShipPositionList trainingPositionList, ShipTrack bestTrack) {
-		KMLGenerator kmlGenerator = null;
-		try {
-			kmlGenerator = new KMLGenerator();
-		} catch (ParserConfigurationException e1) {
-			e1.printStackTrace();
-		}
-		kmlGenerator.addIconStyle("trainingPositionStyle",
-				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
-				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
-		
-		for(ShipPosition pos: trainingPositionList.getPosList()) {
-			kmlGenerator.addPoint("trainingPositionStyle", "", pos.getPoint().lat, pos.getPoint().lon);
-		}
-		
-		kmlGenerator.addTrack(bestTrack, "");		
-		kmlGenerator.saveKMLFile(FILE_DIR+"/"+KML_OUTFILE+".kml");
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	public void makeKML(ShipPositionList trainingPositionList, ShipTrack bestTrack) {
+//		for(ShipPosition pos: trainingPositionList.getPosList()) {
+//			kmlGenerator.addPoint("trainingPositionStyle", "", pos.getPoint().lat, pos.getPoint().lon);
+//		}
+//		
+//		kmlGenerator.addTrack(bestTrack, "");
+//		String kmlFile = FILE_DIR+"/"+KML_OUTFILE+".kml";
+//		System.out.println("Saving KML: "+kmlFile);
+//		kmlGenerator.saveKMLFile(kmlFile);
+//		try {
+//			System.in.read();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public void showBestIndividual(EvolutionState state 
 //									      int genCount,
@@ -223,9 +249,6 @@ public class BestStatistics extends Statistics {
 				state.output.println(""+trackError, popLog);
 				
 				drawOnMap(bestTrack, state, lastGen);
-				if(lastGen) {
-					makeKML(prob.getTrainingShipPositionList(), bestTrack);
-				}
 			}
 		}
 		genCount++;

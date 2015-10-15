@@ -35,16 +35,17 @@ public class DisplacementSequenceProblem extends Problem implements
 	
 	static final String DATA_STORAGE = "DB";
 
-	static final String FILE_DIR = "c:/master_data/";
-	static final String FILE_PREFIX = "pos_";
-	static final String FILE_EXT = ".csv";
+//	static final String FILE_DIR = "c:/master_data/";
+//	static final String FILE_PREFIX = "pos_";
+//	static final String FILE_EXT = ".csv";
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
-	static final String YEAR_PERIOD = "SUMMER";
-//	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
-//	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
-	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");
+	static final String YEAR_PERIOD = "WINTER";
+	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
+//	static final String YEAR_PERIOD = "SUMMER";
+//	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };

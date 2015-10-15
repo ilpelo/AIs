@@ -27,7 +27,7 @@ public class TrackError {
 //	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
 //	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
-	final static float HEADING_ERROR_FACTOR = 1f/10f; // multiply by the number of  changes of heading over the limit 
+	final static float HEADING_ERROR_FACTOR = 1f; // multiply by the number of  changes of heading over the limit 
 	final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
 	// the track to which the error refers to 
@@ -59,7 +59,7 @@ public class TrackError {
 	public TrackError(ShipTrack track, boolean debug) {
 		this.debug = debug;
 		baseTrack = track;
-		int size = baseTrack.getPosList().size();
+		//int size = baseTrack.getPosList().size();
 		//segmentErrorVector = new float[size];
 		//if(debug) extraInfo = new String[size];
 	}
@@ -199,9 +199,11 @@ public class TrackError {
 	 * This should return a high value if the average change of heading is big
 	 * @return
 	 */
-	public float headingError() {
-		return HEADING_ERROR_FACTOR * baseTrack.sumChangeOfHeading() / getNumberOfTrackSegments();
-//		int cohOnceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(MAX_CHANGE_OF_HEADING_ANGLE);
+	public float getAvgChangeOfHeading() {
+		return baseTrack.sumChangeOfHeading() / (getNumberOfTrackSegments()-1);
+		
+		//return HEADING_ERROR_FACTOR * baseTrack.sumChangeOfHeading() / (getNumberOfTrackSegments()-1);
+		//		int cohOnceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(MAX_CHANGE_OF_HEADING_ANGLE);
 //		int cohTwiceOverLimitCount = baseTrack.countChangeOfHeadingOverLimit(2*MAX_CHANGE_OF_HEADING_ANGLE);
 //		return (cohOnceOverLimitCount * HEADING_ERROR_AMPLIFIER +
 //			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100) / (float) getNumberOfTrackSegments();
@@ -241,13 +243,13 @@ public class TrackError {
 	
 	public float getError() {
 		float error =
-			headingError() +
 			//trackError.destinationError() +
 			//trackError.getAvgSquaredDistanceAllSegments() +
 			//getSegmentCoverageError() +
 			//getTotalCoverageError() +
-			//getVarianceError() +
+			getVarianceError() +
 			getAvgDistanceError() +
+			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
 			//trackError.avgTotalSegmentError() +
 			0f;
 		return error;
@@ -297,7 +299,7 @@ public class TrackError {
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
 		//s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
-		s = s + "headingError = " + headingError() + "\n";		
+		s = s + "avgChangeOfHeading = " + getAvgChangeOfHeading() + "\n";		
 		//s = s + "destinationError = " + destinationError() + "\n";		
 		s = s + "segmentCoverageError = " + getSegmentCoverageError() + "\n";	
 		s = s + "totalCoverageError = " + getTotalCoverageError() + "\n";	
