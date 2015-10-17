@@ -143,21 +143,29 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
 
 -- Tracks table
-select * from tracks
+select from_unixtime(ts), from_unixtime(norm_ts), insert_ts
+from tracks
 where 
---period = 'WINTER1'
-dep = 'GIBRALTAR'
+mmsi = 256873000
+order by norm_ts asc
 ;
 
-select count(*) from tracks;
-
-delete from tracks
-where 
+--period = 'WINTER1'
 --dep = 'GIBRALTAR'
---arr = 'GUADELOUPE'
-arr = 'REUNION'
---period = 'WINTER1'
-;
 
+select dep, arr, period, insert_ts, count(*), count(distinct mmsi) as mmsi
+from tracks
+group by dep, arr, period
+order by insert_ts desc;
+
+select mmsi, dep, arr, period, count(*) as counter
+from tracks
+where arr = 'GOA'
+group by mmsi, dep, arr, period
+having counter > 5;
+
+-- dump
+C:\Program Files\MySQL\MySQL Server 5.6\bin>mysqldump -uroot -pmysql ai tracks >
+ c:\master_data\tracks_1931.sql
 
 

@@ -62,5 +62,7 @@ index index_ts (ts),
 index index_dep_arr (dep, arr)
 );
 
+alter table tracks add column norm_ts int;
+
 
 

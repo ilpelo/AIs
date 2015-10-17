@@ -56,6 +56,12 @@ public class Areas {
 	// Red Sea
 	static Point redseaNW = new Point(20, 38);
 	static Point redseaSE = new Point(17, 42);
+	// Lanzarote
+	static Point lanzaroteNW = new Point(29, -14);
+	static Point lanzaroteSE = new Point(27, 12);
+	// Natal
+	static Point natalNW = new Point(-5, -36);
+	static Point natalSE = new Point(-7, -33);
 		
 	public static Map<String, Box> boxes = new HashMap<String, Box>();
 	
@@ -74,6 +80,10 @@ public class Areas {
 		boxes.put(areaName, new Box(calaisNW, calaisSE, areaName));		
 		areaName = "REDSEA";
 		boxes.put(areaName, new Box(redseaNW, redseaSE, areaName));		
+		areaName = "LANZAROTE";
+		boxes.put(areaName, new Box(lanzaroteNW, lanzaroteSE, areaName));		
+		areaName = "NATAL";
+		boxes.put(areaName, new Box(natalNW, natalSE, areaName));		
 	}
 	
 	public static Box getBox(String boxName) {

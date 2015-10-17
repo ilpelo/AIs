@@ -6,6 +6,7 @@ import ec.util.*;
 
 import java.awt.Color;
 import java.io.*;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -176,7 +177,22 @@ public class BestStatistics extends Statistics {
 		} catch (ParserConfigurationException e1) {
 			e1.printStackTrace();
 		}
+		final int HUE_LEVELS = track.getSegList().size();
+		kmlGenerator1.addColoredStyles("pointStyle", 
+				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+				HUE_LEVELS, false);
 		kmlGenerator1.addTrack(track, "");
+		for(ShipTrackSegment seg: track.getSegList()) {
+			int i = 0;
+			for(ShipPosition pos: seg.getTargetPosList()) {
+				kmlGenerator1.addPoint("pointStyle"+i, 
+						"", 
+						pos.getPoint().lat, 
+						pos.getPoint().lon);
+			}
+			i++;
+		}
+		
 		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+state.generation+".kml";
 		System.out.println("Saving KML: "+kmlFile1);
 		kmlGenerator1.saveKMLFile(kmlFile1);

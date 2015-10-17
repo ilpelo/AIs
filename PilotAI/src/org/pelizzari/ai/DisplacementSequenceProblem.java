@@ -41,8 +41,8 @@ public class DisplacementSequenceProblem extends Problem implements
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
 	static final String YEAR_PERIOD = "WINTER";
-	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
+	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
 //	static final String YEAR_PERIOD = "SUMMER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");

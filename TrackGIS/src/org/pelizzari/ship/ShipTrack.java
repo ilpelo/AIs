@@ -43,6 +43,8 @@ public class ShipTrack extends ShipPositionList {
 	float avgSpeed = -1;
 	// mmsi
 	String mmsi = null;
+	// track length in miles
+	float trackLengthInMiles = 0;
 	
 	public ShipTrack() {
 		super();
@@ -137,6 +139,30 @@ public class ShipTrack extends ShipPositionList {
 		}
 	}	
 	
+	
+	public void updateNormalizedShipPositionTimestampInDB(
+			Box depBox, Box arrBox, String yearPeriod, int posIndex, Timestamp normTS) {
+		Connection con = DBConnection.getCon();
+		int updateCount = 0;
+				
+		final String SHIP_POSITION_UPDATE = 
+				"UPDATE tracks SET norm_ts = "+normTS.getTsMillisec()/1000 +" "+
+				"WHERE mmsi = " + getMmsi() + " " +
+				"AND period = '" + yearPeriod+ "' " +
+				"AND dep = '" + depBox.getName() + "' " +
+				"AND arr = '" + arrBox.getName() + "' " +
+				"AND ts = " + getPosList().get(posIndex).getTs().getTsMillisec()/1000 + " ";		
+		try {
+			Statement stmt = con.createStatement();
+			updateCount = stmt.executeUpdate(SHIP_POSITION_UPDATE);	
+		} catch (SQLException e) {
+			System.err.println("Cannot set norm timestamp in DB");
+			e.printStackTrace();
+		}
+		if(updateCount != 1) {
+			System.err.println("Error by updating timestamp; updateCount "+updateCount+", update: " + SHIP_POSITION_UPDATE);
+		}
+	}	
 	
 	/**
 	 * Remove from track any duplicated positions within the given time window.
@@ -446,6 +472,21 @@ public class ShipTrack extends ShipPositionList {
 	}
 	
 	/**
+	 * Compute the timestamp of the position if the voyage duration is 24h.
+	 */
+	public Timestamp computeNormalizedTime(Timestamp referenceStartTS,
+										   int referenceVoyageDurationInSec,
+			   							   int posIndex) {
+		float sailedDistanceInMiles = computeLengthInMiles(posIndex);
+		// relative distance, between 0 and 1
+		float relativeDistance = sailedDistanceInMiles/trackLengthInMiles;
+		int normalizedRelativeDurationInSec = (int) (referenceVoyageDurationInSec * relativeDistance);
+		long normalizedTsInMillisec = referenceStartTS.getTsMillisec()+normalizedRelativeDurationInSec*1000;
+		Timestamp normTs = new Timestamp(normalizedTsInMillisec);
+		return normTs;
+	}
+	
+	/**
 	 * Compute the list of segments corresponding to the positions of this track.
 	 * Keep the position timestamps.
 	 *
@@ -468,16 +509,38 @@ public class ShipTrack extends ShipPositionList {
 		return segList;
 	}
 
-	public float computeLengthInMiles() {
+	/**
+	 * Compute the length of the track from the first position to the given position.
+	 * @param posIndex first pos is 0
+	 * @return
+	 */
+	public float computeLengthInMiles(int posIndex) {
 		float lengthInMiles = 0;
+		if(posIndex == 0) {
+			return 0;
+		}
 		ShipPosition prevPos = null;
+		int i = 0;
 		for (ShipPosition pos : posList) {
 			if (prevPos != null) {
 				lengthInMiles += prevPos.point.distanceInMiles(pos.point); // in nm
 			}
+			if(i == posIndex) {
+				break;
+			}
 			prevPos = pos;
+			i++;
 		}
 		return lengthInMiles;
+	}
+
+	/**
+	 * Compute the length in miles of the track.
+	 * @return
+	 */
+	public float computeLengthInMiles() {
+		trackLengthInMiles = computeLengthInMiles(posList.size()-1);
+		return trackLengthInMiles;		
 	}
 	
 	// in knots (miles/hours)

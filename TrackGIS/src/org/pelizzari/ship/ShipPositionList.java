@@ -61,6 +61,22 @@ public class ShipPositionList {
 		return filteredPosList;
 	}	
 			
+	/**
+	 * Select ship positions only if they are located
+	 * in the stripe perpendicular to the segment. 
+	 * @param segment
+	 * @return
+	 * @throws Exception
+	 */
+	public List<ShipPosition> getPosListOnStripe(ShipTrackSegment segment) throws Exception {
+		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();
+		for (ShipPosition pos : posList) {
+			if(segment.isWithinPerpendicularStripe(pos.point)) {
+				filteredPosList.add(pos);
+			}
+		}
+		return filteredPosList;
+	}	
 	
 	public List<ShipPosition> getPosListInInterval(TimeInterval interval) {
 		List<ShipPosition> filteredPosList = new ArrayList<ShipPosition>();

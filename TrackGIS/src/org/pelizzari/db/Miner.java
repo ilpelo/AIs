@@ -54,8 +54,8 @@ public class Miner {
 
 	String getBoxNamesSQLCondition(Box depBox, Box arrBox) {
 		final String BOX_NAME_COND = 
-				"and dep = "+depBox.getName()+" "+		
-				"and arr = "+arrBox.getName()+" ";		
+				"and dep = '"+depBox.getName()+"' "+		
+				"and arr = '"+arrBox.getName()+"' ";		
 		return BOX_NAME_COND;
 	}
 	
@@ -82,14 +82,21 @@ public class Miner {
 		return INCLUDE_MMSI_COND;
 	}
 	
+	/**
+	 * Get the list of ships present in the tracks table.
+	 * @param yearPeriod
+	 * @param depBox
+	 * @param arrBox
+	 * @return
+	 */
 	public List<Ship> getShipsWithTracks(String yearPeriod, Box depBox, Box arrBox) {
 
 		final String SHIP_QUERY = 
 				"select distinct mmsi " +
 				"from tracks "+
-				"where period = " + yearPeriod +
-				"and dep = " + depBox.getName() + 
-				"and arr = " + arrBox.getName() + 
+				"where period = '" + yearPeriod + "' " +
+				"and dep = '" + depBox.getName() + "' " +
+				"and arr = '" + arrBox.getName() +  "' " +
 				"order by mmsi asc";
 
 		String shipQuery = SHIP_QUERY;
@@ -171,19 +178,29 @@ public class Miner {
 		
 		return listOfShips;
 	}
+
+	/*
+	 * Loads a merged track between 2 areas from the TRACKS table in the db
+	 */
+	public ShipPositionList getMergedShipTracksInPeriodAndBetweenBoxes(
+			String yearPeriod, Box depBox, Box arrBox) {
+		return getMergedShipTracksInPeriodAndBetweenBoxes(yearPeriod, depBox, arrBox, -1);
+	}
 	
 	/*
 	 * Loads a merged track between 2 areas from the TRACKS table in the db
 	 */
-	public ShipPositionList getMergedShipTracksInPeriodAndBetweenBoxes(String yearPeriod, Box depBox, Box arrBox) {
+	public ShipPositionList getMergedShipTracksInPeriodAndBetweenBoxes(
+			String yearPeriod, Box depBox, Box arrBox, long insertTS) {
 		Connection con = DBConnection.getCon();
 		int readCount = 0;				
 		final String FUSED_TRACK_SELECT = 
-				"select ts, lat, lon " +
+				"select norm_ts, lat, lon " +
 				"from tracks " +
 				"where period = '" + yearPeriod + "' " +
 				"and dep = '" + depBox.getName() + "' " +
 				"and arr = '" + arrBox.getName() + "' " + 
+				((insertTS == -1)?"":"and insert_ts = " + insertTS + " ") + 
 				"order by ts asc";
 		System.out.println("Fused Track Query: " + FUSED_TRACK_SELECT);			
 		
@@ -195,7 +212,7 @@ public class Miner {
 			while(rs.next()) {
 				float lat = rs.getFloat("lat");
 				float lon = rs.getFloat("lon");
-				int ts = rs.getInt("ts"); // in sec
+				int ts = rs.getInt("norm_ts"); // in sec
 				Point posPoint = new Point(lat, lon);				
 				pos = new ShipPosition(posPoint, new Timestamp((long)ts*1000));
 				mergedTrack.addPosition(pos);
@@ -276,8 +293,28 @@ public class Miner {
 		List<ShipPosition> posList = getShipPositions(SHIP_POSITION_QUERY);
 		return posList;
 	}
-
-	public List<ShipPosition> getShipPositionsFromTracks(
+	
+	
+	public List<ShipTrack> getShipTracksFromTracksTable(
+			String yearPeriod, 
+			Box depBox,
+			Box arrBox) {
+		List<Ship> ships = getShipsWithTracks(yearPeriod, depBox, arrBox);
+		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
+		for (Ship ship : ships) {
+			ShipTrack track = new ShipTrack();
+			track.setMmsi(ship.getMmsi());
+			List<Ship> oneShip = new ArrayList<Ship>();
+			oneShip.add(ship);
+			List<ShipPosition> posList = getShipPositionsFromTracksTable(
+					depBox, arrBox, oneShip, null, -1);
+			track.setPosList(posList);
+			tracks.add(track);
+		}		
+		return tracks;
+	}
+	
+	public List<ShipPosition> getShipPositionsFromTracksTable(
 			   Box depBox,
 			   Box arrBox,
 			   List<Ship> includeShips,

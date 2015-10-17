@@ -35,7 +35,29 @@ public class KMLGenerator {
 	Element docNode;
 	
 	// print position with MMSI and then skip ... positions
-	static final int MMSI_LABEL_SKIP_INTERVAL = 15;
+	static final int MMSI_LABEL_SKIP_INTERVAL = 5;
+	static final String[] COLOR_SCALE = {
+		"ffffff",
+		"ff0000",
+		"00ff00",
+		"0000ff",
+		"ffff00",
+		"ff00ff",
+		"c0c0c0",
+		"808080",
+		"800000",
+		"808000",
+		"008000",
+		"800080",
+		"008080",
+		"000080",
+		"ff4500",
+		"7fff00",
+		"ff1493",
+		"d2691e",
+		"ff6347",
+		"f0e68c"
+		};
 
 	/**
 	 * @throws ParserConfigurationException
@@ -52,6 +74,79 @@ public class KMLGenerator {
 		root.appendChild(docNode);
 	}
 
+	/**
+	 * @param styleName
+	 * @param iconHrefURL
+	 * @param greenHueLevel 0-(maxHueLevels-1)
+	 */
+	public void addGradientStyle(
+			String styleName, String iconHrefURL, int hueLevel, int maxHueLevels) {
+		int greenHueLevel = 255*hueLevel/(maxHueLevels-1);
+		Element style = doc.createElement("Style");
+		// tstyle.setAttribute("id", styleName);
+		Element iconStyle = doc.createElement("IconStyle");
+		style.setAttribute("id", styleName+hueLevel);
+		// color aabbggrr hex
+		Element color = doc.createElement("color");
+		String green = String.format("%02x", greenHueLevel);
+		color.appendChild(doc.createTextNode("ff66"+green+"ff"));
+		iconStyle.appendChild(color);
+		// HREF to icon
+		Element icon = doc.createElement("Icon");
+		Element iconHref = doc.createElement("href");
+		iconHref.appendChild(doc.createTextNode(iconHrefURL));
+		icon.appendChild(iconHref);
+		iconStyle.appendChild(icon);
+		style.appendChild(iconStyle);
+		docNode.appendChild(style);
+	}
+
+	/**
+	 * @param styleName
+	 * @param iconHrefURL
+	 * @param greenHueLevel 0-(maxHueLevels-1)
+	 */
+	public void addColorScaleStyle(
+			String styleName, String iconHrefURL, int level) {
+		Element style = doc.createElement("Style");
+		// tstyle.setAttribute("id", styleName);
+		Element iconStyle = doc.createElement("IconStyle");
+		style.setAttribute("id", styleName+level);
+		// color aabbggrr hex
+		Element color = doc.createElement("color");
+		if(level >= COLOR_SCALE.length) {
+			level = COLOR_SCALE.length-1;
+		}
+		String colorValue = "ff"+COLOR_SCALE[level];
+		color.appendChild(doc.createTextNode(colorValue));
+		iconStyle.appendChild(color);
+		// HREF to icon
+		Element icon = doc.createElement("Icon");
+		Element iconHref = doc.createElement("href");
+		iconHref.appendChild(doc.createTextNode(iconHrefURL));
+		icon.appendChild(iconHref);
+		iconStyle.appendChild(icon);
+		style.appendChild(iconStyle);
+		docNode.appendChild(style);
+	}
+	
+	/**
+	 * Add maxHueLevels of greens named coloredStyleName1, coloredStyleName2, ...
+	 * @param coloredStyleName
+	 * @param iconHrefURL
+	 * @param maxHueLevels
+	 */
+	public void addColoredStyles(
+			String coloredStyleName, String iconHrefURL, int maxHueLevels, boolean gradient) {
+		for (int i = 0; i < maxHueLevels; i++) {
+			if(gradient) {
+				addGradientStyle(coloredStyleName, iconHrefURL, i, maxHueLevels);
+			} else {
+				addColorScaleStyle(coloredStyleName, iconHrefURL, i);
+			}
+		}
+	}	
+	
 	public void addIconStyle(String iconStyleName, String iconHrefURL) {
 		Element style = doc.createElement("Style");
 		// tstyle.setAttribute("id", styleName);
@@ -133,11 +228,12 @@ public class KMLGenerator {
 		List<ShipPosition> positions = track.getPosList();
 		
 		int i = 0;
+		int lastPos = positions.size()-1;
 		for (ShipPosition pos : positions) {
 			long ts = pos.getTs().getTsMillisec();
 			Date date = new Date(ts);
 			String posLabel = withDates?date.toString():"";
-			if(i % MMSI_LABEL_SKIP_INTERVAL == 0) {
+			if(i % MMSI_LABEL_SKIP_INTERVAL == 0 || i == lastPos) {
 				posLabel = posLabel + " " + track.getMmsi(); 
 			}
 			addPoint("targetStyle",  
@@ -152,26 +248,28 @@ public class KMLGenerator {
 //		element.getParentNode().insertBefore(trackDescription, element);
 	}
 
-	public void addColoredTrainingSet(ShipTrack track) {
-		if (track == null) {
-			System.err.println("addColoredTrainingSet: track is null");
-			return;
-		}
-		List<ShipTrackSegment> segments = track.getSegList();
-		
-		int i = 0;
-		for (ShipTrackSegment seg : segments) {
-			addPoint("targetStyle",  
-					posLabel,
-					pos.getPoint().lat, 
-					pos.getPoint().lon);
-			i++;
-		}
-		addLineString(label, track.getPosList());
-//		Comment trackDescription = doc.createComment(track.toString());
-//		Element element = doc.getDocumentElement();
-//		element.getParentNode().insertBefore(trackDescription, element);
-	}
+//	public void addColoredTrainingSet(ShipTrack track) {
+//		if (track == null) {
+//			System.err.println("addColoredTrainingSet: track is null");
+//			return;
+//		}
+//		List<ShipTrackSegment> segments = track.getSegList();
+//		
+//		
+//		  
+//		int i = 0;
+//		for (ShipTrackSegment seg : segments) {
+//			addPoint("targetStyle",  
+//					posLabel,
+//					pos.getPoint().lat, 
+//					pos.getPoint().lon);
+//			i++;
+//		}
+//		addLineString(label, track.getPosList());
+////		Comment trackDescription = doc.createComment(track.toString());
+////		Element element = doc.getDocumentElement();
+////		element.getParentNode().insertBefore(trackDescription, element);
+//	}
 	
 	
 	public void addTrack(ShipTrack track, String label) {

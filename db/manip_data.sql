@@ -42,10 +42,20 @@ and source = 'N'
 ---------------------------------------------------
 -- Tracks table
 
-update tracks
-set period = 'WINTER'
-where dep = 'GIBRALTAR'
-and arr = 'RIO';
 
-
+-- delete ships with few positions
+delete from tracks
+where arr = 'GOA'
+and mmsi in
+(
+	select mmsi from
+	(
+		select mmsi, dep, arr, period, count(*) as counter
+		from tracks
+		where arr = 'GOA'
+		group by mmsi, dep, arr, period
+		having counter < 5
+	) few_pos
+) 
+;
 

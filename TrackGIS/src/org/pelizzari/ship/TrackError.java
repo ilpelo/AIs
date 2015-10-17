@@ -103,12 +103,15 @@ public class TrackError {
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			
 			// use this if you want to get only position that correspond to the temporal interval of the segment
-			List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
+			//List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
 
 			// use this if you want to get only position that correspond to the temporal interval of the segment
 			// and are located on the perpendicular stripe
-			//List<ShipPosition> targetPosList = trainingPosList.getPosListInIntervalAndOnStripe(seg);
-	
+			List<ShipPosition> targetPosList = trainingPosList.getPosListInIntervalAndOnStripe(seg);
+
+			// use this if you want to get only position that are located on the perpendicular stripe
+			//List<ShipPosition> targetPosList = trainingPosList.getPosListOnStripe(seg);
+
 			// use this if you want to get only positions within a "corridor" of width NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE  
 //			List<ShipPosition> targetPosList = 
 //					trainingPosList.getPosListInIntervalAndBoxAndCloseToSegment(
@@ -247,9 +250,9 @@ public class TrackError {
 			//trackError.getAvgSquaredDistanceAllSegments() +
 			//getSegmentCoverageError() +
 			//getTotalCoverageError() +
-			getVarianceError() +
+			//getVarianceError() +
 			getAvgDistanceError() +
-			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
+			//getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
 			//trackError.avgTotalSegmentError() +
 			0f;
 		return error;
