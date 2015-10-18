@@ -1,5 +1,6 @@
 package org.pelizzari.ship;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.pelizzari.gis.Point;
@@ -13,8 +14,9 @@ public class ShipTrackSegment {
 	float length = 0; // length of the segment (in degrees)
 	float lengthInMiles = 0; // length of the segment (in miles)
 	int durationInSeconds = 0; // difference of the timestamp of the start and end positions
+	int expectedCoveredPositions = 0; // the expected number of positions this segment should cover
 	
-	List<ShipPosition> targetPosList;
+	List<ShipPosition> targetPosList = new ArrayList<ShipPosition>();
 	float[] squaredDistanceOfTargetPositionArray;
 	float[] segmentEndsDistanceToTargetPositionArray;
 	int numberOfCoveredTargetPositions = 0; // number of target positions covered to the segment 
@@ -24,6 +26,8 @@ public class ShipTrackSegment {
 	float varSquaredDistanceToTargetPositions = 0f;
 	float squaredDistanceOfSegmentEndToLastTargetPosition = 0f;
 	float avgSegmentEndsDistanceToTargetPositions = 0f;
+	float coverageOfExpectedPositions = 0f; // % of expected positions covered by this segment
+	int differenceFromExpectedPositions = 0; // (abs) difference of covered and expected positions 
 
 	
 	public ShipTrackSegment(ShipPosition p1, ShipPosition p2) {
@@ -81,12 +85,15 @@ public class ShipTrackSegment {
 	
 	/*
 	 * Compute some stats that can be used for fitness evaluation.
+	 * Beware: distance to target positions MUST be called before
 	 */
 	public void computeStatsForFitness() {
+		// coverage of positions compared to the expected number
+		coverageOfExpectedPositions = (float) numberOfCoveredTargetPositions / expectedCoveredPositions;
+		differenceFromExpectedPositions = Math.abs(numberOfCoveredTargetPositions - expectedCoveredPositions);
 		if(numberOfCoveredTargetPositions == 0) {
 			return;
 		}
-		computeDistancesToTargetPositions();
 		// mean, min, and max distance
 		minSquaredDistanceToTargetPositions = Float.MAX_VALUE;
 		maxSquaredDistanceToTargetPositions = 0;
@@ -116,7 +123,20 @@ public class ShipTrackSegment {
 		}
 		varSquaredDistanceToTargetPositions = sumVariance/numberOfCoveredTargetPositions;
 	}
-		
+
+	/**
+	 * Return if a point is located within the circle 
+	 * with center p1 and radius equals to the segment.
+	 * @param p
+	 * @return
+	 */
+	public boolean isWithinSegmentCircle(Point p) {
+		boolean isWithin = false;
+		float distanceToCenter = p1.point.distance(p);
+		isWithin = distanceToCenter <= length;
+		return isWithin;
+	}	
+	
 	/**
 	 * Return if a point is located within the stripe perpendicular to this segment or not.
 	 * @param p
@@ -133,11 +153,24 @@ public class ShipTrackSegment {
 		return targetPosList;
 	}
 
+	/**
+	 * Add all target positions covered by this segment at once
+	 * @param targetPosList
+	 */
 	public void setTargetPosList(List<ShipPosition> targetPosList) {
 		this.targetPosList = targetPosList;
 		numberOfCoveredTargetPositions = targetPosList.size();
 	}
 
+	/**
+	 * Add one target position covered by this segment
+	 * @param targetPosList
+	 */
+	public void addTargetPos(ShipPosition targetPos) {
+		targetPosList.add(targetPos);
+		numberOfCoveredTargetPositions = targetPosList.size();
+	}
+	
 	public ShipPosition getP1() {
 		return p1;
 	}
@@ -191,7 +224,22 @@ public class ShipTrackSegment {
 	public float getVarSquaredDistanceToTargetPositions() {
 		return varSquaredDistanceToTargetPositions;
 	}
-	
+		
+	public float getCoverageOfExpectedPositions() {
+		return coverageOfExpectedPositions;
+	}
+
+		
+	public int getDifferenceFromExpectedPositions() {
+		return differenceFromExpectedPositions;
+	}
+
+
+	public void setExpectedCoveredPositions(int expectedCoveredPositions) {
+		this.expectedCoveredPositions = expectedCoveredPositions;
+	}
+
+
 	public String toString() {
 		String s = "Segment: ";
 		s = s + p1 + " --- " + p2 +", l = "+ length + " deg, d = " + durationInSeconds + " s" + "\n";
@@ -217,8 +265,11 @@ public class ShipTrackSegment {
 					", max=" + maxSquaredDistanceToTargetPositions +
 					", to segment end=" + squaredDistanceOfSegmentEndToLastTargetPosition + "\n";
 			s = s + "Distance to segment ends: avg=" + avgSegmentEndsDistanceToTargetPositions + "\n";
+			s = s + "Coverage of expected positions=" + coverageOfExpectedPositions + 
+					"(" + numberOfCoveredTargetPositions + "/" + expectedCoveredPositions + ")\n";
 		} else {
 			s = s + "No position covered!\n";
+			s = s + "Number of expected positions=" + expectedCoveredPositions + "\n";
 		}
 		return s;
 	}

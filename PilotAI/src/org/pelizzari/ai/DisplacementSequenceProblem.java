@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
 import org.pelizzari.gis.Point;
 import org.pelizzari.mine.Areas;
+import org.pelizzari.mine.MineVoyages;
 import org.pelizzari.ship.Ship;
 import org.pelizzari.ship.ShipPosition;
 import org.pelizzari.ship.ShipPositionList;
@@ -40,6 +42,9 @@ public class DisplacementSequenceProblem extends Problem implements
 //	static final String FILE_EXT = ".csv";
 	//static final String[] MMSIs = {"211394200", "212720000"};
 	
+	final static String REFERENCE_START_DT = MineVoyages.REFERENCE_START_DT; // reference start date of all tracks
+	final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_DAYS;
+
 	static final String YEAR_PERIOD = "WINTER";
 	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
@@ -122,16 +127,23 @@ public class DisplacementSequenceProblem extends Problem implements
 			System.exit(-1);
 		}
 		
-		// set START position close to the first position of the track (0.1 deg North)
-		// TBD: use the average of the first positions of the input tracks 
-		Point startPoint = new Point(trainingShipPositionList.getFirstPosition().getPoint().lat+0.1f,
-				trainingShipPositionList.getFirstPosition().getPoint().lon);
-		startPosition = new ShipPosition(startPoint, trainingShipPositionList.getFirstPosition().getTs());
-		// set END position close to the last position of the track (0.1 deg North)
-		// TBD: use the average of the last positions of the input tracks 
-		Point endPoint = new Point(trainingShipPositionList.getLastPosition().getPoint().lat+0.1f,
-				trainingShipPositionList.getLastPosition().getPoint().lon);
-		endPosition = new ShipPosition(startPoint, trainingShipPositionList.getLastPosition().getTs());
+		try {
+			// set START position using the Point Of Interest of the Departure box
+			Point startPoint = DEPARTURE_AREA.getPoi();
+			if(startPoint == null) throw new Exception("Departure POI not set");
+			Timestamp startTs = new Timestamp(REFERENCE_START_DT);
+			startPosition = new ShipPosition(startPoint, startTs);
+			// set END position using the Point Of Interest of the Arrival box
+			Point endPoint = ARRIVAL_AREA.getPoi();
+			if(endPoint == null) throw new Exception("Arrival POI not set");
+			Timestamp endTs = new Timestamp(REFERENCE_START_DT);
+			endTs.shiftTimestamp(REFERENCE_VOYAGE_DURATION_IN_DAYS);
+			endPosition = new ShipPosition(endPoint, endTs);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
 		System.out.println("Problem initialized; training position list: " + trainingShipPositionList);
 	}
 

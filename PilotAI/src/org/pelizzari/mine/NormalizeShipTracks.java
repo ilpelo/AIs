@@ -49,8 +49,8 @@ public class NormalizeShipTracks {
 	// max percentage of discrepancy from the average track length
 	static final float MAX_TRACK_LENGTH_DISCREPANCY = 0.1f;
 	//
-	final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
-	final static int REFERENCE_VOYAGE_DURATION = 3600*24; // 24 h
+	final static String REFERENCE_START_DT = MineVoyages.REFERENCE_START_DT; // reference start date of all tracks
+	final static int REFERENCE_VOYAGE_DURATION_IN_SEC = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_DAYS*3600*24;
 	
 	public static void main(String[] args) throws ParseException {
 
@@ -79,7 +79,7 @@ public class NormalizeShipTracks {
 			for (ShipPosition pos : track.getPosList()) {
 				Timestamp normTs = track.computeNormalizedTime(
 						new Timestamp(REFERENCE_START_DT),
-						REFERENCE_VOYAGE_DURATION,
+						REFERENCE_VOYAGE_DURATION_IN_SEC,
 						i);
 				track.updateNormalizedShipPositionTimestampInDB(
 						DEPARTURE_AREA, ARRIVAL_AREA, YEAR_PERIOD, i, normTs);

@@ -68,6 +68,9 @@ public class ShowMergedShipTracks {
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
 		
+		kmlGenerator.addBox(DEPARTURE_AREA);
+		kmlGenerator.addBox(ARRIVAL_AREA);
+		
 		Miner miner = new Miner();
 		ShipPositionList posList = miner.getMergedShipTracksInPeriodAndBetweenBoxes(
 				YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA, INSERT_TS); 

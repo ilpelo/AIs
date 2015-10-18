@@ -199,11 +199,11 @@ public class KMLGenerator {
 		placemark.appendChild(lineString);
 	}
 
-	public void addBox(String title, Box box) {
+	public void addBox(Box box) {
 		Element placemark = doc.createElement("Placemark");
 		docNode.appendChild(placemark);
 		Element name = doc.createElement("name");
-		name.appendChild(doc.createTextNode(title));
+		name.appendChild(doc.createTextNode(box.getName()));
 		placemark.appendChild(name);
 		Element lineString = doc.createElement("LineString");
 		Element coordinates = doc.createElement("coordinates");

@@ -414,8 +414,8 @@ public class ShipTrack extends ShipPositionList {
 	 * @return
 	 */
 	public static ShipTrack reconstructShipTrack(ShipPosition startPosition,
-													Timestamp endTs, 
-													DisplacementSequence displSeq) {
+												 Timestamp endTs, 
+												 DisplacementSequence displSeq) {
 		// first reconstruct track based on displacement; do not bother about timestamps
 		ShipTrack reconstructedTrack = new ShipTrack();
 		reconstructedTrack.addPosition(startPosition);
@@ -557,7 +557,7 @@ public class ShipTrack extends ShipPositionList {
 	
 	public TrackError computeTrackError(ShipPositionList trainingPosList, boolean debug) throws Exception {
 		TrackError trackError = new TrackError(this, debug);
-		trackError.computeSegmentErrorVector(trainingPosList);
+		trackError.computeSegmentStats(trainingPosList);
 		trackError.computeStatsForFitness();
 		return trackError;		
 	}

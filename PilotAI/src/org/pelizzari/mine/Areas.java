@@ -35,6 +35,7 @@ public class Areas {
 	// Golf of Aden
 	static Point goaNW = new Point(18, 50);
 	static Point goaSE = new Point(9, 51);
+	static Point goaPOI = new Point(13.70f, 50.98f);
 	// West Atlantic
 	static Point westAtlanticNW = new Point(70, -77);
 	static Point westAtlanticSE = new Point(-70, -70);
@@ -56,6 +57,7 @@ public class Areas {
 	// Red Sea
 	static Point redseaNW = new Point(20, 38);
 	static Point redseaSE = new Point(17, 42);
+	static Point redseaPOI = new Point(20, 38.86f);
 	// Lanzarote
 	static Point lanzaroteNW = new Point(29, -14);
 	static Point lanzaroteSE = new Point(27, 12);
@@ -74,12 +76,12 @@ public class Areas {
 		boxes.put("REUNION", new Box(reunionNW, reunionSE, "REUNION"));
 		boxes.put("WEST_ATLANTIC", new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC"));
 		boxes.put("RIO", new Box(rioNW, rioSE, "RIO"));
-		boxes.put("GOA", new Box(goaNW, goaSE, "GOA"));
+		boxes.put("GOA", new Box(goaNW, goaSE, "GOA", goaPOI));
 		boxes.put("GUADELOUPE", new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE"));		
 		String areaName = "CALAIS";
 		boxes.put(areaName, new Box(calaisNW, calaisSE, areaName));		
 		areaName = "REDSEA";
-		boxes.put(areaName, new Box(redseaNW, redseaSE, areaName));		
+		boxes.put(areaName, new Box(redseaNW, redseaSE, areaName, redseaPOI));		
 		areaName = "LANZAROTE";
 		boxes.put(areaName, new Box(lanzaroteNW, lanzaroteSE, areaName));		
 		areaName = "NATAL";

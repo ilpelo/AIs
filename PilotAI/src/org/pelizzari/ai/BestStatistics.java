@@ -181,9 +181,12 @@ public class BestStatistics extends Statistics {
 		kmlGenerator1.addColoredStyles("pointStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
+		
+		// draw best track
 		kmlGenerator1.addTrack(track, "");
+		// draw training points
+		int i = 0;
 		for(ShipTrackSegment seg: track.getSegList()) {
-			int i = 0;
 			for(ShipPosition pos: seg.getTargetPosList()) {
 				kmlGenerator1.addPoint("pointStyle"+i, 
 						"", 

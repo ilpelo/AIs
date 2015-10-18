@@ -65,8 +65,8 @@ public class MineVoyages {
 	static String OUTPUT_KML_FILE; // = OUTPUT_DIR+"tracks.kml";
 		
 	final static boolean KML_FILE_WITH_DATES = false;
-	final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
-	
+	public final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
+	public final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = 1;
 	
 	static void loadProps(String absolutePathToPropFile) {
 		Properties prop = new Properties();
@@ -178,8 +178,8 @@ public class MineVoyages {
 		}		
 		
 		// Make KML
-		kmlGenerator.addBox("Departure", DEP_BOX);
-		kmlGenerator.addBox("Arrival", ARR_BOX);
+		kmlGenerator.addBox(DEP_BOX);
+		kmlGenerator.addBox(ARR_BOX);
 		Map map = new Map();
 		for (ShipTrack track : allTracks) {
 			map.plotTrack(track, Color.GREEN, track.getMmsi());
