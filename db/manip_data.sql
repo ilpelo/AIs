@@ -42,19 +42,31 @@ and source = 'N'
 ---------------------------------------------------
 -- Tracks table
 
+delete from tracks
+where arr = 'REUNION'
+and dep = 'CAPETOWN'
+and NOT insert_ts = 1444325922;
+
+delete from tracks
+where dep = 'LANZAROTE'
+and arr = 'NATAL'
+and mmsi = 636007699;
+
 
 -- delete ships with few positions
 delete from tracks
-where arr = 'GOA'
+where arr = 'REUNION'
+and dep = 'CAPETOWN'
 and mmsi in
 (
 	select mmsi from
 	(
 		select mmsi, dep, arr, period, count(*) as counter
 		from tracks
-		where arr = 'GOA'
+		where arr = 'REUNION'
+		and dep = 'CAPETOWN'
 		group by mmsi, dep, arr, period
-		having counter < 5
+		having counter < 10
 	) few_pos
 ) 
 ;

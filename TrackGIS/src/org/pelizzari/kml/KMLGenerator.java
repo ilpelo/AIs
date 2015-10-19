@@ -79,6 +79,34 @@ public class KMLGenerator {
 	 * @param iconHrefURL
 	 * @param greenHueLevel 0-(maxHueLevels-1)
 	 */
+	public void addThickLineStyle(String styleName, String iconHrefURL) {
+		Element style = doc.createElement("Style");
+		Element lineStyle = doc.createElement("LineStyle");
+		style.setAttribute("id", styleName);
+		// color aabbggrr hex
+		Element color = doc.createElement("color");
+		color.appendChild(doc.createTextNode("aa00ff00"));
+		lineStyle.appendChild(color);
+		// line width
+		Element width = doc.createElement("width");
+		width.appendChild(doc.createTextNode("10"));
+		lineStyle.appendChild(width);		
+		// HREF to icon
+		Element icon = doc.createElement("Icon");
+		Element iconHref = doc.createElement("href");
+		iconHref.appendChild(doc.createTextNode(iconHrefURL));
+		icon.appendChild(iconHref);
+		lineStyle.appendChild(icon);
+		//
+		style.appendChild(lineStyle);
+		docNode.appendChild(style);
+	}
+	
+	/**
+	 * @param styleName
+	 * @param iconHrefURL
+	 * @param greenHueLevel 0-(maxHueLevels-1)
+	 */
 	public void addGradientStyle(
 			String styleName, String iconHrefURL, int hueLevel, int maxHueLevels) {
 		int greenHueLevel = 255*hueLevel/(maxHueLevels-1);
@@ -177,16 +205,28 @@ public class KMLGenerator {
 		placemark.appendChild(point);
 	}
 
-	public void addLineString(String mmsi, List<ShipPosition> posList) {
+	public void addLineString(String mmsi, List<ShipPosition> posList, String style) {
 		Element placemark = doc.createElement("Placemark");
 		docNode.appendChild(placemark);
+		//
 		Element name = doc.createElement("name");
 		name.appendChild(doc.createTextNode(mmsi));
 		placemark.appendChild(name);
-		// Element styleUrl = doc.createElement("styleUrl");
-		// styleUrl.appendChild(doc.createTextNode( "#" + iconStyleName));
-		// placemark.appendChild(styleUrl);
+		//
+		Element styleUrl = doc.createElement("styleUrl");
+		styleUrl.appendChild(doc.createTextNode( "#" + style));
+		placemark.appendChild(styleUrl);
+		//
+		Element altitudeMode = doc.createElement("altitudeMode");
+		altitudeMode.appendChild(doc.createTextNode("absolute"));
+		placemark.appendChild(altitudeMode);		
+		//
+		Element altitude = doc.createElement("altitude");
+		altitude.appendChild(doc.createTextNode("1000"));
+		placemark.appendChild(altitude);
+		//
 		Element lineString = doc.createElement("LineString");
+		lineString.appendChild(altitude);
 		Element coordinates = doc.createElement("coordinates");
 		String coordList = "";
 		Iterator<ShipPosition> itr = posList.iterator();
@@ -242,38 +282,18 @@ public class KMLGenerator {
 					pos.getPoint().lon);
 			i++;
 		}
-		addLineString(label, track.getPosList());
+		addThickLineStyle("trackLineStyle", 
+				"http://maps.google.com/mapfiles/kml/shapes/target.png");
+		
+		addLineString(label, track.getPosList(), "trackLineStyle");
 //		Comment trackDescription = doc.createComment(track.toString());
 //		Element element = doc.getDocumentElement();
 //		element.getParentNode().insertBefore(trackDescription, element);
 	}
 
-//	public void addColoredTrainingSet(ShipTrack track) {
-//		if (track == null) {
-//			System.err.println("addColoredTrainingSet: track is null");
-//			return;
-//		}
-//		List<ShipTrackSegment> segments = track.getSegList();
-//		
-//		
-//		  
-//		int i = 0;
-//		for (ShipTrackSegment seg : segments) {
-//			addPoint("targetStyle",  
-//					posLabel,
-//					pos.getPoint().lat, 
-//					pos.getPoint().lon);
-//			i++;
-//		}
-//		addLineString(label, track.getPosList());
-////		Comment trackDescription = doc.createComment(track.toString());
-////		Element element = doc.getDocumentElement();
-////		element.getParentNode().insertBefore(trackDescription, element);
-//	}
-	
 	
 	public void addTrack(ShipTrack track, String label) {
-		addTrack(track, label, true);
+		addTrack(track, label, false);
 	}
 	
 	public void saveKMLFile(String file) {

@@ -37,15 +37,20 @@ import org.pelizzari.time.Timestamp;
  */
 public class ShowMergedShipTracks {
 
+	static final String YEAR_PERIOD = "AUTUMN";
+	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
+	static final long INSERT_TS = -1; //1444915221; //1444927757;	
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
-	static final String YEAR_PERIOD = "WINTER";
-	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
-	static final long INSERT_TS = 1444808464;
+//	static final long INSERT_TS = -1; //1444325922;
+//	static final String YEAR_PERIOD = "WINTER";
+//	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
+//	static final long INSERT_TS = 1444808464;
 	final static String OUTPUT_FILE = "c:/master_data/MergedShipTracks";
-	final static boolean WITH_TRACKS = false;
+	final static boolean WITH_TRACKS = true;
 	final static boolean WITH_DATES = true;
 	
 	

@@ -118,7 +118,9 @@ public class BestStatistics extends Statistics {
 		DisplacementSequenceProblem prob = (DisplacementSequenceProblem)state.evaluator.p_problem;
 		map.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
 		map1.plotShipPositions(prob.getTrainingShipPositionList(), Color.GREEN);
-		map.setVisible(true);
+		
+		//map.setVisible(true);
+		
 		// on KML too
 		for(ShipPosition pos: prob.getTrainingShipPositionList().getPosList()) {
 			kmlGenerator.addPoint("trainingPositionStyle", "", pos.getPoint().lat, pos.getPoint().lon);
@@ -182,8 +184,6 @@ public class BestStatistics extends Statistics {
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
 		
-		// draw best track
-		kmlGenerator1.addTrack(track, "");
 		// draw training points
 		int i = 0;
 		for(ShipTrackSegment seg: track.getSegList()) {
@@ -195,6 +195,8 @@ public class BestStatistics extends Statistics {
 			}
 			i++;
 		}
+		// draw best track
+		kmlGenerator1.addTrack(track, "");
 		
 		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+state.generation+".kml";
 		System.out.println("Saving KML: "+kmlFile1);
@@ -203,7 +205,9 @@ public class BestStatistics extends Statistics {
 		if(lastGen) {
 			map1.plotTrack(track, Color.PINK, ""+state.generation);
 			//drawSegmentBoxes(track, map1);
-			map1.setVisible(true);
+			
+			//map1.setVisible(true);
+			
 			// set up imageFile		
 			map1.saveAsImage(imageFile);
 			// flush

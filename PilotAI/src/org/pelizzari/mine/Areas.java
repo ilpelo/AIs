@@ -45,9 +45,11 @@ public class Areas {
 	// Cape Town
 	static Point capetownNW = new Point(-33.5f, 17);
 	static Point capetownSE = new Point(-35.5f, 19);
+	static Point capetownPOI = new Point(-33.5f, 17);
 	// Reunion
 	static Point reunionNW = new Point(-20, 52);
 	static Point reunionSE = new Point(-27, 57);
+	static Point reunionPOI = new Point(-20, 57);
 	// Guadeloupe
 	static Point guadeloupeNW = new Point(17.27f, -62.9f);
 	static Point guadeloupeSE = new Point(15.8f, -59.7f);
@@ -59,11 +61,14 @@ public class Areas {
 	static Point redseaSE = new Point(17, 42);
 	static Point redseaPOI = new Point(20, 38.86f);
 	// Lanzarote
-	static Point lanzaroteNW = new Point(29, -14);
-	static Point lanzaroteSE = new Point(27, 12);
+	static Point lanzaroteNW = new Point(29.5f, -14);
+	static Point lanzaroteSE = new Point(27, -12);
+	static Point lanzarotePOI = new Point(29.4f, -12.5f);
+	
 	// Natal
 	static Point natalNW = new Point(-5, -36);
-	static Point natalSE = new Point(-7, -33);
+	static Point natalSE = new Point(-8.5f, -31);
+	static Point natalPOI = new Point(-8, -33.6f);
 		
 	public static Map<String, Box> boxes = new HashMap<String, Box>();
 	
@@ -72,8 +77,8 @@ public class Areas {
 		boxes.put("FINISTERRE", new Box(finisterreNW, finisterreSE, "FINISTERRE"));
 		boxes.put("NOVASCOTIA", new Box(novascotiaNW, novascotiaSE, "NOVASCOTIA"));
 		boxes.put("SUEZ", new Box(suezNW, suezSE, "SUEZ"));
-		boxes.put("CAPETOWN", new Box(capetownNW, capetownSE, "CAPETOWN"));
-		boxes.put("REUNION", new Box(reunionNW, reunionSE, "REUNION"));
+		boxes.put("CAPETOWN", new Box(capetownNW, capetownSE, "CAPETOWN", capetownPOI));
+		boxes.put("REUNION", new Box(reunionNW, reunionSE, "REUNION", reunionPOI));
 		boxes.put("WEST_ATLANTIC", new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC"));
 		boxes.put("RIO", new Box(rioNW, rioSE, "RIO"));
 		boxes.put("GOA", new Box(goaNW, goaSE, "GOA", goaPOI));
@@ -83,9 +88,9 @@ public class Areas {
 		areaName = "REDSEA";
 		boxes.put(areaName, new Box(redseaNW, redseaSE, areaName, redseaPOI));		
 		areaName = "LANZAROTE";
-		boxes.put(areaName, new Box(lanzaroteNW, lanzaroteSE, areaName));		
+		boxes.put(areaName, new Box(lanzaroteNW, lanzaroteSE, areaName, lanzarotePOI));		
 		areaName = "NATAL";
-		boxes.put(areaName, new Box(natalNW, natalSE, areaName));		
+		boxes.put(areaName, new Box(natalNW, natalSE, areaName, natalPOI));		
 	}
 	
 	public static Box getBox(String boxName) {

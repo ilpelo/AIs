@@ -89,7 +89,11 @@ public class ShipTrackSegment {
 	 */
 	public void computeStatsForFitness() {
 		// coverage of positions compared to the expected number
-		coverageOfExpectedPositions = (float) numberOfCoveredTargetPositions / expectedCoveredPositions;
+		if(expectedCoveredPositions != 0) {
+			coverageOfExpectedPositions = (float) numberOfCoveredTargetPositions / expectedCoveredPositions;
+		} else {
+			coverageOfExpectedPositions = 0;
+		}		
 		differenceFromExpectedPositions = Math.abs(numberOfCoveredTargetPositions - expectedCoveredPositions);
 		if(numberOfCoveredTargetPositions == 0) {
 			return;
@@ -250,7 +254,7 @@ public class ShipTrackSegment {
 //						", d^2="+ squaredDistanceOfTargetPositionArray[i] + "\n";
 //				i++;
 //			}
-			s = s + "Total covered posistions: " + targetPosList.size() + "\n"; 
+			s = s + "Total covered positions: " + targetPosList.size() + "\n"; 
 			
 			ShipPosition firstCoveredPos = targetPosList.get(0);
 			s = s + "First covered pos: " + firstCoveredPos + 

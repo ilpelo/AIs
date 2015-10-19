@@ -21,14 +21,15 @@ public class TrackError {
 	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
 	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
 														  	
-	//final static float DISTANCE_ERROR_AMPLIFIER = 100f; // multiply distance of positions that are too far 
 	//final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
-	final static float BAD_TRACK_SEGMENT_FITNESS = 10f; // artificially high distance for segment that does not follow the target path
+	//final static float BAD_TRACK_SEGMENT_FITNESS = 10f; // artificially high distance for segment that does not follow the target path
 //	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
 //	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
-	final static float HEADING_ERROR_FACTOR = 1f; // multiply by the number of  changes of heading over the limit 
-	final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
+	final static float DISTANCE_ERROR_FACTOR = 1f; // multiply distance of positions to segment
+	final static float HEADING_ERROR_FACTOR = 0f; // multiply by the number of  changes of heading over the limit 
+	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 1f; // multiply by the number of  changes of heading over the limit 
+	//final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
 	// the track to which the error refers to 
 	ShipTrack baseTrack;
@@ -44,6 +45,8 @@ public class TrackError {
 	float avgTargetPositionCoverageBySegment = 0;
 	// average squared distance to the target points, averaged over number of segments
 	float avgAvgSquaredDistanceToTargetPositionsBySegment = 0;
+	// maximum distances of the segment ends to the target points among all segments
+	float maxAvgSegmentEndsDistanceToTargetPositionsBySegment = 0;
 	// average distances of the segment ends to the target points, averaged over number of segments
 	float avgAvgSegmentEndsDistanceToTargetPositionsBySegment = 0;
 	// variance of the squared distance to the target points, averaged over number of segments
@@ -159,14 +162,16 @@ public class TrackError {
 			  sumSegAvgSquaredPerpendicularDistance = 0,
 			  sumSegAvgSegmentEndsDistance = 0,
 			  sumSegCoverageOfExpectedPositions = 0;
-		//int sumSegDifferenceFromExpectedPositions = 0;
-		int[] coveredTargetPositionsBySegment = new int[baseTrack.getSegList().size()];
-		float[] coverageOfExpectedPositionsBySegment = new float[baseTrack.getSegList().size()];
+		int nOfSegments = baseTrack.getSegList().size();
+		int[] coveredTargetPositionsBySegment = new int[nOfSegments];
+		float[] coverageOfExpectedPositionsBySegment = new float[nOfSegments];
+		float[] avgSegmentEndsDistanceBySegment = new float[nOfSegments];
 		int i = 0;
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {
 			int segTargetPosCounter = seg.getNumberOfCoveredTargetPositions();
 			coveredTargetPositionsBySegment[i] = segTargetPosCounter;
 			coverageOfExpectedPositionsBySegment[i] = seg.getCoverageOfExpectedPositions();
+			avgSegmentEndsDistanceBySegment[i] = seg.getAvgSegmentEndsDistanceToTargetPositions();
 			coveredTargetPositionCount += segTargetPosCounter;
 			if(segTargetPosCounter <= 1) { // segment should cover at least 2 positions
 				noCoverageSegmentCounter++;
@@ -178,7 +183,6 @@ public class TrackError {
 			//sumSegDifferenceFromExpectedPositions += seg.getDifferenceFromExpectedPositions();
 			i++;
 		}
-		int nOfSegments = baseTrack.getSegList().size();
 		targetPositionCoverage = 
 				(float) coveredTargetPositionCount / trainingPosList.getPosList().size();
 		avgTargetPositionCoverageBySegment = 
@@ -192,6 +196,7 @@ public class TrackError {
 		modeCoveredTargetPositionsBySegment = mode(coveredTargetPositionsBySegment);
 		medianCoveredTargetPositionsBySegment = (int) median(coveredTargetPositionsBySegment);
 		minCoverageOfExpectedPositionsBySegment = min(coverageOfExpectedPositionsBySegment);
+		maxAvgSegmentEndsDistanceToTargetPositionsBySegment = max(avgSegmentEndsDistanceBySegment);
 	}
 	
 //	/**
@@ -270,28 +275,28 @@ public class TrackError {
 	 * This should return a high value if the overall coverage of the target positions is bad
 	 * @return
 	 */
-	public float getTotalCoverageError() {
-//		float noCoverageError = 0f;
-//
-////		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
-////			noCoverageError = BAD_TRACK_FITNESS;
+//	public float getTotalCoverageError() {
+////		float noCoverageError = 0f;
+////
+//////		if(targetPositionCoverage < MIN_POSITION_COVERAGE_THRESHOLD) {
+//////			noCoverageError = BAD_TRACK_FITNESS;
+//////		}
+////		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
+//		
+////		if(medianCoveredTargetPositionsBySegment == 0) {
+////			return noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
+////		} else {
+////			return 1f/medianCoveredTargetPositionsBySegment;
 ////		}
-//		noCoverageError += noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
-		
-//		if(medianCoveredTargetPositionsBySegment == 0) {
-//			return noCoverageSegmentCounter * BAD_TRACK_SEGMENT_FITNESS;
-//		} else {
-//			return 1f/medianCoveredTargetPositionsBySegment;
-//		}
-		
-		// should not be here
-		return 1f - minCoverageOfExpectedPositionsBySegment;
-		
-		// good = 0.0, bad = 1.0 * factor
-		//return (1f-targetPositionCoverage)*TOTAL_COVERAGE_ERROR_FACTOR; // artificially high
-				
-		//return 1f-avgTargetPositionCoverageBySegment;
-	}
+//		
+//		// should not be here
+//		return 1f - minCoverageOfExpectedPositionsBySegment;
+//		
+//		// good = 0.0, bad = 1.0 * factor
+//		//return (1f-targetPositionCoverage)*TOTAL_COVERAGE_ERROR_FACTOR; // artificially high
+//				
+//		//return 1f-avgTargetPositionCoverageBySegment;
+//	}
 	
 	
 	
@@ -299,11 +304,11 @@ public class TrackError {
 		float error =
 			//trackError.destinationError() +
 			//trackError.getAvgSquaredDistanceAllSegments() +
-			getSegmentCoverageError() +
+			getSegmentCoverageError()*SEGMENT_COVERAGE_ERROR_FACTOR +
 			//getTotalCoverageError() +
 			//getVarianceError() +
-			//getAvgDistanceError() +
-			//getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
+			getDistanceError()*DISTANCE_ERROR_FACTOR +
+			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
 			//trackError.avgTotalSegmentError() +
 			0f;
 		return error;
@@ -315,9 +320,10 @@ public class TrackError {
 	 * This should return a high value if the average distance to the target positions for each segment is high
 	 * @return
 	 */
-	public float getAvgDistanceError() {
+	public float getDistanceError() {
 		//return avgAvgSquaredDistanceToTargetPositionsBySegment;
 		return avgAvgSegmentEndsDistanceToTargetPositionsBySegment;
+		//return maxAvgSegmentEndsDistanceToTargetPositionsBySegment;
 	}	
 		
 	/**
@@ -357,16 +363,20 @@ public class TrackError {
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
 		//s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
 		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
-		s = s + "avgChangeOfHeading = " + getAvgChangeOfHeading() + "\n";		
 		//s = s + "destinationError = " + destinationError() + "\n";		
-		s = s + "segmentCoverageError = " + getSegmentCoverageError() + "\n";	
-		s = s + "totalCoverageError = " + getTotalCoverageError() + "\n";	
+		//s = s + "totalCoverageError = " + getTotalCoverageError() + "\n";	
 		//s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
-		s = s + "avgSegmentSquaredDistanceError = " + getAvgDistanceError() + "\n"; 
 		s = s + "varianceError = " + getVarianceError() + "\n"; 
 		s = s + "mode of covered target pos = " + modeCoveredTargetPositionsBySegment + "\n"; 
 		s = s + "median of covered target pos = " + medianCoveredTargetPositionsBySegment + "\n"; 
 		s = s + "minimum coverage of expected pos = " + minCoverageOfExpectedPositionsBySegment + "\n"; 
+		s = s + "---\n"; 		
+		s = s + "distanceError = " + getDistanceError() +
+				" (* "+ DISTANCE_ERROR_FACTOR + "=" + getDistanceError()*DISTANCE_ERROR_FACTOR +")\n"; 
+		s = s + "avgChangeOfHeading = " + getAvgChangeOfHeading() +
+				" (* "+ HEADING_ERROR_FACTOR + "=" + getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +")\n";		
+		s = s + "segmentCoverageError = " + getSegmentCoverageError() + 
+				" (* "+ SEGMENT_COVERAGE_ERROR_FACTOR + "=" + getSegmentCoverageError()*SEGMENT_COVERAGE_ERROR_FACTOR +")\n";	
 		s = s + "error for fitness = " + getError() + "\n"; 
 		return s;
 	}
@@ -410,5 +420,15 @@ public class TrackError {
 	        }  
 	     }  
 	    return minValue;  
+	}  
+	
+	public static float max(float[] array){  
+	     float maxValue = array[0];  
+	     for(int i=1;i<array.length;i++){  
+	     if(array[i] > maxValue){  
+	    	 	maxValue = array[i];  
+	        }  
+	     }  
+	    return maxValue;  
 	}  
 }
