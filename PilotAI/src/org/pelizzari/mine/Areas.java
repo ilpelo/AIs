@@ -49,7 +49,7 @@ public class Areas {
 	// Reunion
 	static Point reunionNW = new Point(-20, 52);
 	static Point reunionSE = new Point(-27, 57);
-	static Point reunionPOI = new Point(-20, 57);
+	static Point reunionPOI = new Point(-21.62f, 54.76f);
 	// Guadeloupe
 	static Point guadeloupeNW = new Point(17.27f, -62.9f);
 	static Point guadeloupeSE = new Point(15.8f, -59.7f);

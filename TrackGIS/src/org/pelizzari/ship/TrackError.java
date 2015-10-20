@@ -17,9 +17,11 @@ import org.pelizzari.time.Timestamp;
  */
 public class TrackError {
 	
-	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 0.001f; // position is not too far if < threshold
-	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
-	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f; // frame of the box around the segment in percentage of the segment length
+//	final static float NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE = 0.001f; // position is not too far if < threshold
+//	final static float NEIGHBORHOOD_SEGMENT_END = 1; // number of positions to be checked to control segment length	
+	final static float NEIGHBORHOOD_SEGMENT_FRAME = 0.1f;
+	
+	final static float ELLIPSE_MAJOR_AXIS_FACTOR = 1.2f; // Neighbourhood ellipse major axis = segment * factor
 														  	
 	//final static float MAX_CHANGE_OF_HEADING_ANGLE = 40f; // max angle for a change of heading not to be over the limit
 	//final static float BAD_TRACK_SEGMENT_FITNESS = 10f; // artificially high distance for segment that does not follow the target path
@@ -28,7 +30,7 @@ public class TrackError {
 	
 	final static float DISTANCE_ERROR_FACTOR = 1f; // multiply distance of positions to segment
 	final static float HEADING_ERROR_FACTOR = 0f; // multiply by the number of  changes of heading over the limit 
-	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 1f; // multiply by the number of  changes of heading over the limit 
+	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 0f; //  multiply by the min coverage of the segments
 	//final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
 	// the track to which the error refers to 
@@ -101,18 +103,19 @@ public class TrackError {
 	public void computeSegmentStats(ShipPositionList trainingPosList) throws Exception {
 		// store destination
 		this.trainingPosList = trainingPosList;
-		// keep the timestamps set during reconstruction and based on the duration of the real voyage
-		baseTrack.computeTrackSegments();
 		
-		for (ShipPosition trainingPos : trainingPosList.getPosList()) {
-			for (ShipTrackSegment seg : baseTrack.getSegList()) {
-				if(seg.isWithinSegmentCircle(trainingPos.point)) {
-					seg.addTargetPos(trainingPos);
-					break;
-				}
-			}			
-		}
-		
+		// SPATIAL analysis
+		// associate the positions to each segment
+		// use the neighbouring ellipse to select the positions
+//		for (ShipPosition trainingPos : trainingPosList.getPosList()) {
+//			for (ShipTrackSegment seg : baseTrack.getSegList()) {
+//				if(seg.isWithinEllipse(trainingPos.point, ELLIPSE_MAJOR_AXIS_FACTOR)) {
+//					seg.addTargetPos(trainingPos);
+//					break;
+//				}
+//			}			
+//		}
+				
 		for (ShipTrackSegment seg : baseTrack.getSegList()) {			
 			// bounding box of the 2 positions of the GA track (including a frame)
 			//Box box = makeSegmentBox(seg);
@@ -121,7 +124,7 @@ public class TrackError {
 			//List<ShipPosition> targetPosList = targetTrack.getPosListInIntervalAndBox(interval, box);
 			
 			// use this if you want to get only position that correspond to the temporal interval of the segment
-			//List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
+			List<ShipPosition> targetPosList = trainingPosList.getPosListInInterval(seg.getTimeInterval());
 
 			// use this if you want to get only position that correspond to the temporal interval of the segment
 			// and are located on the perpendicular stripe
@@ -143,7 +146,7 @@ public class TrackError {
 //							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
 			
 			// this was done in the loop before, one position at the time
-			//seg.setTargetPosList(targetPosList);
+			seg.setTargetPosList(targetPosList);
 			
 			int expectedCoveredPositions = (int) (seg.lengthInMiles / baseTrack.trackLengthInMiles * trainingPosList.getPosList().size());
 			seg.setExpectedCoveredPositions(expectedCoveredPositions);
@@ -430,5 +433,9 @@ public class TrackError {
 	        }  
 	     }  
 	    return maxValue;  
-	}  
+	} 
+	
+
+	
+	
 }

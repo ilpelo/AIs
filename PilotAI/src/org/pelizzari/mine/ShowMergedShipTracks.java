@@ -40,15 +40,17 @@ public class ShowMergedShipTracks {
 	static final String YEAR_PERIOD = "AUTUMN";
 	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
 	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
-	static final long INSERT_TS = -1; //1444915221; //1444927757;	
+
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
-//	static final long INSERT_TS = -1; //1444325922;
+
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
-//	static final long INSERT_TS = 1444808464;
+
+	static final long INSERT_TS = -1; //1444808464;
+	
 	final static String OUTPUT_FILE = "c:/master_data/MergedShipTracks";
 	final static boolean WITH_TRACKS = true;
 	final static boolean WITH_DATES = true;
@@ -64,17 +66,26 @@ public class ShowMergedShipTracks {
 			e1.printStackTrace();
 		}
 
-//		kmlGenerator.addIconStyle("pointStyle",
-//				//"http://maps.google.com/mapfiles/kml/shapes/target.png");
-//				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
-//				//"http://maps.google.com/mapfiles/kml/shapes/star.png");
+		kmlGenerator.addIconStyle("poiStyle",
+				"http://maps.google.com/mapfiles/kml/shapes/target.png");
+				//"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png");
+				//"http://maps.google.com/mapfiles/kml/shapes/star.png");
 		final int HUE_LEVELS = 20;
 		kmlGenerator.addColoredStyles("pointStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
 		
 		kmlGenerator.addBox(DEPARTURE_AREA);
+		kmlGenerator.addPoint("poiStyle",  
+				  "DEP POI",
+				  DEPARTURE_AREA.getPoi().lat, 
+				  DEPARTURE_AREA.getPoi().lon);
+
 		kmlGenerator.addBox(ARRIVAL_AREA);
+		kmlGenerator.addPoint("poiStyle",  
+				  "ARR POI",
+				  ARRIVAL_AREA.getPoi().lat, 
+				  ARRIVAL_AREA.getPoi().lon);
 		
 		Miner miner = new Miner();
 		ShipPositionList posList = miner.getMergedShipTracksInPeriodAndBetweenBoxes(

@@ -209,8 +209,8 @@ public class MineVoyages {
 			track.saveTrack(fw);
 			fw.close();
 			//
-			// Normalize tracks (use compute segments to overwrite timestamps)!!!
-			track.computeTrackSegmentsAndNormalizeTime(new Timestamp(REFERENCE_START_DT), ShipTrack.REFERENCE_SPEED_IN_KNOTS);
+			// Normalize tracks (overwrite timestamps)!!!
+			track.computeTrackSegmentsAndNormalizeTimestamps(new Timestamp(REFERENCE_START_DT), REFERENCE_VOYAGE_DURATION_IN_DAYS);
 			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD, startDate.getTime()/1000);			
 		}
 		Date endDate = new Date();

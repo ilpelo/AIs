@@ -455,21 +455,21 @@ public class ShipTrack extends ShipPositionList {
 	 * @param speed
 	 * @return
 	 */
-	public List<ShipTrackSegment> computeTrackSegmentsAndNormalizeTime(Timestamp referenceStartTS, 
-																	   float speed) {
-		if(segList.size() == 0) {
-			ShipPosition prevPos = null;
-			for (ShipPosition pos : posList) {
-				if (prevPos != null) {
-					segList.add(new ShipTrackSegment(prevPos, pos, speed));
-				} else {
-					pos.setTs(referenceStartTS);
-				}
-				prevPos = pos;
-			}
-		}
-		return segList;
-	}
+//	public List<ShipTrackSegment> computeTrackSegmentsAndNormalizeTime(Timestamp referenceStartTS, 
+//																	   float speed) {
+//		if(segList.size() == 0) {
+//			ShipPosition prevPos = null;
+//			for (ShipPosition pos : posList) {
+//				if (prevPos != null) {
+//					segList.add(new ShipTrackSegment(prevPos, pos, speed));
+//				} else {
+//					pos.setTs(referenceStartTS);
+//				}
+//				prevPos = pos;
+//			}
+//		}
+//		return segList;
+//	}
 	
 	/**
 	 * Compute the timestamp of the position if the voyage duration is 24h.
@@ -479,8 +479,8 @@ public class ShipTrack extends ShipPositionList {
 			   							   int posIndex) {
 		float sailedDistanceInMiles = computeLengthInMiles(posIndex);
 		// relative distance, between 0 and 1
-		float relativeDistance = sailedDistanceInMiles/trackLengthInMiles;
-		int normalizedRelativeDurationInSec = (int) (referenceVoyageDurationInSec * relativeDistance);
+		float relativeDistanceFactor = sailedDistanceInMiles/trackLengthInMiles;
+		int normalizedRelativeDurationInSec = (int) (referenceVoyageDurationInSec * relativeDistanceFactor);
 		long normalizedTsInMillisec = referenceStartTS.getTsMillisec()+normalizedRelativeDurationInSec*1000;
 		Timestamp normTs = new Timestamp(normalizedTsInMillisec);
 		return normTs;
@@ -492,7 +492,7 @@ public class ShipTrack extends ShipPositionList {
 	 *
 	 * @return
 	 */
-	public List<ShipTrackSegment> computeTrackSegments() {
+	public void computeTrackSegments() {
 		if(segList.size() == 0) {
 			ShipPosition prevPos = null;
 			for (ShipPosition pos : posList) {
@@ -502,8 +502,15 @@ public class ShipTrack extends ShipPositionList {
 				prevPos = pos;
 			}
 		}
-		return segList;
+		//return segList;
 	}
+	
+	public void computeTrackSegmentsAndNormalizeTimestamps(
+						Timestamp referenceStartTS,
+						int referenceVoyageDurationInSec) {
+		computeTrackSegments();
+		normalizeTimestamps(referenceStartTS, referenceVoyageDurationInSec);
+	}	
 	
 	public List<ShipTrackSegment> getSegList() {
 		return segList;
@@ -602,20 +609,20 @@ public class ShipTrack extends ShipPositionList {
 	}
 	
 	/*
-	 * Normalize timestamps: first position at Epoch 00:00, last at Epoch 24:00
+	 * Normalize timestamps: use reference start Timestamp and voyage duration
 	 */
-//	public void timeNormalize() {
-//		long firstTSMillisec = getFirstPosition().getTs().getTsMillisec();
-//		long lastTSMillisec = getLastPosition().getTs().getTsMillisec();
-//		long durationInMillisec = lastTSMillisec - firstTSMillisec;
-//		for (ShipPosition pos : getPosList()) {
-//			long tsMillisec = pos.getTs().getTsMillisec();
-//			long deltaTsMillisec = tsMillisec - firstTSMillisec;
-//			long newTsMillisec = (long)((float)deltaTsMillisec/(float)durationInMillisec*
-//					Timestamp.ONE_DAY_IN_MILLISEC); // norm to 24h
-//			pos.setTs(new Timestamp(newTsMillisec));
-//		}	
-//	}
+	public void normalizeTimestamps(Timestamp referenceStartTS,
+			   						int referenceVoyageDurationInSec) {
+		int i = 0;
+		for (ShipPosition pos : posList) {
+			Timestamp normTs = computeNormalizedTime(
+					referenceStartTS,
+					referenceVoyageDurationInSec,
+					i);
+			pos.setTs(normTs);
+			i++;
+		}
+	}
 	
 	/*
 	 * Normalize timestamps based on the track distance and fixed speed: first position at Epoch 00:00, last at Epoch 24:00

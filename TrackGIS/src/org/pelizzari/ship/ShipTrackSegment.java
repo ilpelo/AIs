@@ -16,7 +16,9 @@ public class ShipTrackSegment {
 	int durationInSeconds = 0; // difference of the timestamp of the start and end positions
 	int expectedCoveredPositions = 0; // the expected number of positions this segment should cover
 	
+	List<ShipPosition> spaceTargetPosList = new ArrayList<ShipPosition>();
 	List<ShipPosition> targetPosList = new ArrayList<ShipPosition>();
+	
 	float[] squaredDistanceOfTargetPositionArray;
 	float[] segmentEndsDistanceToTargetPositionArray;
 	int numberOfCoveredTargetPositions = 0; // number of target positions covered to the segment 
@@ -153,6 +155,31 @@ public class ShipTrackSegment {
 		return isWithin;
 	}
 	
+	/**
+	 * Return if a point is located within the corridor of given width next to this segment or not.
+	 */
+	public boolean isWithinCorridor(Point p, float width) {
+		boolean isWithin = false;
+		float P2_P1_P_angle = angle(p1.point, p2.point, p);
+		float P1_P_distance = p1.point.distance(p);
+		isWithin = (P1_P_distance*Math.cos(P2_P1_P_angle) < length) ||
+				   (P1_P_distance*Math.sin(P2_P1_P_angle) < width/2);		
+		return isWithin;
+	}
+	
+	/**
+	 * Return if a point is located within the ellipse having the segment ends as the two foci
+	 * and major axis equals to the segment length multiplied by the given factor (> 1)
+	 */
+	public boolean isWithinEllipse(Point p, float majorAxisFactor) {
+		boolean isWithin = false;
+		float majorAxis = length*majorAxisFactor;
+		float sumOfDistancesToSegmentEnds = p.distance(p1.point) + p.distance(p2.point);
+		isWithin = sumOfDistancesToSegmentEnds < majorAxis;		
+		return isWithin;
+	}
+		
+	
 	public List<ShipPosition> getTargetPosList() {
 		return targetPosList;
 	}
@@ -277,4 +304,22 @@ public class ShipTrackSegment {
 		}
 		return s;
 	}
+	
+	public static float dot(Point p1, Point p2) {
+		return p1.lon * p2.lon + p1.lat * p2.lat;
+	}
+	
+	public static float angle(Point origin, Point p1, Point p2) {
+		// move the origin to (lat=0,lon=0)
+		Point vp1 = new Point(p1.lat-origin.lat, p1.lon-origin.lon);
+		Point vp2 = new Point(p2.lat-origin.lat, p2.lon-origin.lon);
+		
+		float dotProd = dot(vp1, vp2);
+		float magVp1 = (float)Math.sqrt(dot(vp1, vp1));
+		float magVp2 = (float)Math.sqrt(dot(vp2, vp2));
+		float cosValue = dotProd/magVp1/magVp2;
+		float angle = (float)Math.acos(cosValue);
+		return angle;		
+	}
+	
 }

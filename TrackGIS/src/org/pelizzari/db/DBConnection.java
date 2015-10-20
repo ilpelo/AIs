@@ -14,12 +14,12 @@ public class DBConnection {
 				Class.forName("com.mysql.jdbc.Driver");
 				
 				//// Laptop
-				String url = "jdbc:mysql://localhost:3306/ai";
-				con = DriverManager.getConnection(url, "root", "mysql");
+//				String url = "jdbc:mysql://localhost:3306/ai";
+//				con = DriverManager.getConnection(url, "root", "mysql");
 				
 				//// EMSA
-//				String url = "jdbc:mysql://tstatdata1.emsa.local:3306/ai";
-//				con = DriverManager.getConnection(url, "pelizan", "ais");
+				String url = "jdbc:mysql://tstatdata1.emsa.local:3306/ai";
+				con = DriverManager.getConnection(url, "pelizan", "ais");
 				
 			} catch (ClassNotFoundException | SQLException e) {
 				System.err.println("Cannot make DB connection");

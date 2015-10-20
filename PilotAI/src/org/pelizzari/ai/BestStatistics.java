@@ -15,6 +15,7 @@ import org.pelizzari.gis.Box;
 import org.pelizzari.gis.DisplacementSequence;
 import org.pelizzari.gis.Map;
 import org.pelizzari.kml.KMLGenerator;
+import org.pelizzari.mine.MineVoyages;
 import org.pelizzari.ship.ChangeOfHeadingSequence;
 import org.pelizzari.ship.HeadingSequence;
 import org.pelizzari.ship.ShipPosition;
@@ -22,6 +23,7 @@ import org.pelizzari.ship.ShipPositionList;
 import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.ShipTrackSegment;
 import org.pelizzari.ship.TrackError;
+import org.pelizzari.time.Timestamp;
 
 import ec.vector.*;
 
@@ -264,6 +266,10 @@ public class BestStatistics extends Statistics {
 				
 				TrackError trackError = null;
 				try {
+					// make the corresponding segments and normalize time
+					bestTrack.computeTrackSegmentsAndNormalizeTimestamps(
+							new Timestamp(MineVoyages.REFERENCE_START_DT), 
+							MineVoyages.REFERENCE_VOYAGE_DURATION_IN_DAYS);
 					trackError = bestTrack.computeTrackError(prob.getTrainingShipPositionList(), DEBUG);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
