@@ -41,7 +41,6 @@ public class BestStatistics extends Statistics {
 	public static final String P_INFOFILE = "info-file";
 	public int infoLog;
 
-	// Output params
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
 	public static final int GEN_OUTPUT_RATE = 10; // print log every Nth
@@ -241,7 +240,6 @@ public class BestStatistics extends Statistics {
 //									      int genCount,
 //									      int genMax,
 //									      int popLog,
-//									      
 									      ) {			
 		// show best individual
 		boolean lastGen = genCount == genMax - 1;
@@ -267,9 +265,9 @@ public class BestStatistics extends Statistics {
 				TrackError trackError = null;
 				try {
 					// make the corresponding segments and normalize time
-					bestTrack.computeTrackSegmentsAndNormalizeTimestamps(
+					bestTrack.normalizeTimestampsAndComputeTrackSegments(
 							new Timestamp(MineVoyages.REFERENCE_START_DT), 
-							MineVoyages.REFERENCE_VOYAGE_DURATION_IN_DAYS);
+							MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC);
 					trackError = bestTrack.computeTrackError(prob.getTrainingShipPositionList(), DEBUG);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

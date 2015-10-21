@@ -37,7 +37,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class ShowMergedShipTracks {
 
-	static final String YEAR_PERIOD = "AUTUMN";
+	static final String YEAR_PERIOD = "SPRING";
 	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
 	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 
@@ -49,11 +49,11 @@ public class ShowMergedShipTracks {
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
 
-	static final long INSERT_TS = -1; //1444808464;
+	static final long INSERT_TS = 1444915221;
 	
 	final static String OUTPUT_FILE = "c:/master_data/MergedShipTracks";
 	final static boolean WITH_TRACKS = true;
-	final static boolean WITH_DATES = true;
+	final static boolean WITH_DATES = false;
 	
 	
 	public static void main(String[] args) {
@@ -107,7 +107,7 @@ public class ShowMergedShipTracks {
 					YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
 			for (ShipTrack track : tracks) {
 				// add tracks with dates
-				kmlGenerator.addTrack(track, track.getMmsi(), false);
+				kmlGenerator.addTrack(track, track.getMmsi(), WITH_DATES);
 			}
 		}
 

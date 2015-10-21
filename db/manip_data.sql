@@ -43,14 +43,22 @@ and source = 'N'
 -- Tracks table
 
 delete from tracks
-where arr = 'REUNION'
-and dep = 'CAPETOWN'
-and NOT insert_ts = 1444325922;
+where arr = 'GOA'
+and dep = 'REDSEA'
+and insert_ts = 1444752436;
 
-delete from tracks
-where dep = 'LANZAROTE'
+update tracks set ts = norm_ts
+where arr = 'GOA'
+and dep = 'REDSEA';
+
+delete 
+--select count(*) 
+from tracks
+where 1=1
+and dep = 'LANZAROTE'
 and arr = 'NATAL'
-and mmsi = 636007699;
+and period = 'AUTUMN'
+and insert_ts <> 1444927311;
 
 
 -- delete ships with few positions

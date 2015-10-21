@@ -29,7 +29,7 @@ public class TrackError {
 //	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
 	final static float DISTANCE_ERROR_FACTOR = 1f; // multiply distance of positions to segment
-	final static float HEADING_ERROR_FACTOR = 0f; // multiply by the number of  changes of heading over the limit 
+	final static float HEADING_ERROR_FACTOR = 0.1f; // multiply by the number of  changes of heading over the limit 
 	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 0f; //  multiply by the min coverage of the segments
 	//final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
@@ -145,11 +145,13 @@ public class TrackError {
 //							seg.p1.point, seg.p2.point, 
 //							NEIGHBORHOOD_SEGMENT_SQUARED_DISTANCE);
 			
-			// this was done in the loop before, one position at the time
 			seg.setTargetPosList(targetPosList);
 			
-			int expectedCoveredPositions = (int) (seg.lengthInMiles / baseTrack.trackLengthInMiles * trainingPosList.getPosList().size());
+			// estimate the number of positions covered by this segment based on its length
+			// ASSUPTION: positions are spread uniformly along the voyage path
+			int expectedCoveredPositions = (int) (seg.lengthInMiles / baseTrack.trackLengthInMiles * trainingPosList.getPosList().size());			
 			seg.setExpectedCoveredPositions(expectedCoveredPositions);
+			
 			seg.computeDistancesToTargetPositions();
 			seg.computeStatsForFitness();
 		}
@@ -310,7 +312,7 @@ public class TrackError {
 			getSegmentCoverageError()*SEGMENT_COVERAGE_ERROR_FACTOR +
 			//getTotalCoverageError() +
 			//getVarianceError() +
-			getDistanceError()*DISTANCE_ERROR_FACTOR +
+			getDistanceError()*DISTANCE_ERROR_FACTOR + //* (2f-(float)Math.log(getSegmentCoverageError()))+
 			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
 			//trackError.avgTotalSegmentError() +
 			0f;

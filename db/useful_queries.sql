@@ -143,19 +143,23 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n';
 
 -- Tracks table
-select from_unixtime(ts), from_unixtime(norm_ts), insert_ts
+select mmsi, lon, lat, dep, arr, period, from_unixtime(ts), from_unixtime(norm_ts), insert_ts
 from tracks
 where 
-mmsi = 256873000
+dep = "REDSEA"
+and mmsi = 240800000
 order by norm_ts asc
 ;
 
+--mmsi = 256873000
 --period = 'WINTER1'
 --dep = 'GIBRALTAR'
 
 select dep, arr, period, insert_ts, count(*), count(distinct mmsi) as mmsi
 from tracks
-group by dep, arr, period
+where arr = 'REUNION'
+and dep = 'CAPETOWN'
+group by dep, arr, period, insert_ts
 order by insert_ts desc;
 
 select mmsi, dep, arr, period, count(*) as counter

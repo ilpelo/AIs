@@ -493,23 +493,21 @@ public class ShipTrack extends ShipPositionList {
 	 * @return
 	 */
 	public void computeTrackSegments() {
-		if(segList.size() == 0) {
-			ShipPosition prevPos = null;
-			for (ShipPosition pos : posList) {
-				if (prevPos != null) {
-					segList.add(new ShipTrackSegment(prevPos, pos));
-				} 
-				prevPos = pos;
-			}
+		segList.clear();
+		ShipPosition prevPos = null;
+		for (ShipPosition pos : posList) {
+			if (prevPos != null) {
+				segList.add(new ShipTrackSegment(prevPos, pos));
+			} 
+			prevPos = pos;
 		}
-		//return segList;
 	}
 	
-	public void computeTrackSegmentsAndNormalizeTimestamps(
+	public void normalizeTimestampsAndComputeTrackSegments(
 						Timestamp referenceStartTS,
 						int referenceVoyageDurationInSec) {
-		computeTrackSegments();
 		normalizeTimestamps(referenceStartTS, referenceVoyageDurationInSec);
+		computeTrackSegments();
 	}	
 	
 	public List<ShipTrackSegment> getSegList() {

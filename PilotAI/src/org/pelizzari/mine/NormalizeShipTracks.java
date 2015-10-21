@@ -38,19 +38,22 @@ import org.pelizzari.time.Timestamp;
  */
 public class NormalizeShipTracks {
 
+	static final String YEAR_PERIOD = "SPRING";
+	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
-	static final String YEAR_PERIOD = "WINTER";
-	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
-	static final long INSERT_TS = -1;	
+//	static final String YEAR_PERIOD = "WINTER";
+//	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
+	static final long INSERT_TS = 1444899117;	
 	
 	// max percentage of discrepancy from the average track length
 	static final float MAX_TRACK_LENGTH_DISCREPANCY = 0.1f;
 	//
 	final static String REFERENCE_START_DT = MineVoyages.REFERENCE_START_DT; // reference start date of all tracks
-	final static int REFERENCE_VOYAGE_DURATION_IN_SEC = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_DAYS*3600*24;
+	final static int REFERENCE_VOYAGE_DURATION_IN_SEC = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC;
 	
 	public static void main(String[] args) throws ParseException {
 

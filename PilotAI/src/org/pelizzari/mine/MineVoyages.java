@@ -66,7 +66,7 @@ public class MineVoyages {
 		
 	final static boolean KML_FILE_WITH_DATES = false;
 	public final static String REFERENCE_START_DT = "2000-01-01 00:00:00"; // reference start date of all tracks
-	public final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = 1;
+	public final static int REFERENCE_VOYAGE_DURATION_IN_SEC = 24*3600;
 	
 	static void loadProps(String absolutePathToPropFile) {
 		Properties prop = new Properties();
@@ -210,7 +210,9 @@ public class MineVoyages {
 			fw.close();
 			//
 			// Normalize tracks (overwrite timestamps)!!!
-			track.computeTrackSegmentsAndNormalizeTimestamps(new Timestamp(REFERENCE_START_DT), REFERENCE_VOYAGE_DURATION_IN_DAYS);
+			track.normalizeTimestampsAndComputeTrackSegments(
+					new Timestamp(REFERENCE_START_DT), 
+					REFERENCE_VOYAGE_DURATION_IN_SEC);
 			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD, startDate.getTime()/1000);			
 		}
 		Date endDate = new Date();
