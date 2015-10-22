@@ -28,8 +28,9 @@ public class TrackError {
 //	final static float BAD_TRACK_FITNESS = 10E4f; // artificially high distance for segment that does not follow the target path
 //	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
-	final static float DISTANCE_ERROR_FACTOR = 1f; // multiply distance of positions to segment
-	final static float HEADING_ERROR_FACTOR = 0.01f; // multiply by the number of  changes of heading over the limit 
+	final static float DISTANCE_TO_DESTINATION_ERROR_FACTOR = 0f; // multiply distance of positions to segment
+	final static float DISTANCE_ERROR_FACTOR = 7f; // multiply distance of positions to segment
+	final static float HEADING_ERROR_FACTOR = 0.1f; // multiply by the number of  changes of heading over the limit 
 	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 0f; //  multiply by the min coverage of the segments
 	//final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	
@@ -38,7 +39,7 @@ public class TrackError {
 	// the target positions used to compute the fitness 
 	ShipPositionList trainingPosList;
 	// the destination of our journey (!) 
-	ShipPosition destinationPos;
+	Point destinationPoint;
 	// a measure of the error of each position of the baseTrack
 	//float[] segmentErrorVector;
 	// target positions coverage (0.0-1.0)
@@ -67,9 +68,10 @@ public class TrackError {
 	//String[] extraInfo;
 	boolean debug = false;
 			
-	public TrackError(ShipTrack track, boolean debug) {
+	public TrackError(ShipTrack track, Point destinationPoint, boolean debug) {
 		this.debug = debug;
 		baseTrack = track;
+		this.destinationPoint = destinationPoint;
 		//int size = baseTrack.getPosList().size();
 		//segmentErrorVector = new float[size];
 		//if(debug) extraInfo = new String[size];
@@ -262,10 +264,10 @@ public class TrackError {
 //			   cohTwiceOverLimitCount * HEADING_ERROR_AMPLIFIER * 100) / (float) getNumberOfTrackSegments();
 	}
 	
-//	public float destinationError() {
-//		float distanceToDestination = baseTrack.getLastPosition().point.distanceInMiles(destinationPos.point);
-//		return distanceToDestination;
-//	}
+	public float getDestinationError() {
+		float distanceToDestination = baseTrack.getLastPosition().point.distanceInMiles(destinationPoint);
+		return distanceToDestination;
+	}
 	
 	/**
 	 * This should return a high value if the coverage of the target positions is bad
@@ -307,7 +309,7 @@ public class TrackError {
 	
 	public float getError() {
 		float error =
-			//trackError.destinationError() +
+			getDestinationError()*DISTANCE_TO_DESTINATION_ERROR_FACTOR +
 			//trackError.getAvgSquaredDistanceAllSegments() +
 			getSegmentCoverageError()*SEGMENT_COVERAGE_ERROR_FACTOR +
 			//getTotalCoverageError() +
@@ -367,15 +369,16 @@ public class TrackError {
 		//s = s + "meanSquaredLocError = " + meanSquaredLocError() + "\n";		
 		//s = s + "meanSquaredLocErrorWithThreshold = " + meanSquaredLocErrorWithThreshold() + "\n";		
 		//s = s + "totalSegmentError (sum of squared distances) = " + totalSegmentError() + "\n";		
-		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";		
-		//s = s + "destinationError = " + destinationError() + "\n";		
+		s = s + "avgSquaredDistanceAllSegments = " + getAvgSquaredDistanceAllSegments() + "\n";	
 		//s = s + "totalCoverageError = " + getTotalCoverageError() + "\n";	
 		//s = s + "avgTotalSegmentError = " + avgTotalSegmentError() + "\n"; 
 		s = s + "varianceError = " + getVarianceError() + "\n"; 
 		s = s + "mode of covered target pos = " + modeCoveredTargetPositionsBySegment + "\n"; 
 		s = s + "median of covered target pos = " + medianCoveredTargetPositionsBySegment + "\n"; 
 		s = s + "minimum coverage of expected pos = " + minCoverageOfExpectedPositionsBySegment + "\n"; 
-		s = s + "---\n"; 		
+		s = s + "---\n"; 				
+		s = s + "destinationError = " + getDestinationError() + 
+				" (* "+ DISTANCE_TO_DESTINATION_ERROR_FACTOR + "=" + getDestinationError()*DISTANCE_TO_DESTINATION_ERROR_FACTOR +")\n"; 						
 		s = s + "distanceError = " + getDistanceError() +
 				" (* "+ DISTANCE_ERROR_FACTOR + "=" + getDistanceError()*DISTANCE_ERROR_FACTOR +")\n"; 
 		s = s + "avgChangeOfHeading = " + getAvgChangeOfHeading() +

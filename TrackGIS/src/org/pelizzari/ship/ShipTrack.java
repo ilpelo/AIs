@@ -560,15 +560,13 @@ public class ShipTrack extends ShipPositionList {
 		return avgSpeed;
 	}
 	
-	public TrackError computeTrackError(ShipPositionList trainingPosList, boolean debug) throws Exception {
-		TrackError trackError = new TrackError(this, debug);
+	public TrackError computeTrackError(
+			ShipPositionList trainingPosList,
+			Point destinationPoint) throws Exception {
+		TrackError trackError = new TrackError(this, destinationPoint, false); // no debug
 		trackError.computeSegmentStats(trainingPosList);
 		trackError.computeStatsForFitness();
 		return trackError;		
-	}
-
-	public TrackError computeTrackError(ShipPositionList trainingPosList) throws Exception {
-		return computeTrackError(trainingPosList, false);		
 	}
 	
 	public int countChangeOfHeadingOverLimit(float thresholdAngle) {

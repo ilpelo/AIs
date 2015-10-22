@@ -30,7 +30,7 @@ import ec.vector.*;
 
 public class BestStatistics extends Statistics {
 	
-	public static final boolean DEBUG = true;
+	//public static final boolean DEBUG = true;
 	
 	// The parameter string and log number of the file for our readable
 	// population
@@ -274,7 +274,9 @@ public class BestStatistics extends Statistics {
 					bestTrack.normalizeTimestampsAndComputeTrackSegments(
 							new Timestamp(MineVoyages.REFERENCE_START_DT), 
 							MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC);
-					trackError = bestTrack.computeTrackError(prob.getTrainingShipPositionList(), DEBUG);
+					trackError = bestTrack.computeTrackError(
+							prob.getTrainingShipPositionList(),
+							prob.getDestinationPoint());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
