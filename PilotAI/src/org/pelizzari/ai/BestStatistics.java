@@ -24,6 +24,7 @@ import org.pelizzari.ship.ShipTrack;
 import org.pelizzari.ship.ShipTrackSegment;
 import org.pelizzari.ship.TrackError;
 import org.pelizzari.time.Timestamp;
+import org.w3c.dom.Element;
 
 import ec.vector.*;
 
@@ -184,12 +185,17 @@ public class BestStatistics extends Statistics {
 		kmlGenerator1.addColoredStyles("pointStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
+		kmlGenerator1.addWaypointStyle("waypointStyle");
 		
+		Element trainingShipPositionsFolder = kmlGenerator1.addFolder("Training Set"); 
+				
 		// draw training points
 		int i = 0;
 		for(ShipTrackSegment seg: track.getSegList()) {
 			for(ShipPosition pos: seg.getTargetPosList()) {
-				kmlGenerator1.addPoint("pointStyle"+i, 
+				kmlGenerator1.addPoint(
+						trainingShipPositionsFolder,
+						"pointStyle"+i, 
 						"", 
 						pos.getPoint().lat, 
 						pos.getPoint().lon);

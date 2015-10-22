@@ -29,7 +29,7 @@ public class TrackError {
 //	final static float MIN_POSITION_COVERAGE_THRESHOLD = 0.99f; // percentage of target positions that are covered by the track
 	
 	final static float DISTANCE_ERROR_FACTOR = 1f; // multiply distance of positions to segment
-	final static float HEADING_ERROR_FACTOR = 0.1f; // multiply by the number of  changes of heading over the limit 
+	final static float HEADING_ERROR_FACTOR = 0.01f; // multiply by the number of  changes of heading over the limit 
 	final static float SEGMENT_COVERAGE_ERROR_FACTOR = 0f; //  multiply by the min coverage of the segments
 	//final static float TOTAL_COVERAGE_ERROR_FACTOR = 10f; // multiply by the number of  changes of heading over the limit 
 	

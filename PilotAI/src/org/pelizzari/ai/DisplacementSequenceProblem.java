@@ -44,19 +44,19 @@ public class DisplacementSequenceProblem extends Problem implements
 	
 	final static String REFERENCE_START_DT = MineVoyages.REFERENCE_START_DT; // reference start date of all tracks
 	final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC;
-	static final long INSERT_TS = 1444915221;
+	static final long INSERT_TS = 1444899117;
 
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
 
-//	static final String YEAR_PERIOD = "WINTER";
-//	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
-//	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
+	static final String YEAR_PERIOD = "WINTER";
+	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
 
-	static final String YEAR_PERIOD = "SPRING";
-	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
+//	static final String YEAR_PERIOD = "SPRING";
+//	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };

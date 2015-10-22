@@ -102,6 +102,32 @@ public class KMLGenerator {
 		docNode.appendChild(style);
 	}
 	
+	
+	public void addWaypointStyle(String styleName) {
+		addWaypointStyle(styleName, "http://maps.google.com/mapfiles/kml/paddle/ylw-blank.png");
+	}		
+	
+	public void addWaypointStyle(String styleName, String iconHrefURL) {
+		Element style = doc.createElement("Style");
+		Element iconStyle = doc.createElement("IconStyle");
+		style.setAttribute("id", styleName);
+		// color aabbggrr hex
+//		Element color = doc.createElement("color");
+//		String green = String.format("%02x", greenHueLevel);
+//		color.appendChild(doc.createTextNode("ff66"+green+"ff"));
+//		iconStyle.appendChild(color);
+		// HREF to icon
+		Element icon = doc.createElement("Icon");
+		Element iconHref = doc.createElement("href");
+		iconHref.appendChild(doc.createTextNode(iconHrefURL));
+		icon.appendChild(iconHref);
+		iconStyle.appendChild(icon);
+		style.appendChild(iconStyle);
+		docNode.appendChild(style);
+	}	
+	
+	
+	
 	/**
 	 * @param styleName
 	 * @param iconHrefURL
@@ -189,9 +215,14 @@ public class KMLGenerator {
 		docNode.appendChild(style);
 	}
 
+	
 	public void addPoint(String iconStyleName, String mmsi, float lat, float lon) {
+		addPoint(docNode, iconStyleName, mmsi, lat, lon);
+	}
+	
+	public void addPoint(Element baseDocNode, String iconStyleName, String mmsi, float lat, float lon) {
 		Element placemark = doc.createElement("Placemark");
-		docNode.appendChild(placemark);
+		baseDocNode.appendChild(placemark);
 		Element name = doc.createElement("name");
 		name.appendChild(doc.createTextNode(mmsi));
 		placemark.appendChild(name);
@@ -206,8 +237,12 @@ public class KMLGenerator {
 	}
 
 	public void addLineString(String mmsi, List<ShipPosition> posList, String style) {
+		addLineString(docNode, mmsi, posList, style);
+	}
+
+	public void addLineString(Element baseDocNode, String mmsi, List<ShipPosition> posList, String style) {
 		Element placemark = doc.createElement("Placemark");
-		docNode.appendChild(placemark);
+		baseDocNode.appendChild(placemark);
 		//
 		Element name = doc.createElement("name");
 		name.appendChild(doc.createTextNode(mmsi));
@@ -257,15 +292,33 @@ public class KMLGenerator {
 		placemark.appendChild(lineString);
 	}
 	
-//	public void addComment(String comment) {
-//	}
+	public Element addFolder(String name) {
+		Element folder = doc.createElement("Folder");
+		docNode.appendChild(folder);
+		Element nameEl = doc.createElement("name");
+		nameEl.appendChild(doc.createTextNode(name));
+		folder.appendChild(nameEl);
+		return folder;
+	}
 	
+	
+	/**
+	 * If label is "" and mmsi is present, use mmsi as label
+	 * @param track
+	 * @param label
+	 * @param withDates
+	 */
 	public void addTrack(ShipTrack track, String label, boolean withDates) {
 		if (track == null) {
 			System.err.println("addTrack: track is null");
 			return;
 		}
 		List<ShipPosition> positions = track.getPosList();
+		if("".equals(label) || label == null) {
+			label = (track.getMmsi() == null)?"":track.getMmsi();
+		}
+				
+		Element trackFolder = addFolder("Track");
 		
 		int i = 0;
 		int lastPos = positions.size()-1;
@@ -274,9 +327,10 @@ public class KMLGenerator {
 			Date date = new Date(ts);
 			String posLabel = withDates?date.toString():"";
 			if(i % MMSI_LABEL_SKIP_INTERVAL == 0 || i == lastPos) {
-				posLabel = posLabel + " " + track.getMmsi(); 
+				posLabel = posLabel + " " + label; 
 			}
-			addPoint("targetStyle",  
+			addPoint(trackFolder,
+					"waypointStyle",  
 					posLabel,
 					pos.getPoint().lat, 
 					pos.getPoint().lon);
@@ -285,7 +339,8 @@ public class KMLGenerator {
 		addThickLineStyle("trackLineStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/target.png");
 		
-		addLineString(label, track.getPosList(), "trackLineStyle");
+		addLineString(trackFolder, label, track.getPosList(), "trackLineStyle");
+		
 //		Comment trackDescription = doc.createComment(track.toString());
 //		Element element = doc.getDocumentElement();
 //		element.getParentNode().insertBefore(trackDescription, element);

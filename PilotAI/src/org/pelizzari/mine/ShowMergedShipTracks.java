@@ -74,6 +74,8 @@ public class ShowMergedShipTracks {
 		kmlGenerator.addColoredStyles("pointStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 				HUE_LEVELS, false);
+		kmlGenerator.addWaypointStyle("waypointStyle");
+
 		
 		kmlGenerator.addBox(DEPARTURE_AREA);
 		kmlGenerator.addPoint("poiStyle",  
