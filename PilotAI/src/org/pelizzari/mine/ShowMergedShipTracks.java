@@ -109,7 +109,7 @@ public class ShowMergedShipTracks {
 					YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
 			for (ShipTrack track : tracks) {
 				// add tracks with dates
-				kmlGenerator.addTrack(track, track.getMmsi(), WITH_DATES);
+				kmlGenerator.addTrack(track, null, WITH_DATES);
 			}
 		}
 

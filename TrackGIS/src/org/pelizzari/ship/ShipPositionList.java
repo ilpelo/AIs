@@ -41,6 +41,10 @@ public class ShipPositionList {
 		return posList.get(posList.size() - 1);
 	}
 
+	public ShipPosition getPosition(int index) {
+		return posList.get(index);
+	}
+
 	
 	/**
 	 * Select ship positions only if they are in the time interval of the segment and they are located

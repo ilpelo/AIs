@@ -69,7 +69,7 @@ public class ShowShipTrack {
 		// make segment to change timestamps based on speed (10 knots)
 		//track.computeTrackSegments(10f);
 		
-		kmlGenerator.addTrack(track, ""+MMSI);
+		kmlGenerator.addTrack(track, null);
 		
 		kmlGenerator.saveKMLFile(OUTPUT_FILE+"_"+MMSI+".kml");
 		

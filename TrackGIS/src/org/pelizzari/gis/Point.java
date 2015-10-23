@@ -66,6 +66,13 @@ public class Point {
 		Point intersectionPoint = new Point(y4, x4);
 		return intersectionPoint;
 	}
+	
+	public Displacement computeDisplacement(Point destPoint) {
+		float deltaLat = destPoint.lat - lat;
+		float deltaLon = destPoint.lon - lon;
+		Displacement d = new Displacement(deltaLat, deltaLon);
+		return d;		
+	}
 
 
 	/**

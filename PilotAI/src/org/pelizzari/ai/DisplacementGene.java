@@ -76,6 +76,11 @@ public class DisplacementGene extends Gene {
 	Displacement getAllele() {
 		return allele;
 	}
+
+	void setAllele(Displacement allele) {
+		this.allele = allele;
+	}
+
 	
     public Object clone() {
         DisplacementGene displGene = (DisplacementGene) (super.clone());

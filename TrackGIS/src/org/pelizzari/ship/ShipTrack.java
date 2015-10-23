@@ -561,9 +561,18 @@ public class ShipTrack extends ShipPositionList {
 	}
 	
 	public TrackError computeTrackError(
-			ShipPositionList trainingPosList,
-			Point destinationPoint) throws Exception {
-		TrackError trackError = new TrackError(this, destinationPoint, false); // no debug
+			  ShipPositionList trainingPosList,
+			  Point destinationPoint,
+			  float distanceToDestinationErrorFactor,
+			  float distanceErrorFactor,
+			  float headingErrorFactor) throws Exception {
+		TrackError trackError = new TrackError(
+				this, 
+				destinationPoint,
+				distanceToDestinationErrorFactor,
+				distanceErrorFactor,
+				headingErrorFactor
+				); 
 		trackError.computeSegmentStats(trainingPosList);
 		trackError.computeStatsForFitness();
 		return trackError;		

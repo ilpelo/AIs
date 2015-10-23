@@ -46,25 +46,29 @@ public class DisplacementSequenceProblem extends Problem implements
 	final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC;
 	//static final long INSERT_TS = 1444899117;
 
-//	static final String YEAR_PERIOD = "WINTER";
-//	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
-//	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
+	static final String YEAR_PERIOD = "WINTER";
+	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
 
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
 
-	static final String YEAR_PERIOD = "SPRING";
-	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
+//	static final String YEAR_PERIOD = "SUMMER";
+//	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 	
 //	static final float[] TRACK_LAT = { 31f, 32f, 31f, 30f, 31f };
 //	static final float[] TRACK_LON = { -12f, -11f, -10f, -11f, -12f };
+	
+	static float DISTANCE_TO_DESTINATION_ERROR_FACTOR;
+	static float DISTANCE_ERROR_FACTOR;
+	static float HEADING_ERROR_FACTOR; 
 
 	// init target track, map, etc.
 	static {
 		//List<ShipTrack> tracks = new ArrayList<ShipTrack>();
-		ShipPositionList shipPositionList = new ShipPositionList();
+		//ShipPositionList shipPositionList = new ShipPositionList();
 		if (DATA_STORAGE.equals("VAR")) {
 			System.err.println("VAR not supported");
 //			Point p = null;
@@ -153,6 +157,23 @@ public class DisplacementSequenceProblem extends Problem implements
 		System.out.println("Problem initialized; training position list: " + trainingShipPositionList);
 	}
 
+	
+		
+	/* (non-Javadoc)
+	 * @see ec.Problem#setup(ec.EvolutionState, ec.util.Parameter)
+	 */
+	@Override
+	public void setup(EvolutionState state, Parameter base) {
+		super.setup(state, base);
+		// get error factors
+		DISTANCE_TO_DESTINATION_ERROR_FACTOR = state.parameters.getFloat(
+				new Parameter("pelizzari.fitness.factor.distance-to-destination-error"), null);		
+		DISTANCE_ERROR_FACTOR = state.parameters.getFloat(
+				new Parameter("pelizzari.fitness.factor.distance-error"), null);		
+		HEADING_ERROR_FACTOR = state.parameters.getFloat(
+				new Parameter("pelizzari.fitness.factor.heading-error"), null);		
+	}
+
 	// ind is the individual to be evaluated.
 	// We're given state and threadnum primarily so we
 	// have access to a random number generator
@@ -176,7 +197,10 @@ public class DisplacementSequenceProblem extends Problem implements
 			// compute error
 			trackError = trackInd.computeTrackError(
 					trainingShipPositionList,
-					getDestinationPoint());
+					getDestinationPoint(),
+					DISTANCE_TO_DESTINATION_ERROR_FACTOR,
+					DISTANCE_ERROR_FACTOR,
+					HEADING_ERROR_FACTOR);
 		} catch (Exception e) {
 			state.output.fatal("computeTrackError: "+e, null);
 			e.printStackTrace();
@@ -205,21 +229,21 @@ public class DisplacementSequenceProblem extends Problem implements
 		displSeqInd.evaluated = true;
 	}
 
-	@Override
-	public void closeContacts(EvolutionState state, int result) {
-		// TODO Auto-generated method stub
-		super.closeContacts(state, result);
-		System.out.println("============= Found in generation: "
-				+ state.generation + "\n");
-		BestStatistics bestStats = (BestStatistics) state.statistics.children[0];
-		// bestStats.showBestIndividual(state);
-		Individual idealInd = bestStats.getBestIndividual(state);
-		ShipTrack idealTrack = makeTrack(state, (GeneVectorIndividual) idealInd);
-		System.out.println("Ideal Track: " + idealTrack);
-		bestStats.drawOnMap(idealTrack, state, true);
-	}
+//	@Override
+//	public void closeContacts(EvolutionState state, int result) {
+//		// TODO Auto-generated method stub
+//		super.closeContacts(state, result);
+//		System.out.println("============= Found in generation: "
+//				+ state.generation + "\n");
+//		BestStatistics bestStats = (BestStatistics) state.statistics.children[0];
+//		// bestStats.showBestIndividual(state);
+//		Individual idealInd = bestStats.getBestIndividual(state);
+//		ShipTrack idealTrack = makeTrack(state, (GeneVectorIndividual) idealInd);
+//		System.out.println("Ideal Track: " + idealTrack);
+//		bestStats.drawOnMap(idealTrack, state, true);
+//	}
 
-	public ShipTrack makeTrack(EvolutionState state,
+	public static ShipTrack makeTrack(EvolutionState state,
 			GeneVectorIndividual displSeqInd) {
 		// build track corresponding to the individual (sequence of
 		// displacements)

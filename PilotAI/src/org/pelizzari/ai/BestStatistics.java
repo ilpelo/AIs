@@ -170,7 +170,11 @@ public class BestStatistics extends Statistics {
 		}
 	}
 	
-	public void drawOnMap(ShipTrack track, EvolutionState state, boolean lastGen) {
+	public void drawOnMap(
+			ShipTrack track, 
+			EvolutionState state, 
+			boolean lastGen,
+			String[] wayPointLabels) {
 		Color trackColor = lastGen?Color.PINK:Color.GRAY;
 		map.plotTrack(track, trackColor, ""+state.generation);
 		//drawSegmentBoxes(track, map);
@@ -203,7 +207,7 @@ public class BestStatistics extends Statistics {
 			i++;
 		}
 		// draw best track
-		kmlGenerator1.addTrack(track, "");
+		kmlGenerator1.addTrack(track, wayPointLabels);
 		
 		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+state.generation+".kml";
 		System.out.println("Saving KML: "+kmlFile1);
@@ -276,14 +280,24 @@ public class BestStatistics extends Statistics {
 							MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC);
 					trackError = bestTrack.computeTrackError(
 							prob.getTrainingShipPositionList(),
-							prob.getDestinationPoint());
+							prob.getDestinationPoint(),
+							prob.DISTANCE_TO_DESTINATION_ERROR_FACTOR,
+							prob.DISTANCE_ERROR_FACTOR,
+							prob.HEADING_ERROR_FACTOR);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				state.output.println(""+trackError, popLog);
 				
-				drawOnMap(bestTrack, state, lastGen);
+				String[] wayPointLabels = new String[bestTrack.getSegList().size()];
+				int i=0;
+				for (ShipTrackSegment seg : bestTrack.getSegList()) {
+					wayPointLabels[i] = "D="+seg.getAvgSquaredPerpendicularDistanceToTargetPositions();
+					i++;
+				}
+				
+				drawOnMap(bestTrack, state, lastGen, wayPointLabels);
 			}
 		}
 		genCount++;

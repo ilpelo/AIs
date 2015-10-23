@@ -38,7 +38,7 @@ import org.pelizzari.time.Timestamp;
  */
 public class NormalizeShipTracks {
 
-	static final String YEAR_PERIOD = "SPRING";
+	static final String YEAR_PERIOD = "SUMMER";
 	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
 	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 //	static final String YEAR_PERIOD = "WINTER";
@@ -47,7 +47,7 @@ public class NormalizeShipTracks {
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
-	static final long INSERT_TS = 1444899117;	
+	static final long INSERT_TS = 1444927757;	
 	
 	// max percentage of discrepancy from the average track length
 	static final float MAX_TRACK_LENGTH_DISCREPANCY = 0.1f;

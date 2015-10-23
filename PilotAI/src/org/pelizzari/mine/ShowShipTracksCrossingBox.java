@@ -69,7 +69,7 @@ public class ShowShipTracksCrossingBox {
 				analysisInterval, BOX, SHIPS_LIMIT);		
 		
 		for (ShipTrack track : tracks) {
-			kmlGenerator.addTrack(track, track.getMmsi());			
+			kmlGenerator.addTrack(track, null);			
 		}
 		
 		kmlGenerator.saveKMLFile(OUTPUT_FILE+".kml");

@@ -183,7 +183,7 @@ public class MineVoyages {
 		Map map = new Map();
 		for (ShipTrack track : allTracks) {
 			map.plotTrack(track, Color.GREEN, track.getMmsi());
-			kmlGenerator.addTrack(track, track.getMmsi(), KML_FILE_WITH_DATES);
+			kmlGenerator.addTrack(track, null, KML_FILE_WITH_DATES);
 		}
 //		map.setVisible(true);
 				

@@ -19,13 +19,13 @@ public class ShipTrackSegment {
 	List<ShipPosition> spaceTargetPosList = new ArrayList<ShipPosition>();
 	List<ShipPosition> targetPosList = new ArrayList<ShipPosition>();
 	
-	float[] squaredDistanceOfTargetPositionArray;
+	float[] squaredPerpendicularDistanceOfTargetPositionArray;
 	float[] segmentEndsDistanceToTargetPositionArray;
 	int numberOfCoveredTargetPositions = 0; // number of target positions covered to the segment 
-	float avgSquaredDistanceToTargetPositions = 0f;
-	float minSquaredDistanceToTargetPositions = 0f;
-	float maxSquaredDistanceToTargetPositions = 0f;
-	float varSquaredDistanceToTargetPositions = 0f;
+	float avgSquaredPerpendicularDistanceToTargetPositions = 0f;
+	float minSquaredPerpendicularDistanceToTargetPositions = 0f;
+	float maxSquaredPerpendicularDistanceToTargetPositions = 0f;
+	float varSquaredPerpendicularDistanceToTargetPositions = 0f;
 	float squaredDistanceOfSegmentEndToLastTargetPosition = 0f;
 	float avgSegmentEndsDistanceToTargetPositions = 0f;
 	float coverageOfExpectedPositions = 0f; // % of expected positions covered by this segment
@@ -68,13 +68,13 @@ public class ShipTrackSegment {
 		if(numberOfCoveredTargetPositions == 0) {
 			return;
 		}
-		squaredDistanceOfTargetPositionArray = new float[numberOfCoveredTargetPositions];
+		squaredPerpendicularDistanceOfTargetPositionArray = new float[numberOfCoveredTargetPositions];
 		segmentEndsDistanceToTargetPositionArray = new float[numberOfCoveredTargetPositions];
 		int i = 0;
 		ShipPosition lastTargetPos = null;
 		for (ShipPosition targetPos : targetPosList) {
 			// distance of target positions from the segment
-			squaredDistanceOfTargetPositionArray[i] = 
+			squaredPerpendicularDistanceOfTargetPositionArray[i] = 
 					targetPos.point.approxSquaredDistanceToSegment(p1.point, p2.point);
 			// sum of the distances of target positions to the segment ends
 			segmentEndsDistanceToTargetPositionArray[i] =					
@@ -101,33 +101,38 @@ public class ShipTrackSegment {
 			return;
 		}
 		// mean, min, and max distance
-		minSquaredDistanceToTargetPositions = Float.MAX_VALUE;
-		maxSquaredDistanceToTargetPositions = 0;
-		float sumSquaredDistance = 0, sumSegmentEndsDistance = 0;
-		for (int i = 0; i < squaredDistanceOfTargetPositionArray.length; i++) {
-			float squaredDistance = squaredDistanceOfTargetPositionArray[i];
-			if(squaredDistance < minSquaredDistanceToTargetPositions) {
-				minSquaredDistanceToTargetPositions = squaredDistance;
-			}
-			if(squaredDistance > maxSquaredDistanceToTargetPositions) {
-				maxSquaredDistanceToTargetPositions = squaredDistance;
-			}
-			// sum up perpendicular distances
-			sumSquaredDistance += squaredDistance;
-			// sum up distances to segment ends
-			sumSegmentEndsDistance += segmentEndsDistanceToTargetPositionArray[i];
-		}
-		// average of the perpendicular distance
-		avgSquaredDistanceToTargetPositions = sumSquaredDistance/numberOfCoveredTargetPositions;
-		// average of the distances to the segment ends
-		avgSegmentEndsDistanceToTargetPositions = sumSegmentEndsDistance/numberOfCoveredTargetPositions;
+		minSquaredPerpendicularDistanceToTargetPositions = TrackError.min(squaredPerpendicularDistanceOfTargetPositionArray);
+		maxSquaredPerpendicularDistanceToTargetPositions = TrackError.max(squaredPerpendicularDistanceOfTargetPositionArray);
+		avgSquaredPerpendicularDistanceToTargetPositions = TrackError.avg(squaredPerpendicularDistanceOfTargetPositionArray);
+		avgSegmentEndsDistanceToTargetPositions = TrackError.avg(segmentEndsDistanceToTargetPositionArray);
+
+//		minSquaredPerpendicularDistanceToTargetPositions = Float.MAX_VALUE;
+//		maxSquaredPerpendicularDistanceToTargetPositions = 0;
+//		float sumSquaredDistance = 0, sumSegmentEndsDistance = 0;
+//		for (int i = 0; i < squaredPerpendicularDistanceOfTargetPositionArray.length; i++) {
+//			float squaredDistance = squaredPerpendicularDistanceOfTargetPositionArray[i];
+//			if(squaredDistance < minSquaredPerpendicularDistanceToTargetPositions) {
+//				minSquaredPerpendicularDistanceToTargetPositions = squaredDistance;
+//			}
+//			if(squaredDistance > maxSquaredPerpendicularDistanceToTargetPositions) {
+//				maxSquaredPerpendicularDistanceToTargetPositions = squaredDistance;
+//			}
+//			// sum up perpendicular distances
+//			sumSquaredDistance += squaredDistance;
+//			// sum up distances to segment ends
+//			sumSegmentEndsDistance += segmentEndsDistanceToTargetPositionArray[i];
+//		}
+//		// average of the perpendicular distance
+//		avgSquaredPerpendicularDistanceToTargetPositions = sumSquaredDistance/numberOfCoveredTargetPositions;
+//		// average of the distances to the segment ends
+//		avgSegmentEndsDistanceToTargetPositions = sumSegmentEndsDistance/numberOfCoveredTargetPositions;
 		// variance
 		float sumVariance = 0;
-		for (float sqrDist : squaredDistanceOfTargetPositionArray) {
-			sumVariance += (avgSquaredDistanceToTargetPositions - sqrDist) * 
-					(avgSquaredDistanceToTargetPositions - sqrDist); 
+		for (float sqrDist : squaredPerpendicularDistanceOfTargetPositionArray) {
+			sumVariance += (avgSquaredPerpendicularDistanceToTargetPositions - sqrDist) * 
+					(avgSquaredPerpendicularDistanceToTargetPositions - sqrDist); 
 		}
-		varSquaredDistanceToTargetPositions = sumVariance/numberOfCoveredTargetPositions;
+		varSquaredPerpendicularDistanceToTargetPositions = sumVariance/numberOfCoveredTargetPositions;
 	}
 
 	/**
@@ -227,15 +232,15 @@ public class ShipTrackSegment {
 	}
 
 	public float getAvgSquaredPerpendicularDistanceToTargetPositions() {
-		return avgSquaredDistanceToTargetPositions;
+		return avgSquaredPerpendicularDistanceToTargetPositions;
 	}
 
 	public float getAvgSegmentEndsDistanceToTargetPositions() {
 		return avgSegmentEndsDistanceToTargetPositions;
 	}	
 
-	public float getMinSquaredDistanceToTargetPositions() {
-		return minSquaredDistanceToTargetPositions;
+	public float getMinSquaredPerpendicularDistanceToTargetPositions() {
+		return minSquaredPerpendicularDistanceToTargetPositions;
 	}
 
 //	public void setMinSquaredDistanceToTargetPositions(
@@ -243,8 +248,8 @@ public class ShipTrackSegment {
 //		this.minSquaredDistanceToTargetPositions = minSquaredDistanceToTargetPositions;
 //	}
 
-	public float getMaxSquaredDistanceToTargetPositions() {
-		return maxSquaredDistanceToTargetPositions;
+	public float getMaxSquaredPerpendicularDistanceToTargetPositions() {
+		return maxSquaredPerpendicularDistanceToTargetPositions;
 	}
 
 //	public void setMaxSquaredDistanceToTargetPositions(
@@ -253,7 +258,7 @@ public class ShipTrackSegment {
 //	}
 	
 	public float getVarSquaredDistanceToTargetPositions() {
-		return varSquaredDistanceToTargetPositions;
+		return varSquaredPerpendicularDistanceToTargetPositions;
 	}
 		
 	public float getCoverageOfExpectedPositions() {
@@ -285,15 +290,15 @@ public class ShipTrackSegment {
 			
 			ShipPosition firstCoveredPos = targetPosList.get(0);
 			s = s + "First covered pos: " + firstCoveredPos + 
-					", d^2="+ squaredDistanceOfTargetPositionArray[0] + "\n";
+					", d^2="+ squaredPerpendicularDistanceOfTargetPositionArray[0] + "\n";
 			
 			ShipPosition lastCoveredPos = targetPosList.get(targetPosList.size()-1);
 			s = s + "Last covered pos: " + lastCoveredPos + 
-					", d^2="+ squaredDistanceOfTargetPositionArray[targetPosList.size()-1] + "\n";
+					", d^2="+ squaredPerpendicularDistanceOfTargetPositionArray[targetPosList.size()-1] + "\n";
 			
-			s = s + "Squared perpendicular distance: avg=" + avgSquaredDistanceToTargetPositions +
-					", min=" + minSquaredDistanceToTargetPositions +
-					", max=" + maxSquaredDistanceToTargetPositions +
+			s = s + "Squared perpendicular distance: avg=" + avgSquaredPerpendicularDistanceToTargetPositions +
+					", min=" + minSquaredPerpendicularDistanceToTargetPositions +
+					", max=" + maxSquaredPerpendicularDistanceToTargetPositions +
 					", to segment end=" + squaredDistanceOfSegmentEndToLastTargetPosition + "\n";
 			s = s + "Distance to segment ends: avg=" + avgSegmentEndsDistanceToTargetPositions + "\n";
 			s = s + "Coverage of expected positions=" + coverageOfExpectedPositions + 

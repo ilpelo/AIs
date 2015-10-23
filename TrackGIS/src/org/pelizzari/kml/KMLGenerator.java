@@ -308,26 +308,31 @@ public class KMLGenerator {
 	 * @param label
 	 * @param withDates
 	 */
-	public void addTrack(ShipTrack track, String label, boolean withDates) {
+	public void addTrack(ShipTrack track, String[] labels, boolean withDates) {
 		if (track == null) {
 			System.err.println("addTrack: track is null");
 			return;
 		}
 		List<ShipPosition> positions = track.getPosList();
-		if("".equals(label) || label == null) {
-			label = (track.getMmsi() == null)?"":track.getMmsi();
-		}
-				
+//		if("".equals(label) || label == null) {
+//			label = (track.getMmsi() == null)?"":track.getMmsi();
+//		}
+		String mmsi = ((track.getMmsi() == null)?"":track.getMmsi());
+		
 		Element trackFolder = addFolder("Track");
 		
 		int i = 0;
 		int lastPos = positions.size()-1;
 		for (ShipPosition pos : positions) {
+			String label = "";
+			if(labels != null && i < lastPos) {
+				label = labels[i];				
+			}
 			long ts = pos.getTs().getTsMillisec();
 			Date date = new Date(ts);
-			String posLabel = withDates?date.toString():"";
+			String posLabel = label + (withDates?" "+date.toString():"");
 			if(i % MMSI_LABEL_SKIP_INTERVAL == 0 || i == lastPos) {
-				posLabel = posLabel + " " + label; 
+				posLabel = posLabel + " " + mmsi; 
 			}
 			addPoint(trackFolder,
 					"waypointStyle",  
@@ -339,7 +344,7 @@ public class KMLGenerator {
 		addThickLineStyle("trackLineStyle", 
 				"http://maps.google.com/mapfiles/kml/shapes/target.png");
 		
-		addLineString(trackFolder, label, track.getPosList(), "trackLineStyle");
+		addLineString(trackFolder, mmsi, track.getPosList(), "trackLineStyle");
 		
 //		Comment trackDescription = doc.createComment(track.toString());
 //		Element element = doc.getDocumentElement();
@@ -347,8 +352,8 @@ public class KMLGenerator {
 	}
 
 	
-	public void addTrack(ShipTrack track, String label) {
-		addTrack(track, label, false);
+	public void addTrack(ShipTrack track, String[] labels) {
+		addTrack(track, labels, false);
 	}
 	
 	public void saveKMLFile(String file) {
