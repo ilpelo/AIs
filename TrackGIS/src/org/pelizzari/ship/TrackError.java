@@ -323,13 +323,13 @@ public class TrackError {
 	public float getError() {
 		float error =
 			getDestinationError()*DISTANCE_TO_DESTINATION_ERROR_FACTOR +
+			getDistanceError()*DISTANCE_ERROR_FACTOR + 
+			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
+			//trackError.avgTotalSegmentError() +
 			//trackError.getAvgSquaredDistanceAllSegments() +
 			getSegmentCoverageError()*SEGMENT_COVERAGE_ERROR_FACTOR +
 			//getTotalCoverageError() +
 			//getVarianceError() +
-			getDistanceError()*DISTANCE_ERROR_FACTOR + //* (2f-(float)Math.log(getSegmentCoverageError()))+
-			getAvgChangeOfHeading()*HEADING_ERROR_FACTOR +
-			//trackError.avgTotalSegmentError() +
 			0f;
 		return error;
 	}

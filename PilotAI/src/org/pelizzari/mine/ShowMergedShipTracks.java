@@ -49,7 +49,7 @@ public class ShowMergedShipTracks {
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("GOA");
 
-	static final long INSERT_TS = 1444915221;
+	static final long INSERT_TS = 1445881117;
 	
 	final static String OUTPUT_FILE = "c:/master_data/MergedShipTracks";
 	final static boolean WITH_TRACKS = true;
@@ -106,7 +106,7 @@ public class ShowMergedShipTracks {
 		
 		if(WITH_TRACKS) {
 			List<ShipTrack> tracks = miner.getShipTracksFromTracksTable(
-					YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA);
+					YEAR_PERIOD, DEPARTURE_AREA, ARRIVAL_AREA, INSERT_TS);
 			for (ShipTrack track : tracks) {
 				// add tracks with dates
 				kmlGenerator.addTrack(track, null, WITH_DATES);

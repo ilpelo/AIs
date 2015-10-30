@@ -1,7 +1,6 @@
 breedthreads	= 1
 evalthreads	= 1
-seed.0		= time
-#5375
+seed.0		= 5370
 
 state		= ec.simple.SimpleEvolutionState
 pop			= ec.Population
@@ -25,17 +24,12 @@ pop.subpop.0.size = 1000
 pop.subpop.0.species.pipe.source.0.likelihood = 0.5
 pop.subpop.0.species.mutation-prob	= 0.2
 select.tournament.size		= 10
-# CUSTOM parameters
-# Multiplying factors used to compute fitness
-pelizzari.fitness.factor.distance-to-destination-error = 0.01
-pelizzari.fitness.factor.distance-error = 10.0
-pelizzari.fitness.factor.heading-error = 1
 
 # number of displacements
 #pop.subpop.0.species.genome-size	= 7
 pop.subpop.0.species.genome-size = uniform
 pop.subpop.0.species.min-initial-size = 6
-pop.subpop.0.species.max-initial-size = 15
+pop.subpop.0.species.max-initial-size = 10
 
 # min/max displacement (absolute values MUST be the same)
 pop.subpop.0.species.min-gene	= -10.0
@@ -52,7 +46,6 @@ pop.subpop.0		= ec.Subpopulation
 pop.subpop.0.duplicate-retries 	= 0
 pop.subpop.0.species 		= ec.vector.GeneVectorSpecies
 pop.subpop.0.species.ind	= ec.vector.GeneVectorIndividual
-#pop.subpop.0.species.ind	= org.pelizzari.ai.DisplacementGeneVectorIndividual
 pop.subpop.0.species.crossover-type	= one
 # this is the per-gene probability of being crossovered (my guess...); no influence on result
 #pop.subpop.0.species.crossover-prob	= 0.0

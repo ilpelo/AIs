@@ -155,10 +155,10 @@ order by norm_ts asc
 --period = 'WINTER1'
 --dep = 'GIBRALTAR'
 
-select dep, arr, period, insert_ts, count(*), count(distinct mmsi) as mmsi
+select dep, arr, period, insert_ts, from_unixtime(insert_ts), count(*), count(distinct mmsi) as mmsi
 from tracks
-where arr = 'REUNION'
-and dep = 'CAPETOWN'
+where dep = 'LANZAROTE'
+and arr = 'NATAL'
 group by dep, arr, period, insert_ts
 order by insert_ts desc;
 
@@ -171,5 +171,8 @@ having counter > 5;
 -- dump
 C:\Program Files\MySQL\MySQL Server 5.6\bin>mysqldump -uroot -pmysql ai tracks >
  c:\master_data\tracks_20151018_1741.sql
+ 
+ -- Mine voyages
+ java -cp minevoyages.jar org.pelizzari.mine.MineVoyages C:\master_data\conf\lanzarote-natal-spring-2011.props
 
 

@@ -44,7 +44,7 @@ public class BestStatistics extends Statistics {
 
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
-	public static final int GEN_OUTPUT_RATE = 10; // print log every Nth
+	public static final int GEN_OUTPUT_RATE = 50; // print log every Nth
 													// generations
 	public static Map map, map1;
 	//public KMLGenerator kmlGenerator;

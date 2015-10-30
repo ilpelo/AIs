@@ -89,7 +89,7 @@ public class Miner {
 	 * @param arrBox
 	 * @return
 	 */
-	public List<Ship> getShipsWithTracks(String yearPeriod, Box depBox, Box arrBox) {
+	public List<Ship> getShipsWithTracks(String yearPeriod, Box depBox, Box arrBox, long insertTs) {
 
 		final String SHIP_QUERY = 
 				"select distinct mmsi " +
@@ -97,6 +97,7 @@ public class Miner {
 				"where period = '" + yearPeriod + "' " +
 				"and dep = '" + depBox.getName() + "' " +
 				"and arr = '" + arrBox.getName() +  "' " +
+				((insertTs == -1)?"":"and insert_ts = " + insertTs + " ") + 				
 				"order by mmsi asc";
 
 		String shipQuery = SHIP_QUERY;
@@ -191,7 +192,7 @@ public class Miner {
 	 * Loads a merged track between 2 areas from the TRACKS table in the db
 	 */
 	public ShipPositionList getMergedShipTracksInPeriodAndBetweenBoxes(
-			String yearPeriod, Box depBox, Box arrBox, long insertTS) {
+			String yearPeriod, Box depBox, Box arrBox, long insertTs) {
 		Connection con = DBConnection.getCon();
 		int readCount = 0;				
 		final String FUSED_TRACK_SELECT = 
@@ -200,7 +201,7 @@ public class Miner {
 				"where period = '" + yearPeriod + "' " +
 				"and dep = '" + depBox.getName() + "' " +
 				"and arr = '" + arrBox.getName() + "' " + 
-				((insertTS == -1)?"":"and insert_ts = " + insertTS + " ") + 
+				((insertTs == -1)?"":"and insert_ts = " + insertTs + " ") + 
 				"order by ts asc";
 		System.out.println("Fused Track Query: " + FUSED_TRACK_SELECT);			
 		
@@ -298,8 +299,9 @@ public class Miner {
 	public List<ShipTrack> getShipTracksFromTracksTable(
 			String yearPeriod, 
 			Box depBox,
-			Box arrBox) {
-		List<Ship> ships = getShipsWithTracks(yearPeriod, depBox, arrBox);
+			Box arrBox,
+			long insertTs) {
+		List<Ship> ships = getShipsWithTracks(yearPeriod, depBox, arrBox, insertTs);
 		List<ShipTrack> tracks = new ArrayList<ShipTrack>();
 		for (Ship ship : ships) {
 			ShipTrack track = new ShipTrack();
@@ -307,7 +309,7 @@ public class Miner {
 			List<Ship> oneShip = new ArrayList<Ship>();
 			oneShip.add(ship);
 			List<ShipPosition> posList = getShipPositionsFromTracksTable(
-					depBox, arrBox, oneShip, null, -1);
+					depBox, arrBox, oneShip, null, -1, insertTs);
 			track.setPosList(posList);
 			tracks.add(track);
 		}		
@@ -319,7 +321,8 @@ public class Miner {
 			   Box arrBox,
 			   List<Ship> includeShips,
 			   List<Ship> excludeShips,
-			   int limitPositions) {
+			   int limitPositions,
+			   long insertTs) {
 	
 	final String INCLUDE_MMSI_COND = getMmsiSQLCondition(includeShips, true);		
 	
@@ -327,7 +330,9 @@ public class Miner {
 	
 	final String BOX_NAMES_COND = getBoxNamesSQLCondition(depBox, arrBox);
 	
-	final String LIMIT_POS = (limitPositions > 0)?"limit "+limitPositions+" ":"";		
+	final String INSERT_TS_COND = ((insertTs == -1)?"":"and insert_ts = " + insertTs + " ");
+	
+	final String LIMIT_POS = (limitPositions > 0)?"limit "+limitPositions+" ":"";
 
 	final String SHIP_POSITION_QUERY = 
 			"SELECT ts, date(from_unixtime(ts)) as ts_date, lat, lon "+
@@ -336,6 +341,7 @@ public class Miner {
 			INCLUDE_MMSI_COND+
 			EXCLUDE_MMSI_COND+
 			BOX_NAMES_COND+
+			INSERT_TS_COND+
 			"order by ts asc "+ // this is important: it sorts all positions regardless of mmsi
 								// tracks must have been speed normalized!
 			LIMIT_POS;

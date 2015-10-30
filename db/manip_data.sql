@@ -51,15 +51,19 @@ update tracks set ts = norm_ts
 where arr = 'GOA'
 and dep = 'REDSEA';
 
-delete 
 --select count(*) 
+--delete 
 from tracks
 where 1=1
 and dep = 'LANZAROTE'
 and arr = 'NATAL'
-and period = 'AUTUMN'
-and insert_ts <> 1444927311;
+and period = 'SPRING'
+and insert_ts = 1445881117;
 
+update tracks
+set period = 'SPRING'
+--where period = 'SPRING';
+where insert_ts = 1445881117;
 
 -- delete ships with few positions
 delete from tracks
