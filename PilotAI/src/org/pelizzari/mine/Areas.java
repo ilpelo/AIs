@@ -11,6 +11,7 @@ public class Areas {
 	// Gibraltar
 	static Point gibraltarNW = new Point(37, -6);
 	static Point gibraltarSE = new Point(35, -5);
+	static Point gibraltarPOI = new Point(36, -5.5f);
 	// Finisterre
 	static Point finisterreNW = new Point(44, -10);
 	static Point finisterreSE = new Point(43, -8);
@@ -18,8 +19,9 @@ public class Areas {
 	static Point copenhagenNW = new Point(56, 12);
 	static Point copenhagenSE = new Point(55, 14);
 	// Channel
-	static Point channelNW = new Point(51, 1);
-	static Point channelSE = new Point(50.5f, 2.5f);
+	static Point channelNW = new Point(50.22f, -5.3f);
+	static Point channelSE = new Point(49.24f, -2.45f);
+	static Point channelPOI = new Point(50, -2.5f);
 	// New York
 	static Point nyNW = new Point(44, -77);
 	static Point nySE = new Point(40, -70);
@@ -40,8 +42,9 @@ public class Areas {
 	static Point westAtlanticNW = new Point(70, -77);
 	static Point westAtlanticSE = new Point(-70, -70);
 	// Nova Scotia
-	static Point novascotiaNW = new Point(50, -72);
+	static Point novascotiaNW = new Point(47.5f, -58);
 	static Point novascotiaSE = new Point(45f, -55);
+	static Point novascotiaPOI = new Point(46.75f, -58);
 	// Cape Town
 	static Point capetownNW = new Point(-33.5f, 17);
 	static Point capetownSE = new Point(-35.5f, 19);
@@ -53,6 +56,7 @@ public class Areas {
 	// Guadeloupe
 	static Point guadeloupeNW = new Point(17.27f, -62.9f);
 	static Point guadeloupeSE = new Point(15.8f, -59.7f);
+	static Point guadeloupePOI = new Point(16, -59.7f);
 	// Calais
 	static Point calaisNW = new Point(51.33f, 0.95f);
 	static Point calaisSE = new Point(50.61f, 2.58f);
@@ -73,16 +77,16 @@ public class Areas {
 	public static Map<String, Box> boxes = new HashMap<String, Box>();
 	
 	static {
-		boxes.put("GIBRALTAR", new Box(gibraltarNW, gibraltarSE, "GIBRALTAR"));
+		boxes.put("GIBRALTAR", new Box(gibraltarNW, gibraltarSE, "GIBRALTAR", gibraltarPOI));
 		boxes.put("FINISTERRE", new Box(finisterreNW, finisterreSE, "FINISTERRE"));
-		boxes.put("NOVASCOTIA", new Box(novascotiaNW, novascotiaSE, "NOVASCOTIA"));
+		boxes.put("NOVASCOTIA", new Box(novascotiaNW, novascotiaSE, "NOVASCOTIA", novascotiaPOI));
 		boxes.put("SUEZ", new Box(suezNW, suezSE, "SUEZ"));
 		boxes.put("CAPETOWN", new Box(capetownNW, capetownSE, "CAPETOWN", capetownPOI));
 		boxes.put("REUNION", new Box(reunionNW, reunionSE, "REUNION", reunionPOI));
 		boxes.put("WEST_ATLANTIC", new Box(westAtlanticNW, westAtlanticSE, "WEST_ATLANTIC"));
 		boxes.put("RIO", new Box(rioNW, rioSE, "RIO"));
 		boxes.put("GOA", new Box(goaNW, goaSE, "GOA", goaPOI));
-		boxes.put("GUADELOUPE", new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE"));		
+		boxes.put("GUADELOUPE", new Box(guadeloupeNW, guadeloupeSE, "GUADELOUPE", guadeloupePOI));		
 		String areaName = "CALAIS";
 		boxes.put(areaName, new Box(calaisNW, calaisSE, areaName));		
 		areaName = "REDSEA";
@@ -91,6 +95,8 @@ public class Areas {
 		boxes.put(areaName, new Box(lanzaroteNW, lanzaroteSE, areaName, lanzarotePOI));		
 		areaName = "NATAL";
 		boxes.put(areaName, new Box(natalNW, natalSE, areaName, natalPOI));		
+		areaName = "CHANNEL";
+		boxes.put(areaName, new Box(channelNW, channelSE, areaName, channelPOI));		
 	}
 	
 	public static Box getBox(String boxName) {

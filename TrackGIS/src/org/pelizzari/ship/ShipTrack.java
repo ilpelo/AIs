@@ -472,7 +472,7 @@ public class ShipTrack extends ShipPositionList {
 //	}
 	
 	/**
-	 * Compute the timestamp of the position if the voyage duration is 24h.
+	 * Compute the timestamp of the position if start and voyage duration are fixed.
 	 */
 	public Timestamp computeNormalizedTime(Timestamp referenceStartTS,
 										   int referenceVoyageDurationInSec,

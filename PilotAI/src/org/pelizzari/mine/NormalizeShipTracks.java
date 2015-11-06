@@ -38,9 +38,14 @@ import org.pelizzari.time.Timestamp;
  */
 public class NormalizeShipTracks {
 
-	static final String YEAR_PERIOD = "SUMMER";
-	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
+//	static final String YEAR_PERIOD = "SPRING";
+//	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");
+	static final String YEAR_PERIOD = "WINTER";
+	static final Box DEPARTURE_AREA = Areas.getBox("CHANNEL"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("NOVASCOTIA");
+//	static final Box DEPARTURE_AREA = Areas.getBox("LANZAROTE"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("NATAL");
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
 //	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");

@@ -9,12 +9,22 @@ group by source, date_format(date(from_unixtime(ts)),'%Y')
 order by 2, 1;
 
 -- count positions per month
+select date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
+from pos
+where 1=1
+-- and source = 'E'
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) <= '2012-12-31'
+group by date_format(date(from_unixtime(ts)),'%Y-%m')
+order by 1;
+
+-- count positions per month/source
 select source, date_format(date(from_unixtime(ts)),'%Y-%m') "Month", count(*)
 from pos
 where 1=1
 -- and source = 'E'
-and date(from_unixtime(ts)) >= '2011-08-01'
-and date(from_unixtime(ts)) < '2011-09-01'
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) <= '2012-12-31'
 group by source, date_format(date(from_unixtime(ts)),'%Y-%m')
 order by 2, 1;
 
@@ -30,6 +40,24 @@ and date(from_unixtime(ts)) >= '2011-01-01'
 and date(from_unixtime(ts)) < '2011-04-01'
 --group by date(from_unixtime(ts)) order by 1
 ;
+
+-- count distinct ships by source
+select source, count(distinct mmsi)
+from pos 
+where 1=1
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) < '2011-02-01'
+group by source;
+
+-- count distinct ships 
+select count(distinct mmsi)
+from pos 
+where 1=1
+and (source = 'E' or source = 'N')
+and date(from_unixtime(ts)) >= '2011-01-01'
+and date(from_unixtime(ts)) < '2011-02-01'
+;
+
 
 -----------------------------------------------------------------
 -- BEWARE delete!
@@ -157,14 +185,26 @@ order by norm_ts asc
 
 select dep, arr, period, insert_ts, from_unixtime(insert_ts), count(*), count(distinct mmsi) as mmsi
 from tracks
-where dep = 'LANZAROTE'
-and arr = 'NATAL'
+where 1=1
+and dep = 'CHANNEL'
+and arr = 'NOVASCOTIA'
+and period = 'WINTER'
 group by dep, arr, period, insert_ts
 order by insert_ts desc;
 
-select mmsi, dep, arr, period, count(*) as counter
+select mmsi, dep, arr, period, 
+count(*) as counter, 
+min(ts) as min_ep_ts, 
+max(ts) as max_ep_ts,
+min(from_unixtime(ts)) as min_ts, 
+max(from_unixtime(ts)) as max_ts,
+min(from_unixtime(norm_ts)) as min_norm_ts, 
+max(from_unixtime(norm_ts)) as max_norm_ts
 from tracks
-where arr = 'GOA'
+where 1=1
+and dep = 'CHANNEL' -- 'GIBRALTAR' --
+and arr = 'NOVASCOTIA' -- 'GUADELOUPE' --
+and period = 'SUMMER' -- 'SPRING' --'SUMMER'
 group by mmsi, dep, arr, period
 having counter > 5;
 

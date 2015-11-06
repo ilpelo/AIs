@@ -46,9 +46,17 @@ public class DisplacementSequenceProblem extends Problem implements
 	final static int REFERENCE_VOYAGE_DURATION_IN_DAYS = MineVoyages.REFERENCE_VOYAGE_DURATION_IN_SEC;
 	//static final long INSERT_TS = 1444899117;
 
-	static final String YEAR_PERIOD = "WINTER";
-	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
-	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
+	static final String YEAR_PERIOD = "SUMMER";
+	static final Box DEPARTURE_AREA = Areas.getBox("CHANNEL"); 
+	static final Box ARRIVAL_AREA = Areas.getBox("NOVASCOTIA");
+
+//	static final String YEAR_PERIOD = "SPRING";
+//	static final Box DEPARTURE_AREA = Areas.getBox("GIBRALTAR"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("GUADELOUPE");	
+	
+//	static final String YEAR_PERIOD = "WINTER";
+//	static final Box DEPARTURE_AREA = Areas.getBox("CAPETOWN"); 
+//	static final Box ARRIVAL_AREA = Areas.getBox("REUNION");
 
 //	static final String YEAR_PERIOD = "WINTER";
 //	static final Box DEPARTURE_AREA = Areas.getBox("REDSEA"); 

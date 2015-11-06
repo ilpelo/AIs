@@ -110,7 +110,8 @@ public class MineVoyages {
 //		}
 //		Box box = new Box(new Point(boxCoord[0], boxCoord[1]),
 //						  new Point(boxCoord[2], boxCoord[3]));
-		Box box = Areas.getBox(boxParam);
+		String boxName = prop.getProperty(boxParam);
+		Box box = Areas.getBox(boxName);
 		return box;
 	}
 	
@@ -210,9 +211,9 @@ public class MineVoyages {
 			fw.close();
 			//
 			// Normalize tracks (overwrite timestamps)!!!
-			track.normalizeTimestampsAndComputeTrackSegments(
-					new Timestamp(REFERENCE_START_DT), 
-					REFERENCE_VOYAGE_DURATION_IN_SEC);
+//			track.normalizeTimestampsAndComputeTrackSegments(
+//					new Timestamp(REFERENCE_START_DT), 
+//					REFERENCE_VOYAGE_DURATION_IN_SEC);
 			track.saveTrackToDB(DEP_BOX, ARR_BOX, YEAR_PERIOD, startDate.getTime()/1000);			
 		}
 		Date endDate = new Date();

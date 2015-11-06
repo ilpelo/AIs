@@ -52,13 +52,16 @@ where arr = 'GOA'
 and dep = 'REDSEA';
 
 --select count(*) 
---delete 
+delete 
 from tracks
 where 1=1
-and dep = 'LANZAROTE'
-and arr = 'NATAL'
-and period = 'SPRING'
-and insert_ts = 1445881117;
+--and dep = 'GIBRALTAR' --'CHANNEL'
+--and arr = 'GUADELOUPE' --'NOVASCOTIA'
+--and period = 'SPRING' --'SUMMER'
+and dep = 'CHANNEL'
+and arr = 'NOVASCOTIA'
+and period = 'SUMMER'
+and insert_ts <> 1446748715;
 
 update tracks
 set period = 'SPRING'
