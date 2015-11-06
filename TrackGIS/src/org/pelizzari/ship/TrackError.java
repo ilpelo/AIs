@@ -1,11 +1,15 @@
 package org.pelizzari.ship;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.pelizzari.db.DBConnection;
 import org.pelizzari.gis.Box;
 import org.pelizzari.gis.Displacement;
 import org.pelizzari.gis.Point;
@@ -333,7 +337,6 @@ public class TrackError {
 			0f;
 		return error;
 	}
-
 	
 	
 	/**
@@ -374,6 +377,48 @@ public class TrackError {
 //	}
 
 
+	public void recordFitnessInDB(Box depBox, 
+								  Box arrBox, 
+								  String yearPeriod, 
+								  long insertTs,
+								  int gen
+								  ) {
+		Connection con = DBConnection.getCon();
+				
+		final float FITNESS = -getError();
+		final String FITNESS_INSERT = 
+				"INSERT INTO fitness (period, dep, arr, insert_ts, gen, "+
+									"distance_err, dest_err, head_err, var_err, cov_err, " + 
+									"distance_factor, dest_factor, head_factor, var_factor, cov_factor, fitness)" +
+				"VALUES ("+
+				"'" + yearPeriod+ "', " +
+				"'" + depBox.getName() + "', " +
+				"'" + arrBox.getName() + "', " +
+				insertTs + ", " +
+				gen + ", " +
+				getDistanceError() + "," +
+				getDestinationError() + "," +
+				getAvgChangeOfHeading() + "," +
+				getVarianceError() + "," +
+				getSegmentCoverageError() + "," +
+				DISTANCE_ERROR_FACTOR + "," +
+				DISTANCE_TO_DESTINATION_ERROR_FACTOR + "," +
+				HEADING_ERROR_FACTOR + "," +
+				0 + "," +
+				0 + "," +
+				FITNESS + ")";
+		System.out.println("Fitness insert SQL: "+FITNESS_INSERT);
+		
+		try {
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate(FITNESS_INSERT);	
+			System.out.println("Fitness data written to DB");
+		} catch (SQLException e) {
+			System.err.println("Cannot write fitness data to DB");
+			e.printStackTrace();
+		}
+	}		
+	
 	public String toString() {
 		String s = "Track error: \n";
 		for (ShipTrackSegment segment : baseTrack.getSegList()) {

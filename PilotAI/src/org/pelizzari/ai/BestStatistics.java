@@ -45,7 +45,7 @@ public class BestStatistics extends Statistics {
 	public int genCount = 0;
 	public int genMax = 0; // max number of generation (from params file)
 	
-	public static final int GEN_OUTPUT_RATE = 50; // print log every Nth
+	public static final int GEN_OUTPUT_RATE = 10; // print log every Nth
 													// generations
 	public static Map map, map1;
 	//public KMLGenerator kmlGenerator;
@@ -175,7 +175,8 @@ public class BestStatistics extends Statistics {
 			ShipTrack track, 
 			EvolutionState state, 
 			boolean lastGen,
-			String[] wayPointLabels) {
+			String[] wayPointLabels,
+			long execution_start_ts) {
 		Color trackColor = lastGen?Color.PINK:Color.GRAY;
 		map.plotTrack(track, trackColor, ""+state.generation);
 		//drawSegmentBoxes(track, map);
@@ -210,7 +211,10 @@ public class BestStatistics extends Statistics {
 		// draw best track
 		kmlGenerator1.addTrack(track, wayPointLabels);
 		
-		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+state.generation+".kml";
+		String kmlFile1 = FILE_DIR+KML_OUTFILE+"_"+
+						  state.generation+"_"+
+						  execution_start_ts+
+						  ".kml";
 		System.out.println("Saving KML: "+kmlFile1);
 		kmlGenerator1.saveKMLFile(kmlFile1);
 		// save map image
@@ -290,6 +294,11 @@ public class BestStatistics extends Statistics {
 					e.printStackTrace();
 				}
 				state.output.println(""+trackError, popLog);
+				trackError.recordFitnessInDB(prob.DEPARTURE_AREA, 
+											 prob.ARRIVAL_AREA, 
+											 prob.YEAR_PERIOD, 
+											 prob.EXECUTION_START_TS,
+											 genCount);
 				
 				String[] wayPointLabels = new String[bestTrack.getSegList().size()];
 				int i=0;
@@ -298,7 +307,7 @@ public class BestStatistics extends Statistics {
 					i++;
 				}
 				
-				drawOnMap(bestTrack, state, lastGen, wayPointLabels);
+				drawOnMap(bestTrack, state, lastGen, wayPointLabels, prob.EXECUTION_START_TS);
 			}
 		}
 		genCount++;

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.pelizzari.db.Miner;
@@ -72,6 +73,7 @@ public class DisplacementSequenceProblem extends Problem implements
 	static float DISTANCE_TO_DESTINATION_ERROR_FACTOR;
 	static float DISTANCE_ERROR_FACTOR;
 	static float HEADING_ERROR_FACTOR; 
+	static final long EXECUTION_START_TS = (new java.util.Date()).getTime()/1000;
 
 	// init target track, map, etc.
 	static {

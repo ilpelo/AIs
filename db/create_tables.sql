@@ -64,5 +64,28 @@ index index_dep_arr (dep, arr)
 
 alter table tracks add column norm_ts int;
 
+-- fitness record
+create table fitness
+(
+period varchar(30) not null,
+dep varchar(30) not null,
+arr varchar(30) not null,
+gen int not null,
+distance_err double not null,
+dest_err double not null,
+head_err double not null,
+var_err double not null,
+cov_err double not null,
+distance_factor double not null,
+dest_factor double not null,
+head_factor double not null,
+var_factor double not null,
+cov_factor  double not null,
+fitness double not null,
+insert_ts int not null,
+index index_ts (insert_ts),
+index index_dep_arr (dep, arr, gen, insert_ts)
+);
+
 
 

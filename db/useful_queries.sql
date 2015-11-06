@@ -208,6 +208,12 @@ and period = 'SUMMER' -- 'SPRING' --'SUMMER'
 group by mmsi, dep, arr, period
 having counter > 5;
 
+-- fitness
+select *
+from fitness
+order by dep, arr, period, insert_ts desc, gen asc;
+
+
 -- dump
 C:\Program Files\MySQL\MySQL Server 5.6\bin>mysqldump -uroot -pmysql ai tracks >
  c:\master_data\tracks_20151018_1741.sql
